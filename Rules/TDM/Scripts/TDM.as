@@ -296,7 +296,7 @@ shared class TDMCore : RulesCore
 		RulesCore::Setup(_rules, _respawns);
 		gametime = getGameTime() + 100;
 		@tdm_spawns = cast < TDMSpawns@ > (_respawns);
-		server_CreateBlob("ww_music");
+		server_CreateBlob("ctf_music");
 		players_in_small_team = -1;
 		all_death_counts_as_kill = false;
 		sudden_death = false;
