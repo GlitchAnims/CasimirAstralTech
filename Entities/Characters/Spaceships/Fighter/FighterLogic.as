@@ -2,7 +2,6 @@
 
 #include "SmallshipCommon.as"
 #include "SpaceshipVars.as"
-#include "MagicCommon.as"
 #include "ThrowCommon.as"
 #include "KnockedCommon.as"
 #include "Hitters.as"
@@ -40,12 +39,6 @@ void onInit( CBlob@ this )
 
 	this.set_bool( "leftCannonTurn", false);
 
-	this.set_s8( "charge_time", 0 );
-	this.set_u8( "charge_state", FrigateParams::not_aiming );
-	this.set_s32( "mana", 100 );
-	this.set_f32("gib health", -3.0f);
-	this.set_Vec2f("spell blocked pos", Vec2f(0.0f, 0.0f));
-	this.set_bool("casting", false);
 	this.set_bool("shifted", false);
 	
 	this.Tag("player");
@@ -65,30 +58,10 @@ void onInit( CBlob@ this )
 	//this.getShape().SetGravityScale(0);
 
 	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
-
-    AddIconToken( "$Skeleton$", "SpellIcons.png", Vec2f(16,16), 0 );
-    AddIconToken( "$Zombie$", "SpellIcons.png", Vec2f(16,16), 1 );
-    AddIconToken( "$Wraith$", "SpellIcons.png", Vec2f(16,16), 2 );
-    AddIconToken( "$Greg$", "SpellIcons.png", Vec2f(16,16), 3 );
-    AddIconToken( "$ZK$", "SpellIcons.png", Vec2f(16,16), 4 );
-    AddIconToken( "$Orb$", "SpellIcons.png", Vec2f(16,16), 5 );
-    AddIconToken( "$ZombieRain$", "SpellIcons.png", Vec2f(16,16), 6 );
-    AddIconToken( "$Teleport$", "SpellIcons.png", Vec2f(16,16), 7 );
-    AddIconToken( "$MeteorRain$", "SpellIcons.png", Vec2f(16,16), 8 );
-    AddIconToken( "$SkeletonRain$", "SpellIcons.png", Vec2f(16,16), 9 );
-	AddIconToken( "$Firebomb$", "SpellIcons.png", Vec2f(16,16), 10 );
-	AddIconToken( "$FireSprite$", "SpellIcons.png", Vec2f(16,16), 11 );
-	AddIconToken( "$FrostBall$", "SpellIcons.png", Vec2f(16,16), 12 );
-	AddIconToken( "$Heal$", "SpellIcons.png", Vec2f(16,16), 13 );
-	AddIconToken( "$Revive$", "SpellIcons.png", Vec2f(16,16), 14 );
-	AddIconToken( "$CounterSpell$", "SpellIcons.png", Vec2f(16,16), 15 );
-	AddIconToken( "$MagicMissile$", "SpellIcons.png", Vec2f(16,16), 16 );
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";
 	
-	if(getNet().isServer())
-		this.set_u8("spell_count", 0);
 
 	/*if(isClient())
 	{
@@ -194,10 +167,6 @@ void onTick( CBlob@ this )
 	{
 		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
 	}*/
-
-	
-
-    //ManageSpell( this, ship, playerPrefsInfo, moveVars );
 }
 
 
