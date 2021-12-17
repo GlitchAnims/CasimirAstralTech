@@ -112,10 +112,3 @@ bool doesCollideWithBlob( CBlob@ this, CBlob@ b )
 		&& b.hasTag("barrier")//collides with enemy barriers
 	); 
 }
-
-// Vec2f lerp(Vec2f start,Vec2f end, f32 percent){
-//     Vec2f x = end - start;
-//     x *= percent;
-//     x += start;
-//     return x;
-// }

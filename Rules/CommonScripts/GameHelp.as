@@ -4,8 +4,6 @@
 #include "IslandsCommon.as"
 #include "KGUI.as";
 #include "Achievements.as";
-#include "shipAchieves.as";
-#include "WWPlayerClassButton.as";
 #include "WheelMenuCommon.as";
 
 bool showHelp = true;

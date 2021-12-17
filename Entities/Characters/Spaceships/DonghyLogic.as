@@ -1,7 +1,6 @@
 // Frigate logic
 
 #include "FrigateCommon.as"
-#include "PlayerPrefsCommon.as"
 #include "MagicCommon.as";
 #include "ThrowCommon.as"
 #include "KnockedCommon.as"
@@ -10,7 +9,6 @@
 #include "ShieldCommon.as";
 #include "Help.as";
 #include "BombCommon.as";
-#include "SpellCommon.as";
 #include "SpellManagementSpaceship.as"
 
 const u8 rechargeSeconds = 1; //seconds for recharge
@@ -138,17 +136,6 @@ void onTick( CBlob@ this )
 	{
 		return;
 	}
-	
-	PlayerPrefsInfo@ playerPrefsInfo;
-	if (!thisPlayer.get( "playerPrefsInfo", @playerPrefsInfo )) 
-	{
-		return;
-	}
-	
-	if ( playerPrefsInfo.infoLoaded == false )
-	{
-		return;
-	}
 
 	if (getGameTime() % (30*rechargeSeconds) == 0) //Pulse regeneration
 	{
@@ -189,8 +176,6 @@ void onTick( CBlob@ this )
 	}
 
 	if (this.isInInventory()) return;
-
-    ManageSpell( this, frigate, playerPrefsInfo, moveVars );
 }
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
