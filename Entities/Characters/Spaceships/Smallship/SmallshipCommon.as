@@ -16,7 +16,7 @@ namespace FighterParams
 	const ::f32 rcs_force = 0.1f;
 	const ::f32 ship_turn_speed = 10.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.1f; // air drag
-	const ::f32 max_speed = 200.0f; // 0 = infinite speed
+	const ::f32 max_speed = 18.0f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 4; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
@@ -38,7 +38,7 @@ namespace InterceptorParams
 	const ::f32 rcs_force = 0.05f;
 	const ::f32 ship_turn_speed = 25.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.1f; // air drag
-	const ::f32 max_speed = 400.0f; // 0 = infinite speed
+	const ::f32 max_speed = 30.0f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 2; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
@@ -60,7 +60,7 @@ namespace BomberParams
 	const ::f32 rcs_force = 0.1f;
 	const ::f32 ship_turn_speed = 6.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.5f; // air drag
-	const ::f32 max_speed = 180.f; // 0 = infinite speed
+	const ::f32 max_speed = 10.f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 10; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
@@ -82,7 +82,7 @@ namespace ScoutParams
 	const ::f32 rcs_force = 0.06f;
 	const ::f32 ship_turn_speed = 8.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.1f; // air drag
-	const ::f32 max_speed = 180.f; // 0 = infinite speed
+	const ::f32 max_speed = 15.f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 60; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 15; // bullets per shot, won't fire if 0

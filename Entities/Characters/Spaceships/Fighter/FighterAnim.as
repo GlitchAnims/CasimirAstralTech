@@ -117,7 +117,7 @@ void onTick(CSprite@ this)
 	}*/
 
 	SmallshipInfo@ ship;
-	if (!blob.get( "smallshipInfo", @ship )) 
+	if (!blob.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	/*

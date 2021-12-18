@@ -32,7 +32,7 @@ void onTick(CMovement@ this)
 	{ return; }
 
 	SmallshipInfo@ ship;
-	if (!thisBlob.get( "smallshipInfo", @ship )) 
+	if (!thisBlob.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	const bool left		= thisBlob.isKeyPressed(key_left);

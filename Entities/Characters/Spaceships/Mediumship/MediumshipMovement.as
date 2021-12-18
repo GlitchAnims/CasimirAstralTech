@@ -31,8 +31,8 @@ void onTick(CMovement@ this)
 	if (!thisBlob.get("moveVars", @moveVars))
 	{ return; }
 
-	SmallshipInfo@ ship;
-	if (!thisBlob.get( "smallshipInfo", @ship )) 
+	MediumshipInfo@ ship;
+	if (!thisBlob.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	const bool left		= thisBlob.isKeyPressed(key_left);
@@ -62,34 +62,15 @@ void onTick(CMovement@ this)
 	Vec2f vel = thisBlob.getVelocity();
 	Vec2f oldVel = vel;
 	Vec2f pos = thisBlob.getPosition();
-	f32 blobAngle = thisBlob.getAngleDegrees();
-	blobAngle = (blobAngle+360.0f) % 360;
 
-	Vec2f aimPos = thisBlob.getAimPos();
-	Vec2f aimVec = aimPos - pos;
-	f32 aimAngle = aimVec.getAngleDegrees();
-	aimAngle *= -1.0f;
-
-	if (blobAngle != aimAngle) //aiming logic
+	if (vel.x < 0 && !thisBlob.isFacingLeft()) //flips ship if moving left
 	{
-		f32 turnSpeed = ship.ship_turn_speed * moveVars.turnSpeedFactor; //multiplier for turn speed
-
-		f32 angleDiff = blobAngle - aimAngle;
-		angleDiff = (angleDiff + 180) % 360 - 180;
-
-		if (turnSpeed <= 0 || (angleDiff < turnSpeed && angleDiff > -turnSpeed)) //if turn difference is smaller than turn speed, snap to it
-		{
-			thisBlob.setAngleDegrees(aimAngle);
-		}
-		else
-		{
-			f32 turnAngle = angleDiff > 0 ? -turnSpeed : turnSpeed; //either left or right turn
-			thisBlob.setAngleDegrees(blobAngle + turnAngle);
-			thisBlob.setAngleDegrees(blobAngle + turnAngle);
-		}
-		blobAngle = thisBlob.getAngleDegrees();
+		thisBlob.SetFacingLeft(true);
 	}
-	
+	else if (vel.x > 0 && thisBlob.isFacingLeft())
+	{
+		thisBlob.SetFacingLeft(false);
+	}
 	
 	CShape@ shape = thisBlob.getShape();
 	if (shape != null)
@@ -109,59 +90,80 @@ void onTick(CMovement@ this)
 
 	const f32 vellen = shape.vellen;
 	const bool onground = thisBlob.isOnGround() || thisBlob.isOnLadder();
+	const bool isShifting = thisBlob.get_bool("shifting");
 
 	if (keysPressedAmount != 0)
 	{
-		Vec2f forward		= Vec2f_zero;
-		Vec2f backward		= Vec2f_zero;
-		Vec2f port			= Vec2f_zero;
-		Vec2f starboard		= Vec2f_zero;
+		Vec2f ascend		= Vec2f_zero;
+		Vec2f descend		= Vec2f_zero;
+		Vec2f moveLeft		= Vec2f_zero;
+		Vec2f moveRight		= Vec2f_zero;
 
 		if(up)
 		{
-			Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
-			thrustVel.RotateByDegrees(blobAngle);
-			forward += thrustVel;
-			ship.forward_thrust = true;
-		}
-		else
-		{ ship.forward_thrust = false; }
-
-		if(down)
-		{
-			Vec2f thrustVel = Vec2f(ship.secondary_engine_force, 0);
-			thrustVel.RotateByDegrees(blobAngle + 180.0f);
-			backward += thrustVel;
-			ship.backward_thrust = true;
-		}
-		else
-		{ ship.backward_thrust = false; }
-
-		if(left)
-		{
-			Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
-			thrustVel.RotateByDegrees(blobAngle + 270.0f);
-			port += thrustVel;
-			ship.board_thrust = true;
-		}
-		else
-		{ ship.port_thrust = false; }
-		
-		if(right)
-		{
-			Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
-			thrustVel.RotateByDegrees(blobAngle + 90.0f);
-			starboard += thrustVel;
+			Vec2f thrustVel = Vec2f(0, -ship.rcs_force);
+			ascend += thrustVel;
 			ship.starboard_thrust = true;
 		}
 		else
 		{ ship.starboard_thrust = false; }
 
+		if(down)
+		{
+			Vec2f thrustVel = Vec2f(0, ship.rcs_force);
+			descend += thrustVel;
+			ship.port_thrust = true;
+		}
+		else
+		{ ship.port_thrust = false; }
+
+		
+		if (thisBlob.isFacingLeft())
+		{
+			if(left)
+			{
+				Vec2f thrustVel = Vec2f(-ship.main_engine_force, 0);
+				moveLeft += thrustVel;
+				ship.forward_thrust = true;
+			}
+			else
+			{ ship.forward_thrust = false; }
+				
+			if(right)
+			{
+				Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
+				moveRight += thrustVel;
+				ship.backward_thrust = true;
+			}
+			else
+			{ ship.backward_thrust = false; }
+		}
+		else
+		{
+			if(left)
+			{
+				Vec2f thrustVel = Vec2f(-ship.main_engine_force, 0);
+				moveLeft += thrustVel;
+				ship.backward_thrust = true;
+			}
+			else
+			{ ship.backward_thrust = false; }
+				
+			if(right)
+			{
+				Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
+				moveRight += thrustVel;
+				ship.forward_thrust = true;
+			}
+			else
+			{ ship.forward_thrust = false; }
+		}
+		
 		Vec2f addedVel = Vec2f_zero;
-		addedVel += forward / float(keysPressedAmount); //divide thrust between multiple sides
-		addedVel += backward / float(keysPressedAmount);
-		addedVel += port / float(keysPressedAmount);
-		addedVel += starboard / float(keysPressedAmount);
+		addedVel += ascend 		/ float(keysPressedAmount); //divide thrust between multiple sides
+		addedVel += descend 	/ float(keysPressedAmount);
+		addedVel += moveLeft 	/ float(keysPressedAmount);
+		addedVel += moveRight 	/ float(keysPressedAmount);
 		
 		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
 	}

@@ -9,14 +9,16 @@
 #include "CommonFX.as"
 #include "ShieldCommon.as"
 
-const string up_fire = "forward_burn";
-const string down_fire = "backward_burn";
+const string up_fire1 = "forward_burn1";
+const string up_fire2 = "forward_burn2";
+const string down_fire1 = "backward_burn1";
+const string down_fire2 = "backward_burn2";
 const string left_fire1 = "port_burn1";
 const string left_fire2 = "port_burn2";
 const string right_fire1 = "starboard_burn1";
 const string right_fire2 = "starboard_burn2";
 
-Random _fighter_anim_r(14861);
+Random _martyr_anim_r(65444);
 
 void onInit(CSprite@ this)
 {
@@ -45,56 +47,107 @@ void LoadSprites(CSprite@ this)
 	}*/
 
 	// add engine burns
-	this.RemoveSpriteLayer(up_fire);
-	this.RemoveSpriteLayer(down_fire);
-	this.RemoveSpriteLayer(left_fire);
-	this.RemoveSpriteLayer(right_fire);
-	CSpriteLayer@ upFire = this.addSpriteLayer(up_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ downFire = this.addSpriteLayer(down_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ leftFire = this.addSpriteLayer(left_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ rightFire = this.addSpriteLayer(right_fire, "Flash1.png", 32, 32);
-	if (upFire !is null)
+	this.RemoveSpriteLayer(up_fire1);
+	this.RemoveSpriteLayer(up_fire2);
+	this.RemoveSpriteLayer(down_fire1);
+	this.RemoveSpriteLayer(down_fire2);
+	this.RemoveSpriteLayer(left_fire1);
+	this.RemoveSpriteLayer(left_fire2);
+	this.RemoveSpriteLayer(right_fire1);
+	this.RemoveSpriteLayer(right_fire2);
+	CSpriteLayer@ upFire1 		= this.addSpriteLayer(up_fire1, "Flash1.png", 32, 32);
+	CSpriteLayer@ upFire2 		= this.addSpriteLayer(up_fire2, "Flash1.png", 32, 32);
+	CSpriteLayer@ downFire1 	= this.addSpriteLayer(down_fire1, "Flash1.png", 32, 32);
+	CSpriteLayer@ downFire2 	= this.addSpriteLayer(down_fire2, "Flash1.png", 32, 32);
+	CSpriteLayer@ leftFire1 	= this.addSpriteLayer(left_fire1, "Flash1.png", 32, 32);
+	CSpriteLayer@ leftFire2 	= this.addSpriteLayer(left_fire2, "Flash1.png", 32, 32);
+	CSpriteLayer@ rightFire1 	= this.addSpriteLayer(right_fire1, "Flash1.png", 32, 32);
+	CSpriteLayer@ rightFire2 	= this.addSpriteLayer(right_fire2, "Flash1.png", 32, 32);
+	if (upFire1 !is null)
 	{
-		Animation@ anim = upFire.addAnimation("default", 2, true);
+		Animation@ anim = upFire1.addAnimation("default", 2, true);
 		int[] frames = {0, 1, 2, 3};
 		anim.AddFrames(frames);
-		upFire.SetVisible(false);
-		upFire.SetRelativeZ(-1.1f);
-		//upFire.RotateBy(0, Vec2f_zero);
-		upFire.SetOffset(Vec2f(8, 0));
+		upFire1.SetVisible(false);
+		upFire1.SetRelativeZ(-1.1f);
+		//upFire1.RotateBy(0, Vec2f_zero);
+		upFire1.SetOffset(Vec2f(32, 10.0f));
 	}
-	if (downFire !is null)
+	if (upFire2 !is null)
 	{
-		Animation@ anim = downFire.addAnimation("default", 2, true);
+		Animation@ anim = upFire2.addAnimation("default", 2, true);
 		int[] frames = {0, 1, 2, 3};
 		anim.AddFrames(frames);
-		downFire.SetVisible(false);
-		downFire.SetRelativeZ(-1.2f);
-		downFire.ScaleBy(0.5f, 0.5f);
-		//downFire.RotateBy(0, Vec2f_zero);
-		downFire.SetOffset(Vec2f(-6, 0));
+		upFire2.SetVisible(false);
+		upFire2.SetRelativeZ(-1.1f);
+		//upFire2.RotateBy(0, Vec2f_zero);
+		upFire2.SetOffset(Vec2f(32.0f, -10.0f));
 	}
-	if (leftFire !is null)
+	if (downFire1 !is null)
 	{
-		Animation@ anim = leftFire.addAnimation("default", 2, true);
+		Animation@ anim = downFire1.addAnimation("default", 2, true);
 		int[] frames = {0, 1, 2, 3};
 		anim.AddFrames(frames);
-		leftFire.SetVisible(false);
-		leftFire.SetRelativeZ(-1.3f);
-		leftFire.ScaleBy(0.3f, 0.3f);
-		leftFire.RotateBy(90, Vec2f_zero);
-		leftFire.SetOffset(Vec2f(0, 5));
+		downFire1.SetVisible(false);
+		downFire1.SetRelativeZ(-1.2f);
+		downFire1.ScaleBy(0.5f, 0.5f);
+		//downFire1.RotateBy(0, Vec2f_zero);
+		downFire1.SetOffset(Vec2f(-32.0f, 3.0f));
 	}
-	if (rightFire !is null)
+	if (downFire2 !is null)
 	{
-		Animation@ anim = rightFire.addAnimation("default", 2, true);
+		Animation@ anim = downFire2.addAnimation("default", 2, true);
 		int[] frames = {0, 1, 2, 3};
 		anim.AddFrames(frames);
-		rightFire.SetVisible(false);
-		rightFire.SetRelativeZ(-1.4f);
-		rightFire.ScaleBy(0.3f, 0.3f);
-		rightFire.RotateBy(90, Vec2f_zero);
-		rightFire.SetOffset(Vec2f(0, -5));
+		downFire2.SetVisible(false);
+		downFire2.SetRelativeZ(-1.2f);
+		downFire2.ScaleBy(0.5f, 0.5f);
+		//downFire2.RotateBy(0, Vec2f_zero);
+		downFire2.SetOffset(Vec2f(-32.0f, -3.0f));
+	}
+	if (leftFire1 !is null)
+	{
+		Animation@ anim = leftFire1.addAnimation("default", 2, true);
+		int[] frames = {0, 1, 2, 3};
+		anim.AddFrames(frames);
+		leftFire1.SetVisible(false);
+		leftFire1.SetRelativeZ(-1.3f);
+		leftFire1.ScaleBy(0.3f, 0.3f);
+		leftFire1.RotateBy(90, Vec2f_zero);
+		leftFire1.SetOffset(Vec2f(-27.5f, -7.0f));
+	}
+	if (leftFire2 !is null)
+	{
+		Animation@ anim = leftFire2.addAnimation("default", 2, true);
+		int[] frames = {0, 1, 2, 3};
+		anim.AddFrames(frames);
+		leftFire2.SetVisible(false);
+		leftFire2.SetRelativeZ(-1.3f);
+		leftFire2.ScaleBy(0.3f, 0.3f);
+		leftFire2.RotateBy(90, Vec2f_zero);
+		leftFire2.SetOffset(Vec2f(28.0f, -16.0f));
+	}
+	if (rightFire1 !is null)
+	{
+		Animation@ anim = rightFire1.addAnimation("default", 2, true);
+		int[] frames = {0, 1, 2, 3};
+		anim.AddFrames(frames);
+		rightFire1.SetVisible(false);
+		rightFire1.SetRelativeZ(-1.4f);
+		rightFire1.ScaleBy(0.3f, 0.3f);
+		rightFire1.RotateBy(90, Vec2f_zero);
+		rightFire1.SetOffset(Vec2f(-27.5f, 7.0f));
+	}
+	if (rightFire2 !is null)
+	{
+		Animation@ anim = rightFire2.addAnimation("default", 2, true);
+		int[] frames = {0, 1, 2, 3};
+		anim.AddFrames(frames);
+		rightFire2.SetVisible(false);
+		rightFire2.SetRelativeZ(-1.4f);
+		rightFire2.ScaleBy(0.3f, 0.3f);
+		rightFire2.RotateBy(90, Vec2f_zero);
+		rightFire2.SetOffset(Vec2f(28.0f, 16.0f));
 	}
 	
 }
@@ -111,6 +164,8 @@ void onTick(CSprite@ this)
 	f32 blobAngle = blob.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 	Vec2f aimpos;
+	bool facingLeft = this.isFacingLeft();
+	int teamNum = blob.getTeamNum();
 
 	/*KnightInfo@ knight;
 	if (!blob.get("knightInfo", @knight))
@@ -118,8 +173,8 @@ void onTick(CSprite@ this)
 		return;
 	}*/
 
-	SmallshipInfo@ ship;
-	if (!blob.get( "smallshipInfo", @ship )) 
+	MediumshipInfo@ ship;
+	if (!blob.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	/*
@@ -389,90 +444,93 @@ void onTick(CSprite@ this)
 
 	//set engine burns to correct places
 
-	CSpriteLayer@ upFire	= this.getSpriteLayer(up_fire);
-	CSpriteLayer@ downFire	= this.getSpriteLayer(down_fire);
-	CSpriteLayer@ leftFire	= this.getSpriteLayer(left_fire);
-	CSpriteLayer@ rightFire	= this.getSpriteLayer(right_fire);
+	CSpriteLayer@ upFire1		= this.getSpriteLayer(up_fire1);
+	CSpriteLayer@ upFire2		= this.getSpriteLayer(up_fire2);
+	CSpriteLayer@ downFire1		= this.getSpriteLayer(down_fire1);
+	CSpriteLayer@ downFire2		= this.getSpriteLayer(down_fire2);
+	CSpriteLayer@ leftFire1		= this.getSpriteLayer(left_fire1);
+	CSpriteLayer@ leftFire2		= this.getSpriteLayer(left_fire2);
+	CSpriteLayer@ rightFire1	= this.getSpriteLayer(right_fire1);
+	CSpriteLayer@ rightFire2	= this.getSpriteLayer(right_fire2);
 
 	bool mainEngine = ship.forward_thrust;
-	if (upFire !is null)
-	{ upFire.SetVisible(mainEngine); }
-	if (downFire !is null)
-	{ downFire.SetVisible(ship.backward_thrust); }
-	if (leftFire !is null)
-	{ leftFire.SetVisible(ship.port_thrust); }
-	if (rightFire !is null)
-	{ rightFire.SetVisible(ship.starboard_thrust); }
+	if (upFire1 !is null)
+	{ upFire1.SetVisible(mainEngine); }
+	if (upFire2 !is null)
+	{ upFire2.SetVisible(mainEngine); }
+	bool backEngine = ship.backward_thrust;
+	if (downFire1 !is null)
+	{ downFire1.SetVisible(backEngine); }
+	if (downFire2 !is null)
+	{ downFire2.SetVisible(backEngine); }
 
+	if (leftFire1 !is null)
+	{ leftFire1.SetVisible(ship.port_thrust || ship.portBow_thrust); }
+	if (leftFire2 !is null)
+	{ leftFire2.SetVisible(ship.port_thrust || ship.portQuarter_thrust); }
+
+	if (rightFire1 !is null)
+	{ rightFire1.SetVisible(ship.starboard_thrust || ship.starboardBow_thrust); }
+	if (rightFire2 !is null)
+	{ rightFire2.SetVisible(ship.starboard_thrust || ship.starboardQuarter_thrust); }
 
 
 	if (mainEngine)
 	{
-		Vec2f engineOffset = Vec2f(-8.0f, 0);
+		f32 leftMult = facingLeft ? -1.0f : 1.0f;
+		Vec2f engineOffset = Vec2f(-32.0f * leftMult, -10.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		Vec2f trailPos = blobPos + engineOffset;
 
-		Vec2f trailNorm = Vec2f(-1.0f, 0);
-		trailNorm.RotateByDegrees(blobAngle);
+		makeEngineTrail(trailPos, 4, blobVel, blobAngle, facingLeft, teamNum);
 
-		u32 gameTime = getGameTime();
+		engineOffset = Vec2f(-32.0f * leftMult, 10.0f);
+		engineOffset.RotateByDegrees(blobAngle);
+		trailPos = blobPos + engineOffset;
 
-		//f32 trailSwing = Maths::Sin(gameTime * 0.1f) + 1.0f;
-		//trailSwing *= 0.5f;
-		f32 trailSwing = Maths::Sin(gameTime * 0.1f);
-
-		f32 swingMaxAngle = 30.0f * trailSwing;
-
-		u16 particleNum = 9; //loop will do this + 1
-
-		int teamNum = blob.getTeamNum();
-		SColor color = getTeamColorWW(teamNum);
-
-		for(int i = 0; i <= particleNum; i++)
-	    {
-			u8 alpha = 200.0f + (55.0f * _fighter_anim_r.NextFloat()); //randomize alpha
-			color.setAlpha(alpha);
-
-			f32 pRatio = float(i) / float(particleNum);
-			f32 pAngle = (pRatio*2.0f) - 1.0f;
-
-			Vec2f pVel = trailNorm;
-			pVel.RotateByDegrees(swingMaxAngle*pAngle);
-			pVel *= 3.0f - Maths::Abs(pAngle);
-
-			pVel += blobVel;
-
-	        CParticle@ p = ParticlePixelUnlimited(trailPos, pVel, color, true);
-	        if(p !is null)
-	        {
-	   	        p.collides = false;
-	   	        p.gravity = Vec2f_zero;
-	            p.bounce = 0;
-	            p.Z = 7;
-	            p.timeout = 30.0f + (15.0f * _fighter_anim_r.NextFloat());
-				p.setRenderStyle(RenderStyle::light);
-	    	}
-		}
+		makeEngineTrail(trailPos, 4, blobVel, blobAngle, facingLeft, teamNum);
 	}
 
+}
 
-	//set the head anim
-	/*
-	if (knocked)
-	{
-		blob.Tag("dead head");
-	}
-	else if (blob.isKeyPressed(key_action1))
-	{
-		blob.Tag("attack head");
-		blob.Untag("dead head");
-	}
-	else
-	{
-		blob.Untag("attack head");
-		blob.Untag("dead head");
-	}*/
+void makeEngineTrail(Vec2f trailPos = Vec2f_zero, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, bool facingLeft = false, int teamNum = 0)
+{
+	Vec2f trailNorm = Vec2f(facingLeft ? 1.0f : -1.0f, 0);
+	trailNorm.RotateByDegrees(blobAngle);
 
+	u32 gameTime = getGameTime();
+
+	f32 trailSwing = Maths::Sin(gameTime * 0.1f);
+
+	f32 swingMaxAngle = 30.0f * trailSwing;
+
+	SColor color = getTeamColorWW(teamNum);
+
+	for(int i = 0; i <= particleNum; i++) //will do particleNum + 1
+    {
+		u8 alpha = 200.0f + (55.0f * _martyr_anim_r.NextFloat()); //randomize alpha
+		color.setAlpha(alpha);
+
+		f32 pRatio = float(i) / float(particleNum);
+		f32 pAngle = (pRatio*2.0f) - 1.0f;
+
+		Vec2f pVel = trailNorm;
+		pVel.RotateByDegrees(swingMaxAngle*pAngle);
+		pVel *= 3.0f - Maths::Abs(pAngle);
+
+		pVel += blobVel;
+
+        CParticle@ p = ParticlePixelUnlimited(trailPos, pVel, color, true);
+        if(p !is null)
+        {
+   	        p.collides = false;
+   	        p.gravity = Vec2f_zero;
+            p.bounce = 0;
+            p.Z = 7;
+            p.timeout = 30.0f + (15.0f * _martyr_anim_r.NextFloat());
+			p.setRenderStyle(RenderStyle::light);
+    	}
+	}
 }
 
 /*

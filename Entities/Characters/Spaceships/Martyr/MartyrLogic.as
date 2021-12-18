@@ -1,7 +1,7 @@
 // Fighter logic
 
 #include "ChargeCommon.as"
-#include "SmallshipCommon.as"
+#include "MediumshipCommon.as"
 #include "SpaceshipVars.as"
 #include "ThrowCommon.as"
 #include "KnockedCommon.as"
@@ -17,27 +17,25 @@ void onInit( CBlob@ this )
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= FighterParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= FighterParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= FighterParams::CHARGE_RATE;
+		chargeInfo.charge 			= MartyrParams::CHARGE_START * MartyrParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= MartyrParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= MartyrParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= MartyrParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 	
-	SmallshipInfo ship;
-	ship.main_engine_force 			= FighterParams::main_engine_force;
-	ship.secondary_engine_force 	= FighterParams::secondary_engine_force;
-	ship.rcs_force 					= FighterParams::rcs_force;
-	ship.ship_turn_speed 			= FighterParams::ship_turn_speed;
-	ship.ship_drag 					= FighterParams::ship_drag;
-	ship.max_speed 					= FighterParams::max_speed;
+	MediumshipInfo ship;
+	ship.main_engine_force 			= MartyrParams::main_engine_force;
+	ship.rcs_force 					= MartyrParams::rcs_force;
+	ship.ship_drag 					= MartyrParams::ship_drag;
+	ship.max_speed 					= MartyrParams::max_speed;
 	
-	ship.firing_rate 				= FighterParams::firing_rate;
-	ship.firing_burst 				= FighterParams::firing_burst;
-	ship.firing_delay 				= FighterParams::firing_delay;
-	ship.firing_spread 				= FighterParams::firing_spread;
-	ship.shot_speed 				= FighterParams::shot_speed;
-	this.set("smallshipInfo", @ship);
+	ship.firing_rate 				= MartyrParams::firing_rate;
+	ship.firing_burst 				= MartyrParams::firing_burst;
+	ship.firing_delay 				= MartyrParams::firing_delay;
+	ship.firing_spread 				= MartyrParams::firing_spread;
+	ship.shot_speed 				= MartyrParams::shot_speed;
+	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;
@@ -76,11 +74,11 @@ void onInit( CBlob@ this )
 	this.getCurrentScript().removeIfTag = "dead";
 	
 
-	/*if(isClient())
+	if(isClient())
 	{
 		this.getSprite().SetEmitSound("engine_loop.ogg");
-		this.getSprite().SetEmitSoundPaused(true);
-	}*/
+		this.getSprite().SetEmitSoundPaused(false);
+	}
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -97,8 +95,8 @@ void onTick( CBlob@ this )
 	if (this.isInInventory()) return;
 	if (!this.isMyPlayer()) return;
 
-    SmallshipInfo@ ship;
-	if (!this.get( "smallshipInfo", @ship )) 
+    MediumshipInfo@ ship;
+	if (!this.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	CPlayer@ thisPlayer = this.getPlayer();
@@ -174,7 +172,7 @@ void onTick( CBlob@ this )
 	this.set_u32( "m2_shotTime", m2ShotTicks );
 
 	//sound logic
-	/*Vec2f vel = this.getVelocity();
+	Vec2f vel = this.getVelocity();
 	float posVelX = Maths::Abs(vel.x);
 	float posVelY = Maths::Abs(vel.y);
 	if(posVelX > 2.9f)
@@ -184,7 +182,7 @@ void onTick( CBlob@ this )
 	else
 	{
 		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
-	}*/
+	}
 }
 
 

@@ -37,7 +37,7 @@ void onInit( CBlob@ this )
 	ship.firing_delay 				= FighterParams::firing_delay;
 	ship.firing_spread 				= FighterParams::firing_spread;
 	ship.shot_speed 				= FighterParams::shot_speed;
-	this.set("smallshipInfo", @ship);
+	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;
@@ -98,7 +98,7 @@ void onTick( CBlob@ this )
 	if (!this.isMyPlayer()) return;
 
     SmallshipInfo@ ship;
-	if (!this.get( "smallshipInfo", @ship )) 
+	if (!this.get( "shipInfo", @ship )) 
 	{ return; }
 	
 	CPlayer@ thisPlayer = this.getPlayer();
