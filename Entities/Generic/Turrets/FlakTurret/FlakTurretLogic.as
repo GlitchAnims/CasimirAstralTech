@@ -4,10 +4,6 @@
 #include "ChargeCommon.as"
 #include "TurretCommon.as"
 #include "SpaceshipVars.as"
-#include "KnockedCommon.as"
-#include "Hitters.as"
-#include "ShieldCommon.as"
-#include "Help.as"
 #include "CommonFX.as"
 
 Random _flak_turret_logic_r(98444);
@@ -41,11 +37,8 @@ void onInit( CBlob@ this )
 	this.set_bool("shifted", false);
 	
 	this.Tag("npc");
-	this.Tag("hull");
+	//this.Tag("hull");
 	this.Tag("ignore crouch");
-	
-	this.push("names to activate", "keg");
-	this.push("names to activate", "nuke");
 
 	//centered on arrows
 	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
@@ -80,7 +73,7 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 void onTick( CBlob@ this )
 {
 	// vvvvvvvvvvvvvv SERVER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
-	//if (!isClient()) return;
+	if (!isServer()) return;
 	if (this.isInInventory()) return;
 
 	bool attached = this.isAttached();
