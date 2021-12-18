@@ -4,9 +4,8 @@ void DrawChargeMeter(CBlob@ this, Vec2f origin)
 {
 	ChargeInfo@ chargeInfo;
     if (!this.get( "chargeInfo", @chargeInfo )) 
-	{
-        return;
-    }
+	{ return; }
+    
     string manaFile = "GUI/ManaBar.png";
 	int barLength = 4;
     int segmentWidth = 24;

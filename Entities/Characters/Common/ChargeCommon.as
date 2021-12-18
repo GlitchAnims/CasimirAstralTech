@@ -1,7 +1,10 @@
+
+const string absoluteCharge_string = "absolute_charge";
+
 shared class ChargeInfo
 {
 	s32 charge;
-	s32 maxCharge;
+	s32 chargeMax;
 	s32 chargeRegen;
 	s32 chargeRate;
 
