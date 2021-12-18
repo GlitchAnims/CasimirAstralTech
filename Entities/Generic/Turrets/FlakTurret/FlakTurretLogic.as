@@ -10,7 +10,7 @@
 #include "Help.as"
 #include "CommonFX.as"
 
-Random _fighter_logic_r(67532);
+Random _flag_turret_logic_r(98444);
 void onInit( CBlob@ this )
 {
 	this.set_s32(absoluteCharge_string, 0);
@@ -146,7 +146,7 @@ void onTick( CBlob@ this )
 				firePos += thisPos; //fire pos
 
 				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _fighter_logic_r.NextFloat()) ); //shot spread
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _flag_turret_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
@@ -223,8 +223,8 @@ void blast( Vec2f pos , int amount)
 
 	for (int i = 0; i < amount; i++)
     {
-        Vec2f vel(_fighter_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_fighter_logic_r.NextFloat() * 360.0f);
+        Vec2f vel(_flag_turret_logic_r.NextFloat() * 3.0f, 0);
+        vel.RotateBy(_flag_turret_logic_r.NextFloat() * 360.0f);
 
         CParticle@ p = ParticleAnimated("GenericBlast6.png", 
 									pos, 
