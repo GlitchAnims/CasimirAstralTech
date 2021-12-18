@@ -9,7 +9,7 @@ Random _gatling_basicshot_r(67521);
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";
 
-const f32 damage = 0.4f;
+const f32 damage = 0.2f;
 
 void onInit(CBlob@ this)
 {
