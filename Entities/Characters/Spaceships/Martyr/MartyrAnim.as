@@ -1,6 +1,6 @@
 // Knight animations
 
-#include "SmallshipCommon.as";
+#include "MediumshipCommon.as";
 #include "RunnerAnimCommon.as";
 #include "RunnerCommon.as";
 #include "KnockedCommon.as";
@@ -11,8 +11,10 @@
 
 const string up_fire = "forward_burn";
 const string down_fire = "backward_burn";
-const string left_fire = "board_burn";
-const string right_fire = "starboard_burn";
+const string left_fire1 = "port_burn1";
+const string left_fire2 = "port_burn2";
+const string right_fire1 = "starboard_burn1";
+const string right_fire2 = "starboard_burn2";
 
 Random _fighter_anim_r(14861);
 
@@ -398,7 +400,7 @@ void onTick(CSprite@ this)
 	if (downFire !is null)
 	{ downFire.SetVisible(ship.backward_thrust); }
 	if (leftFire !is null)
-	{ leftFire.SetVisible(ship.board_thrust); }
+	{ leftFire.SetVisible(ship.port_thrust); }
 	if (rightFire !is null)
 	{ rightFire.SetVisible(ship.starboard_thrust); }
 

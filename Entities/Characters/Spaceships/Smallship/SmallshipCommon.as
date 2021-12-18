@@ -95,7 +95,7 @@ class SmallshipInfo
 {
 	bool forward_thrust;
 	bool backward_thrust;
-	bool board_thrust;
+	bool port_thrust;
 	bool starboard_thrust;
 
 	// ship general
@@ -116,7 +116,7 @@ class SmallshipInfo
 	{
 		forward_thrust = false;
 		backward_thrust = false;
-		board_thrust = false;
+		port_thrust = false;
 		starboard_thrust = false;
 
 		//ship general

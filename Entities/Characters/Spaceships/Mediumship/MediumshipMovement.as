@@ -1,6 +1,6 @@
 // Fighter Movement
 
-#include "SmallshipCommon.as"
+#include "MediumshipCommon.as"
 #include "SpaceshipVars.as"
 #include "MakeDustParticle.as";
 #include "KnockedCommon.as";
@@ -114,7 +114,7 @@ void onTick(CMovement@ this)
 	{
 		Vec2f forward		= Vec2f_zero;
 		Vec2f backward		= Vec2f_zero;
-		Vec2f board			= Vec2f_zero;
+		Vec2f port			= Vec2f_zero;
 		Vec2f starboard		= Vec2f_zero;
 
 		if(up)
@@ -141,11 +141,11 @@ void onTick(CMovement@ this)
 		{
 			Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
 			thrustVel.RotateByDegrees(blobAngle + 270.0f);
-			board += thrustVel;
+			port += thrustVel;
 			ship.board_thrust = true;
 		}
 		else
-		{ ship.board_thrust = false; }
+		{ ship.port_thrust = false; }
 		
 		if(right)
 		{
@@ -160,7 +160,7 @@ void onTick(CMovement@ this)
 		Vec2f addedVel = Vec2f_zero;
 		addedVel += forward / float(keysPressedAmount); //divide thrust between multiple sides
 		addedVel += backward / float(keysPressedAmount);
-		addedVel += board / float(keysPressedAmount);
+		addedVel += port / float(keysPressedAmount);
 		addedVel += starboard / float(keysPressedAmount);
 		
 		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
@@ -169,7 +169,7 @@ void onTick(CMovement@ this)
 	{
 		ship.forward_thrust = false;
 		ship.backward_thrust = false;
-		ship.board_thrust = false;
+		ship.port_thrust = false;
 		ship.starboard_thrust = false;
 	}
 

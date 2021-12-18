@@ -11,7 +11,7 @@
 
 const string up_fire = "forward_burn";
 const string down_fire = "backward_burn";
-const string left_fire = "board_burn";
+const string left_fire = "port_burn";
 const string right_fire = "starboard_burn";
 
 Random _fighter_anim_r(14861);
@@ -398,7 +398,7 @@ void onTick(CSprite@ this)
 	if (downFire !is null)
 	{ downFire.SetVisible(ship.backward_thrust); }
 	if (leftFire !is null)
-	{ leftFire.SetVisible(ship.board_thrust); }
+	{ leftFire.SetVisible(ship.port_thrust); }
 	if (rightFire !is null)
 	{ rightFire.SetVisible(ship.starboard_thrust); }
 
