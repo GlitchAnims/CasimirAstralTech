@@ -92,6 +92,11 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 
 void onTick( CBlob@ this )
 {
+	u32 gameTime = getGameTime();
+	
+	if (isServer() && (gameTime + this.getNetworkID()) % 30 == 0) //once a second, server only
+	{ spawnTurrets(this); }
+
 	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	//if (!isClient()) return;
 	if (this.isInInventory()) return;
@@ -317,4 +322,55 @@ void blast( Vec2f pos , int particleNum)
 		p.Z = 200.0f;
 		p.lighting = false;
     }
+}
+
+void spawnTurrets(CBlob@ ownerBlob)
+{
+	if (ownerBlob == null)
+	{ return; }
+
+	CAttachment@ attachments = ownerBlob.getAttachments();
+	if (attachments == null)
+	{ return; }
+
+	Vec2f ownerPos = ownerBlob.getPosition();
+	string turretName = "turret_flak";
+	int teamNum = ownerBlob.getTeamNum();
+
+	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("TURRETSLOT1");
+	AttachmentPoint@ slot2 = attachments.getAttachmentPointByName("TURRETSLOT2");
+
+	if (slot1 != null)
+	{
+		Vec2f slotOffset = slot1.offset;
+		CBlob@ turret = slot1.getOccupied();
+		if (turret == null)
+		{
+			CBlob@ blob = server_CreateBlob( turretName , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, slot1);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+			}
+		}
+	}
+	if (slot2 != null)
+	{
+		Vec2f slotOffset = slot2.offset;
+		CBlob@ turret = slot2.getOccupied();
+		if (turret == null)
+		{
+			CBlob@ blob = server_CreateBlob( turretName , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, slot2);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+			}
+		}
+	}
+	
 }

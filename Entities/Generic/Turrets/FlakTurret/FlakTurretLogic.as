@@ -1,49 +1,33 @@
 // Fighter logic
 
 #include "ChargeCommon.as"
-#include "SmallshipCommon.as"
+#include "TurretCommon.as"
 #include "SpaceshipVars.as"
-#include "ThrowCommon.as"
 #include "KnockedCommon.as"
 #include "Hitters.as"
 #include "ShieldCommon.as"
 #include "Help.as"
 #include "CommonFX.as"
 
-Random _flag_turret_logic_r(98444);
+Random _flak_turret_logic_r(98444);
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= FighterParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= FighterParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= FighterParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
+	TurretInfo turret;
+	turret.turret_turn_speed 	= FlakParams::turret_turn_speed;
 	
-	SmallshipInfo ship;
-	ship.main_engine_force 			= FighterParams::main_engine_force;
-	ship.secondary_engine_force 	= FighterParams::secondary_engine_force;
-	ship.rcs_force 					= FighterParams::rcs_force;
-	ship.ship_turn_speed 			= FighterParams::ship_turn_speed;
-	ship.ship_drag 					= FighterParams::ship_drag;
-	ship.max_speed 					= FighterParams::max_speed;
-	
-	ship.firing_rate 				= FighterParams::firing_rate;
-	ship.firing_burst 				= FighterParams::firing_burst;
-	ship.firing_delay 				= FighterParams::firing_delay;
-	ship.firing_spread 				= FighterParams::firing_spread;
-	ship.shot_speed 				= FighterParams::shot_speed;
-	this.set("shipInfo", @ship);
+	turret.firing_rate 			= FlakParams::firing_rate;
+	turret.firing_burst 		= FlakParams::firing_burst;
+	turret.firing_delay 		= FlakParams::firing_delay;
+	turret.firing_spread 		= FlakParams::firing_spread;
+	turret.shot_speed 			= FlakParams::shot_speed;
+	this.set("shipInfo", @turret);
 	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;
 	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
 	this.set("manaInfo", @manaInfo);*/
+
+	this.set_u32("ownerBlobID", 0);
 
 	this.set_u32( "m1_heldTime", 0 );
 	this.set_u32( "m2_heldTime", 0 );
@@ -55,7 +39,7 @@ void onInit( CBlob@ this )
 
 	this.set_bool("shifted", false);
 	
-	this.Tag("player");
+	this.Tag("npc");
 	this.Tag("hull");
 	this.Tag("ignore crouch");
 	
@@ -67,9 +51,10 @@ void onInit( CBlob@ this )
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
-	//no spinning
-	this.getShape().SetRotationsAllowed(false);
-	//this.getShape().SetGravityScale(0);
+	
+	this.getShape().SetRotationsAllowed(false); //no spinning
+	this.getShape().SetGravityScale(0);
+	this.getShape().getConsts().mapCollisions = false;
 
 	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	
@@ -93,21 +78,25 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 
 void onTick( CBlob@ this )
 {
-	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
+	// vvvvvvvvvvvvvv SERVER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	//if (!isClient()) return;
 	if (this.isInInventory()) return;
-	if (!this.isMyPlayer()) return;
 
-    SmallshipInfo@ ship;
-	if (!this.get( "shipInfo", @ship )) 
-	{ return; }
-	
-	CPlayer@ thisPlayer = this.getPlayer();
-	if ( thisPlayer is null )
+	bool attached = this.isAttached();
+	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
+	if (!attached || ownerBlobID == 0 || ownerBlob == null)
+	{ 
+		this.server_Die();
+		return;
+	}
+
+    TurretInfo@ turret;
+	if (!this.get( "shipInfo", @turret )) 
 	{ return; }
 
 	SpaceshipVars@ moveVars;
-    if (!this.get( "moveVars", @moveVars )) {
+    if (!ownerBlob.get( "moveVars", @moveVars )) {
         return;
     }
 
@@ -115,6 +104,32 @@ void onTick( CBlob@ this )
 	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
+
+	Vec2f ownerAimpos = ownerBlob.getAimPos();
+	Vec2f aimVec = ownerAimpos - thisPos;
+	f32 aimAngle = aimVec.getAngleDegrees();
+	aimAngle *= -1.0f;
+
+	if (blobAngle != aimAngle) //aiming logic
+	{
+		f32 turnSpeed = turret.turret_turn_speed; //turn rate
+
+		f32 angleDiff = blobAngle - aimAngle;
+		angleDiff = (angleDiff + 180) % 360 - 180;
+
+		if (turnSpeed <= 0 || (angleDiff < turnSpeed && angleDiff > -turnSpeed)) //if turn difference is smaller than turn speed, snap to it
+		{
+			this.setAngleDegrees(aimAngle);
+		}
+		else
+		{
+			f32 turnAngle = angleDiff > 0 ? -turnSpeed : turnSpeed; //either left or right turn
+			this.setAngleDegrees(blobAngle + turnAngle);
+			this.setAngleDegrees(blobAngle + turnAngle);
+		}
+		blobAngle = this.getAngleDegrees();
+	}
+
 
 	//gun logic
 	bool pressed_m1 = this.isKeyPressed(key_action1);
@@ -126,9 +141,9 @@ void onTick( CBlob@ this )
 	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
 	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_m1 && m1Time >= ship.firing_delay)
+	if (pressed_m1 && m1Time >= turret.firing_delay)
 	{
-		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
+		if (m1ShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
@@ -137,7 +152,7 @@ void onTick( CBlob@ this )
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
 
-			uint bulletCount = ship.firing_burst;
+			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
 				f32 leftMult = leftCannon ? 1.0f : -1.0f;
@@ -145,10 +160,10 @@ void onTick( CBlob@ this )
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
-				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _flag_turret_logic_r.NextFloat()) ); //shot spread
+				Vec2f fireVec = Vec2f(1.0f,0) * turret.shot_speed; 
+				f32 randomSpread = turret.firing_spread * (1.0f - (2.0f * _flak_turret_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
-				fireVec += thisVel; //adds ship speed
+				fireVec += thisVel; //adds turret speed
 
 				params.write_Vec2f(firePos); //shot position
 				params.write_Vec2f(fireVec); //shot velocity
@@ -223,8 +238,8 @@ void blast( Vec2f pos , int amount)
 
 	for (int i = 0; i < amount; i++)
     {
-        Vec2f vel(_flag_turret_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_flag_turret_logic_r.NextFloat() * 360.0f);
+        Vec2f vel(_flak_turret_logic_r.NextFloat() * 3.0f, 0);
+        vel.RotateBy(_flak_turret_logic_r.NextFloat() * 360.0f);
 
         CParticle@ p = ParticleAnimated("GenericBlast6.png", 
 									pos, 
