@@ -129,25 +129,31 @@ void onTick( CBlob@ this )
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
-			CBitStream params;
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
-			f32 leftMult = leftCannon ? 1.0f : -1.0f;
-			Vec2f firePos = Vec2f(8, 4 * leftMult); //barrel pos
-			firePos.RotateByDegrees(blobAngle);
-			firePos += thisPos; //fire pos
+			uint bulletCount = ship.firing_burst;
+			for (uint i = 0; i < bulletCount; i ++)
+			{
+				f32 leftMult = leftCannon ? 1.0f : -1.0f;
+				Vec2f firePos = Vec2f(8, 4 * leftMult); //barrel pos
+				firePos.RotateByDegrees(blobAngle);
+				firePos += thisPos; //fire pos
 
-			Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-			fireVec.RotateByDegrees(blobAngle); //shot vector
-			fireVec += thisVel; //adds ship speed
+				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _fighter_logic_r.NextFloat()) ); //shot spread
+				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
+				fireVec += thisVel; //adds ship speed
 
-			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(1); //shot type
-			params.write_Vec2f(firePos); //shot position
-			params.write_Vec2f(fireVec); //shot velocity
+				CBitStream params;
+				params.write_u16(this.getNetworkID()); //ownerID
+				params.write_u8(1); //shot type
+				params.write_Vec2f(firePos); //shot position
+				params.write_Vec2f(fireVec); //shot velocity
+				
+				this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
+			}
 			
-			this.SendCommand(this.getCommandID(shot_command_ID), params);
 
 			m1ShotTicks = 0;
 		}

@@ -15,13 +15,12 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		{ return; }
 		
 		u16 ownerID;
-		if (!params.saferead_u16(ownerID)) return;
-
 		u8 shotType;
-		if (!params.saferead_u8(shotType)) return;
-
 		Vec2f blobPos;
 		Vec2f blobVel;
+		
+		if (!params.saferead_u16(ownerID)) return;
+		if (!params.saferead_u8(shotType)) return;
 		if (!params.saferead_Vec2f(blobPos)) return;
 		if (!params.saferead_Vec2f(blobVel)) return;
 
