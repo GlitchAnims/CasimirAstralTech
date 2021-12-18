@@ -17,15 +17,10 @@ const uint idleToWarnSeconds = totalToKickSeconds - warnToKickSeconds;
 void onTick(CRules@ this)
 {
 	if (getGameTime() % checkInterval != 0)
-	{
-		return;
-	}
+	{ return; }
 
-	if(getPlayerCount() == 1)
-	{
-		return;
-	}
-
+	if(getPlayerCount() <= 2)
+	{ return; }
 
 	CPlayer@ p = getLocalPlayer();
 	CControls@ controls = getControls();
