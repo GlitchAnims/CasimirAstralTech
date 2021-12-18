@@ -1,7 +1,6 @@
 //knight HUD
 
 #include "/Entities/Common/GUI/ActorHUDStartPos.as";
-#include "ChargeMeterHUD.as";
 
 const string iconsFilename = "Entities/Characters/Knight/KnightIcons.png";
 const int slotsSize = 6;
@@ -68,6 +67,5 @@ void onRender(CSprite@ this)
 
 	GUI::DrawIcon(iconsFilename, frame, Vec2f(16, 32), tl + Vec2f(8 + (slotsSize - 1) * 32, -16), 1.0f);
 	GUI::DrawIcon("GUI/jslot.png", 1, Vec2f(32,32), Vec2f(2,48));
-	DrawChargeMeter(blob, Vec2f(52,56)); //For the Charge meter script
 }
 

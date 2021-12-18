@@ -13,29 +13,30 @@
 void onInit( CBlob@ this )
 {
 	this.set_s32(absoluteCharge_string, 0);
+	this.set_s32(absoluteMaxCharge_string, 0);
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 		= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
-		chargeInfo.chargeMax 	= FighterParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 	= FighterParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 	= FighterParams::CHARGE_RATE;
+		chargeInfo.charge 			= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= FighterParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= FighterParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= FighterParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 	
 	SmallshipInfo ship;
-	ship.main_engine_force = FighterParams::main_engine_force;
-	ship.secondary_engine_force = FighterParams::secondary_engine_force;
-	ship.rcs_force = FighterParams::rcs_force;
-	ship.ship_turn_speed = FighterParams::ship_turn_speed;
-	ship.ship_drag = FighterParams::ship_drag;
-	ship.max_speed = FighterParams::max_speed;
+	ship.main_engine_force 			= FighterParams::main_engine_force;
+	ship.secondary_engine_force 	= FighterParams::secondary_engine_force;
+	ship.rcs_force 					= FighterParams::rcs_force;
+	ship.ship_turn_speed 			= FighterParams::ship_turn_speed;
+	ship.ship_drag 					= FighterParams::ship_drag;
+	ship.max_speed 					= FighterParams::max_speed;
 	
-	ship.firing_rate = FighterParams::firing_rate;
-	ship.firing_burst = FighterParams::firing_burst;
-	ship.firing_delay = FighterParams::firing_delay;
-	ship.firing_spread = FighterParams::firing_spread;
-	ship.shot_speed = FighterParams::shot_speed;
+	ship.firing_rate 				= FighterParams::firing_rate;
+	ship.firing_burst 				= FighterParams::firing_burst;
+	ship.firing_delay 				= FighterParams::firing_delay;
+	ship.firing_spread 				= FighterParams::firing_spread;
+	ship.shot_speed 				= FighterParams::shot_speed;
 	this.set("smallshipInfo", @ship);
 	
 	/*ManaInfo manaInfo;

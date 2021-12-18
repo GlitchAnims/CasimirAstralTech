@@ -1,17 +1,28 @@
 #include "ChargeCommon.as"
 
+void onRender(CSprite@ this)
+{
+	if (g_videorecording)
+		return;
+
+	CBlob@ blob = this.getBlob();
+
+    if (blob.isMyPlayer())
+    {
+        GUI::DrawIcon("GUI/jslot.png", 1, Vec2f(32,32), Vec2f(2,48));//For the Charge meter script
+        DrawChargeMeter(blob, Vec2f(52,56)); 
+    }
+}
+
 void DrawChargeMeter(CBlob@ this, Vec2f origin)
 {
-	ChargeInfo@ chargeInfo;
-    if (!this.get( "chargeInfo", @chargeInfo )) 
-	{ return; }
-    
     string manaFile = "GUI/ManaBar.png";
 	int barLength = 4;
     int segmentWidth = 24;
     GUI::DrawIcon("GUI/jends.png", 0, Vec2f(8,16), origin+Vec2f(-8,0));
-    s32 maxCharge = chargeInfo.maxCharge;
-    s32 currCharge = chargeInfo.charge;
+
+    s32 currCharge = this.get_s32(absoluteCharge_string);
+    s32 maxCharge = this.get_s32(absoluteMaxCharge_string);
 	
 	f32 chargePerSegment = maxCharge/barLength;
 	
@@ -36,5 +47,5 @@ void DrawChargeMeter(CBlob@ this, Vec2f origin)
         CHARGE++;
     }
     GUI::DrawIcon("GUI/jends.png", 1, Vec2f(8,16), origin+Vec2f(segmentWidth*CHARGE,0));
-	GUI::DrawText(currCharge+"%", origin+Vec2f(-42,8), color_white );
+	GUI::DrawText(currCharge+"/"+maxCharge, origin+Vec2f(-42,8), color_white );
 }

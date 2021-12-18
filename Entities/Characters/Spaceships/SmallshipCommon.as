@@ -6,10 +6,10 @@ const string hit_command_ID = "hit";
 namespace FighterParams
 {
 	//charge
-	const ::f32 CHARGE_START = 1.0f; //percentage charge to start with (0.0f - 1.0f)
+	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 100; //max charge amount
 	const ::s32 CHARGE_REGEN = 1; //amount per regen
-	const ::s32 CHARGE_RATE = 1; //ticks per regen
+	const ::s32 CHARGE_RATE = 5; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.3f;
 	const ::f32 secondary_engine_force = 0.1f;
