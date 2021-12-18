@@ -131,6 +131,10 @@ void onTick( CBlob@ this )
 		{
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
+			
+			CBitStream params;
+			params.write_u16(this.getNetworkID()); //ownerID
+			params.write_u8(1); //shot type
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
@@ -145,15 +149,11 @@ void onTick( CBlob@ this )
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
-				CBitStream params;
-				params.write_u16(this.getNetworkID()); //ownerID
-				params.write_u8(1); //shot type
+				
 				params.write_Vec2f(firePos); //shot position
 				params.write_Vec2f(fireVec); //shot velocity
-				
-				this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 			}
-			
+			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 
 			m1ShotTicks = 0;
 		}

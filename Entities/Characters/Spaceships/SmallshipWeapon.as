@@ -21,14 +21,9 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		
 		if (!params.saferead_u16(ownerID)) return;
 		if (!params.saferead_u8(shotType)) return;
-		if (!params.saferead_Vec2f(blobPos)) return;
-		if (!params.saferead_Vec2f(blobVel)) return;
 
 		CBlob@ ownerBlob = getBlobByNetworkID(ownerID);
 		if (ownerBlob == null || ownerBlob.hasTag("dead"))
-		{ return; }
-		
-		if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
 		{ return; }
 
 		string blobName = "orb";
@@ -54,13 +49,28 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			default: return;
 		}
 
-		CBlob@ blob = server_CreateBlob( blobName , ownerBlob.getTeamNum(), blobPos);
-		if (blob !is null)
+		/*
+		if (!params.saferead_Vec2f(blobPos)) return;
+		if (!params.saferead_Vec2f(blobVel)) return;
+		*/
+
+		//bool !params.saferead_u16(ownerID);
+		//bool !params.saferead_u8(shotType);
+
+		while (params.saferead_Vec2f(blobPos) && params.saferead_Vec2f(blobVel))
 		{
-			blob.IgnoreCollisionWhileOverlapped( ownerBlob );
-			blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
-			blob.setVelocity( blobVel );
+			if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
+			{ return; }
+
+			CBlob@ blob = server_CreateBlob( blobName , ownerBlob.getTeamNum(), blobPos);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				blob.setVelocity( blobVel );
+			}
 		}
+		
 	}
 	else if (cmd == this.getCommandID(hit_command_ID)) // if a shot hits, this gets sent
     {
