@@ -1,5 +1,6 @@
 // Fighter logic
 
+#include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
 #include "SmallshipCommon.as"
 #include "SpaceshipVars.as"

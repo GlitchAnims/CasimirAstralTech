@@ -1,4 +1,4 @@
-#include "SmallshipCommon.as"
+#include "SpaceshipGlobal.as"
 
 void onInit( CBlob@ this )
 {
@@ -26,28 +26,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		if (ownerBlob == null || ownerBlob.hasTag("dead"))
 		{ return; }
 
-		string blobName = "orb";
-		switch (shotType)
-		{
-			case 0:
-			{
-				blobName = "orb";
-			}
-			break;
-
-			case 1:
-			{
-				blobName = "gatling_basicshot";
-			}
-			break;
-
-			case 2:
-			{
-				blobName = "bee";
-			}
-			break;
-			default: return;
-		}
+		string blobName = getBulletName(shotType);
 
 		/*
 		if (!params.saferead_Vec2f(blobPos)) return;

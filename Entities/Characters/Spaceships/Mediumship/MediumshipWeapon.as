@@ -1,4 +1,4 @@
-#include "SmallshipCommon.as"
+#include "SpaceshipGlobal.as"
 
 void onInit( CBlob@ this )
 {

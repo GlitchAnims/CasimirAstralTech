@@ -1,5 +1,6 @@
 // Fighter logic
 
+#include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
 #include "TurretCommon.as"
 #include "SpaceshipVars.as"
@@ -29,10 +30,10 @@ void onInit( CBlob@ this )
 
 	this.set_u32("ownerBlobID", 0);
 
-	this.set_u32( "m1_heldTime", 0 );
+	this.set_u32( "space_heldTime", 0 );
 	this.set_u32( "m2_heldTime", 0 );
 
-	this.set_u32( "m1_shotTime", 0 );
+	this.set_u32( "space_shotTime", 0 );
 	this.set_u32( "m2_shotTime", 0 );
 
 	this.set_bool( "leftCannonTurn", false);
@@ -132,31 +133,29 @@ void onTick( CBlob@ this )
 
 
 	//gun logic
-	bool pressed_m1 = this.isKeyPressed(key_action1);
+	bool pressed_space = ownerBlob.isKeyPressed(key_action3);
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
-	u32 m1Time = this.get_u32( "m1_heldTime");
+	u32 spaceTime = this.get_u32( "space_heldTime");
 	u32 m2Time = this.get_u32( "m2_heldTime");
 
-	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
+	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
 	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_m1 && m1Time >= turret.firing_delay)
+	if (pressed_space && spaceTime >= turret.firing_delay)
 	{
-		if (m1ShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
+		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
-			CBitStream params;
-			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(1); //shot type
+			u8 shotType = 1; //shot type
 
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
 				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8, 4 * leftMult); //barrel pos
+				Vec2f firePos = Vec2f(8.0f, 0.0f * leftMult); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
@@ -165,29 +164,34 @@ void onTick( CBlob@ this )
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds turret speed
 
-				params.write_Vec2f(firePos); //shot position
-				params.write_Vec2f(fireVec); //shot velocity
+				turretFire(this, shotType, firePos, fireVec); //at TurretCommon.as
 			}
-			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 
-			m1ShotTicks = 0;
+			spaceShotTicks = 0;
 		}
 	}
 
-	if (pressed_m1)
-	{ m1Time++; }
-	else { m1Time = 0; }
+	if (pressed_space)
+	{ spaceTime++; }
+	else { spaceTime = 0; }
 	
 	if (pressed_m2)
 	{ m2Time++; }
 	else { m2Time = 0; }
-	this.set_u32( "m1_heldTime", m1Time );
+	this.set_u32( "space_heldTime", spaceTime );
 	this.set_u32( "m2_heldTime", m2Time );
 
-	m1ShotTicks++;
-	//m2ShotTicks++;
-	this.set_u32( "m1_shotTime", m1ShotTicks );
-	this.set_u32( "m2_shotTime", m2ShotTicks );
+	if (spaceShotTicks < 1000)
+	{
+		spaceShotTicks++;
+		this.set_u32( "space_shotTime", spaceShotTicks );
+	}
+
+	if (m2ShotTicks < 1000)
+	{
+		//m2ShotTicks++;
+		this.set_u32( "m2_shotTime", m2ShotTicks );
+	}
 
 	//sound logic
 	/*Vec2f vel = this.getVelocity();

@@ -1,7 +1,6 @@
 //Smallship Include
 
-const string shot_command_ID = "shot";
-const string hit_command_ID = "hit";
+#include "SpaceshipGlobal.as"
 
 namespace FighterParams
 {

@@ -1,7 +1,6 @@
-//Smallship Include
+//Turret Include
 
-const string shot_command_ID = "shot";
-const string hit_command_ID = "hit";
+#include "SpaceshipGlobal.as"
 
 namespace FlakParams
 {
@@ -35,3 +34,21 @@ class TurretInfo
 		shot_speed = 3.0f;
 	}
 };
+
+void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero)
+{
+	if (ownerBlob == null || ownerBlob.hasTag("dead"))
+	{ return; }
+	if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
+	{ return; }
+
+	string blobName = getBulletName(shotType);
+
+	CBlob@ blob = server_CreateBlob( blobName , ownerBlob.getTeamNum(), blobPos);
+	if (blob !is null)
+	{
+		blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+		blob.SetDamageOwnerPlayer( ownerBlob.getDamageOwnerPlayer() );
+		blob.setVelocity( blobVel );
+	}
+}
