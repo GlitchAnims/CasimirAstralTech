@@ -57,7 +57,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		//bool !params.saferead_u16(ownerID);
 		//bool !params.saferead_u8(shotType);
 
-		while (params.saferead_Vec2f(blobPos) && params.saferead_Vec2f(blobVel))
+		while (params.saferead_Vec2f(blobPos) && params.saferead_Vec2f(blobVel)) //immediately stops if something fails
 		{
 			if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
 			{ return; }
@@ -70,7 +70,6 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 				blob.setVelocity( blobVel );
 			}
 		}
-		
 	}
 	else if (cmd == this.getCommandID(hit_command_ID)) // if a shot hits, this gets sent
     {

@@ -143,8 +143,8 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i++)
    	{
-		u8 alpha = (210.0f * _gatling_basicshot_r.NextFloat()); //randomize alpha
-		color.setAlpha(alpha);
+		if (_gatling_basicshot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
 
@@ -155,8 +155,7 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 			p.gravity = Vec2f_zero;
 			p.bounce = 0;
 			p.Z = 8;
-			p.timeout = 2;
-			p.setRenderStyle(RenderStyle::light);
+			p.timeout = 1;
 		}
 	}
 }

@@ -131,7 +131,7 @@ void onTick( CBlob@ this )
 		{
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
-			
+
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
@@ -149,7 +149,6 @@ void onTick( CBlob@ this )
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
-				
 				params.write_Vec2f(firePos); //shot position
 				params.write_Vec2f(fireVec); //shot velocity
 			}

@@ -19,9 +19,9 @@ namespace FighterParams
 	const ::f32 max_speed = 200.0f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 4; // ticks per shot, won't fire if 0
-	const ::u32 firing_burst = 10; // bullets per shot, won't fire if 0
+	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
-	const ::u32 firing_spread = 2; // degrees
+	const ::u32 firing_spread = 1; // degrees
 	const ::f32 shot_speed = 20.0f; // pixels per tick, won't fire if 0
 }
 
