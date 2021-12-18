@@ -1,5 +1,6 @@
 // Fighter logic
 
+#include "ChargeCommon.as"
 #include "SmallshipCommon.as"
 #include "SpaceshipVars.as"
 #include "ThrowCommon.as"
@@ -11,6 +12,13 @@
 
 void onInit( CBlob@ this )
 {
+	ChargeInfo chargeInfo;
+	chargeInfo.charge 		= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
+	chargeInfo.chargeMax 	= FighterParams::CHARGE_MAX;
+	chargeInfo.chargeRegen 	= FighterParams::CHARGE_REGEN;
+	chargeInfo.chargeRate 	= FighterParams::CHARGE_RATE;
+	this.set("chargeInfo", @chargeInfo);
+
 	SmallshipInfo ship;
 	ship.main_engine_force = FighterParams::main_engine_force;
 	ship.secondary_engine_force = FighterParams::secondary_engine_force;
