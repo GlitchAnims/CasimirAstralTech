@@ -10,6 +10,8 @@
 #include "Help.as"
 #include "CommonFX.as"
 
+Random _martyr_logic_r(16661);
+
 void onInit( CBlob@ this )
 {
 	this.set_s32(absoluteCharge_string, 0);
@@ -93,8 +95,8 @@ void onTick( CBlob@ this )
 	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	//if (!isClient()) return;
 	if (this.isInInventory()) return;
-	if (!this.isMyPlayer()) return;
-
+	if (!isClient()) return;
+	
     MediumshipInfo@ ship;
 	if (!this.get( "shipInfo", @ship )) 
 	{ return; }
@@ -112,6 +114,9 @@ void onTick( CBlob@ this )
 	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
+	int teamNum = this.getTeamNum();
+	bool facingLeft = this.isFacingLeft();
+	bool isMyPlayer = this.isMyPlayer();
 
 	//gun logic
 	bool pressed_m1 = this.isKeyPressed(key_action1);
@@ -123,11 +128,11 @@ void onTick( CBlob@ this )
 	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
 	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_m1 && m1Time >= ship.firing_delay)
+	if (pressed_m1 && m1Time >= ship.firing_delay && isMyPlayer)
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
-			bool leftCannon = this.get_bool( "leftCannonTurn" );
+			bool leftCannon = this.get_bool( "leftCannonTurn" ); //this is used if the "gun" has 2 firing positions
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
 			CBitStream params;
@@ -137,13 +142,13 @@ void onTick( CBlob@ this )
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8, 4 * leftMult); //barrel pos
+				f32 cannonMult = leftCannon ? 1.0f : -1.0f;
+				Vec2f firePos = Vec2f(facingLeft ? -9.0f : 9.0f, 9.5 * cannonMult); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
-				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _fighter_logic_r.NextFloat()) ); //shot spread
+				Vec2f fireVec = Vec2f(facingLeft ? -1.0f : 1.0f,0) * ship.shot_speed; 
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
@@ -153,6 +158,39 @@ void onTick( CBlob@ this )
 			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 
 			m1ShotTicks = 0;
+		}
+	}
+	
+	s32 mainCannonDelay = 60; //ticks before firing main cannon
+	f32 cannonLoad = float(m2Time) / float(mainCannonDelay); //load percentage
+	if (pressed_m2 && cannonLoad <= 1.0f)
+	{
+		Vec2f firePos = Vec2f(facingLeft ? -11.0f : 11.0f, 0); //barrel pos
+		firePos.RotateByDegrees(blobAngle);
+		firePos += thisPos; //fire pos
+
+		makeCannonChargeParticles(firePos, thisVel, cannonLoad, teamNum); //fancy particle effects
+
+		if (cannonLoad >= 1.0f && isMyPlayer) //fires after 2 seconds
+		{
+			CBitStream params;
+			params.write_u16(this.getNetworkID()); //ownerID
+			params.write_u8(1); //shot type, see weapon script
+
+			uint bulletCount = ship.firing_burst;
+			for (uint i = 0; i < bulletCount; i ++)
+			{
+				
+
+				Vec2f fireVec = Vec2f(facingLeft ? -1.0f : 1.0f,0) * ship.shot_speed; 
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
+				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
+				fireVec += thisVel; //adds ship speed
+
+				params.write_Vec2f(firePos); //shot position
+				params.write_Vec2f(fireVec); //shot velocity
+			}
+			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 		}
 	}
 
@@ -172,20 +210,60 @@ void onTick( CBlob@ this )
 	this.set_u32( "m2_shotTime", m2ShotTicks );
 
 	//sound logic
-	Vec2f vel = this.getVelocity();
+	/*Vec2f vel = this.getVelocity();
 	float posVelX = Maths::Abs(vel.x);
 	float posVelY = Maths::Abs(vel.y);
-	if(posVelX > 2.9f)
+	if(posVelX > 3.0f)
 	{
 		this.getSprite().SetEmitSoundVolume(3.0f);
 	}
 	else
 	{
 		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
+	}*/
+
+	if(cannonLoad > 1.0f)
+	{
+		this.getSprite().SetEmitSoundVolume(0.0f);
+	}
+	else
+	{
+		this.getSprite().SetEmitSoundVolume(2.0f * cannonLoad);
+		this.getSprite().SetEmitSoundSpeed(2.0f * cannonLoad);
 	}
 }
 
+void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, f32 mult = 0.0f, int teamNum = 0)
+{
+	if (barrelPos == Vec2f_zero) //abort if no barrel pos
+	{ return; }
 
+	s32 particleNum = 2.0f + (30.0f * mult);
+
+	//SColor color = getTeamColorWW(teamNum);
+	SColor color = SColor(255, 10, 255, 10); //green particles
+
+	for(int i = 0; i < particleNum; i++)
+	{
+		Vec2f pNorm = Vec2f(1,0);
+		pNorm.RotateByDegrees(360.0f * _martyr_logic_r.NextFloat());
+
+		Vec2f pVel = (pNorm * mult) * 5.0f;
+		pVel += blobVel;
+		Vec2f pGrav = (-pNorm * mult) * 0.5;
+
+		CParticle@ p = ParticlePixelUnlimited(barrelPos, pVel, color, true);
+        if(p !is null)
+        {
+   	        p.collides = false;
+   	        p.gravity = pGrav;
+            p.bounce = 0;
+            p.Z = 20 * (1.0f - (2.0f * _martyr_logic_r.NextFloat()));
+            p.timeout = 3.0f + (15.0f * mult);
+			//p.timeout = 30;
+    	}
+	}
+}
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
 {
@@ -211,18 +289,17 @@ void onDie( CBlob@ this )
 	blast( thisPos , 12);
 }
 
-Random _fighter_logic_r(67532);
-void blast( Vec2f pos , int amount)
+void blast( Vec2f pos , int particleNum)
 {
 	if(!isClient())
 	{return;}
 
 	Sound::Play("GenericExplosion1.ogg", pos, 0.8f, 0.8f + XORRandom(10)/10.0f);
 
-	for (int i = 0; i < amount; i++)
+	for (int i = 0; i < particleNum; i++)
     {
-        Vec2f vel(_fighter_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_fighter_logic_r.NextFloat() * 360.0f);
+        Vec2f vel(_martyr_logic_r.NextFloat() * 3.0f, 0);
+        vel.RotateBy(_martyr_logic_r.NextFloat() * 360.0f);
 
         CParticle@ p = ParticleAnimated("GenericBlast6.png", 
 									pos, 

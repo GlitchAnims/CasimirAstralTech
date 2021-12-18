@@ -10,6 +10,7 @@
 #include "Help.as"
 #include "CommonFX.as"
 
+Random _fighter_logic_r(67532);
 void onInit( CBlob@ this )
 {
 	this.set_s32(absoluteCharge_string, 0);
@@ -213,7 +214,6 @@ void onDie( CBlob@ this )
 	blast( thisPos , 12);
 }
 
-Random _fighter_logic_r(67532);
 void blast( Vec2f pos , int amount)
 {
 	if(!isClient())
