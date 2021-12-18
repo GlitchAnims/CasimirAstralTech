@@ -70,9 +70,9 @@ void onTick(CMovement@ this)
 	f32 aimAngle = aimVec.getAngleDegrees();
 	aimAngle *= -1.0f;
 
-	if (blobAngle != aimAngle)
+	if (blobAngle != aimAngle) //aiming logic
 	{
-		f32 turnSpeed = ship.ship_turn_speed * moveVars.turnSpeedFactor;
+		f32 turnSpeed = ship.ship_turn_speed * moveVars.turnSpeedFactor; //multiplier for turn speed
 
 		f32 angleDiff = blobAngle - aimAngle;
 		angleDiff = (angleDiff + 180) % 360 - 180;
@@ -163,16 +163,6 @@ void onTick(CMovement@ this)
 		addedVel += board / float(keysPressedAmount);
 		addedVel += starboard / float(keysPressedAmount);
 		
-
-		if (thisBlob.getPosition().y/8 >=  getMap().tilemapheight - 2) //if too high or too low, bounce back
-		{
-			vel = Vec2f(vel.x,-1);
-		}
-		else if (thisBlob.getPosition().y <= 2)
-		{
-			vel = Vec2f(vel.x,1);
-		}
-
 		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
 	}
 	else
@@ -181,6 +171,23 @@ void onTick(CMovement@ this)
 		ship.backward_thrust = false;
 		ship.board_thrust = false;
 		ship.starboard_thrust = false;
+	}
+
+	if (thisBlob.getPosition().y >=  (map.tilemapheight*8) - 8) //if too high or too low, bounce back
+	{
+		vel = Vec2f(vel.x,-1);
+	}
+	else if (thisBlob.getPosition().y <= 2)
+	{
+		vel = Vec2f(vel.x,1);
+	}
+	else if (thisBlob.getPosition().x >=  (map.tilemapwidth*8) - 8) //if too left or too right, bounce back
+	{
+		vel = Vec2f(-1,vel.y);
+	}
+	else if (thisBlob.getPosition().x <= 8)
+	{
+		vel = Vec2f(1,vel.y);
 	}
 
 	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
