@@ -47,10 +47,10 @@ void LoadSprites(CSprite@ this)
 	this.RemoveSpriteLayer(down_fire);
 	this.RemoveSpriteLayer(left_fire);
 	this.RemoveSpriteLayer(right_fire);
-	CSpriteLayer@ upFire = this.addSpriteLayer(up_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ downFire = this.addSpriteLayer(down_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ leftFire = this.addSpriteLayer(left_fire, "Flash1.png", 32, 32);
-	CSpriteLayer@ rightFire = this.addSpriteLayer(right_fire, "Flash1.png", 32, 32);
+	CSpriteLayer@ upFire = this.addSpriteLayer(up_fire, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ downFire = this.addSpriteLayer(down_fire, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ leftFire = this.addSpriteLayer(left_fire, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ rightFire = this.addSpriteLayer(right_fire, "ThrustFlash.png", 27, 27);
 	if (upFire !is null)
 	{
 		Animation@ anim = upFire.addAnimation("default", 2, true);
@@ -69,7 +69,7 @@ void LoadSprites(CSprite@ this)
 		downFire.SetVisible(false);
 		downFire.SetRelativeZ(-1.2f);
 		downFire.ScaleBy(0.5f, 0.5f);
-		//downFire.RotateBy(0, Vec2f_zero);
+		downFire.RotateBy(180, Vec2f_zero);
 		downFire.SetOffset(Vec2f(-6, 0));
 	}
 	if (leftFire !is null)
@@ -80,7 +80,7 @@ void LoadSprites(CSprite@ this)
 		leftFire.SetVisible(false);
 		leftFire.SetRelativeZ(-1.3f);
 		leftFire.ScaleBy(0.3f, 0.3f);
-		leftFire.RotateBy(90, Vec2f_zero);
+		leftFire.RotateBy(270, Vec2f_zero);
 		leftFire.SetOffset(Vec2f(0, 5));
 	}
 	if (rightFire !is null)
