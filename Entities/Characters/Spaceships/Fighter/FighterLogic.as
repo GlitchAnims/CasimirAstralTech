@@ -38,7 +38,9 @@ void onInit( CBlob@ this )
 	ship.firing_burst 				= FighterParams::firing_burst;
 	ship.firing_delay 				= FighterParams::firing_delay;
 	ship.firing_spread 				= FighterParams::firing_spread;
+	ship.firing_cost 				= FighterParams::firing_cost;
 	ship.shot_speed 				= FighterParams::shot_speed;
+	ship.shot_lifetime 				= FighterParams::shot_lifetime;
 	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
@@ -118,6 +120,7 @@ void onTick( CBlob@ this )
 	blobAngle = (blobAngle+360.0f) % 360;
 
 	//gun logic
+	s32 m1ChargeCost = ship.firing_cost;
 	bool pressed_m1 = this.isKeyPressed(key_action1);
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
@@ -137,7 +140,8 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
-			params.write_f32(0.8f); //shot lifetime
+			params.write_f32(ship.shot_lifetime); //shot lifetime
+			params.write_s32(m1ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)

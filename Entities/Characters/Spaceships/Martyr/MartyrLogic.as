@@ -37,7 +37,9 @@ void onInit( CBlob@ this )
 	ship.firing_burst 				= MartyrParams::firing_burst;
 	ship.firing_delay 				= MartyrParams::firing_delay;
 	ship.firing_spread 				= MartyrParams::firing_spread;
+	ship.firing_cost 				= MartyrParams::firing_cost;
 	ship.shot_speed 				= MartyrParams::shot_speed;
+	ship.shot_lifetime 				= MartyrParams::shot_lifetime;
 	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
@@ -49,7 +51,6 @@ void onInit( CBlob@ this )
 	this.set_u32( "m2_heldTime", 0 );
 
 	this.set_u32( "m1_shotTime", 0 );
-	this.set_u32( "m2_shotTime", 0 );
 
 	this.set_bool( "leftCannonTurn", false);
 
@@ -125,6 +126,11 @@ void onTick( CBlob@ this )
 	bool isMyPlayer = this.isMyPlayer();
 
 	//gun logic
+	s32 thisCharge = this.get_s32(absoluteCharge_string);
+
+	s32 m1ChargeCost = ship.firing_cost;
+	s32 m2ChargeCost = 50;
+
 	bool pressed_m1 = this.isKeyPressed(key_action1);
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
@@ -132,9 +138,8 @@ void onTick( CBlob@ this )
 	u32 m2Time = this.get_u32( "m2_heldTime");
 
 	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
-	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_m1 && m1Time >= ship.firing_delay && isMyPlayer)
+	if (pressed_m1 && m1Time >= ship.firing_delay && isMyPlayer && thisCharge >= m1ChargeCost)
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
@@ -144,7 +149,8 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
-			params.write_f32(1.0f); //shot lifetime
+			params.write_f32(ship.shot_lifetime); //shot lifetime
+			params.write_s32(m1ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
@@ -169,7 +175,8 @@ void onTick( CBlob@ this )
 	}
 	
 	s32 mainCannonDelay = 60; //ticks before firing main cannon
-	f32 cannonLoad = float(m2Time) / float(mainCannonDelay); //load percentage
+	f32 m2Mult = thisCharge >= m2ChargeCost ? 1.0f : 0.0f;
+	f32 cannonLoad = (float(m2Time) / float(mainCannonDelay)) * m2Mult; //load percentage
 	if (pressed_m2 && cannonLoad <= 1.0f)
 	{
 		Vec2f firePos = Vec2f(facingLeft ? -11.0f : 11.0f, 0); //barrel pos
@@ -184,12 +191,11 @@ void onTick( CBlob@ this )
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type, see weapon script
 			params.write_f32(1.0f); //shot lifetime
+			params.write_s32(m2ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				
-
 				Vec2f fireVec = Vec2f(facingLeft ? -1.0f : 1.0f,0) * ship.shot_speed; 
 				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
@@ -213,9 +219,7 @@ void onTick( CBlob@ this )
 	this.set_u32( "m2_heldTime", m2Time );
 
 	m1ShotTicks++;
-	//m2ShotTicks++;
 	this.set_u32( "m1_shotTime", m1ShotTicks );
-	this.set_u32( "m2_shotTime", m2ShotTicks );
 
 	//sound logic
 	/*Vec2f vel = this.getVelocity();

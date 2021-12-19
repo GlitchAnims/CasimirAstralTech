@@ -1,4 +1,6 @@
 
+const string chargeTag = "holds_charge";
+
 const string absoluteCharge_string = "absolute_charge";
 const string absoluteMaxCharge_string = "absolute_max_charge";
 
@@ -122,7 +124,7 @@ bool addCharge(CBlob@ blob, s32 chargeAmount = 0) //increases charge
 	return false;
 }
 
-bool removeCharge(CBlob@ blob, s32 chargeAmount = 0) //decreases charge
+bool removeCharge(CBlob@ blob, s32 chargeAmount = 0, bool mustHaveEnough = false) //decreases charge
 {//this method returns whether or not it was able to decrease charge
 	
 	ChargeInfo@ chargeInfo;
@@ -140,11 +142,14 @@ bool removeCharge(CBlob@ blob, s32 chargeAmount = 0) //decreases charge
 			newCharge = charge - chargeAmount;
 			chargeInfo.charge = newCharge;
 		}
-        else
+        else if (!mustHaveEnough)
 		{
 			newCharge = 0;
 			chargeInfo.charge = newCharge;
 		}
+		else
+		{ return false; }
+
 		updateAbsoluteCharge(blob, newCharge);
 		return true;
     }

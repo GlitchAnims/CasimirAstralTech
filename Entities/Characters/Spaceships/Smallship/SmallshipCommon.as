@@ -21,7 +21,9 @@ namespace FighterParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 1; // degrees
-	const ::f32 shot_speed = 20.0f; // pixels per tick, won't fire if 0
+	const ::s32 firing_cost = 2; // charge cost
+	const ::f32 shot_speed = 20.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 0.8f; // float, seconds
 }
 
 namespace InterceptorParams
@@ -29,8 +31,8 @@ namespace InterceptorParams
 	//charge
 	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 200; //max charge amount
-	const ::s32 CHARGE_REGEN = 0; //amount per regen
-	const ::s32 CHARGE_RATE = 0; //ticks per regen
+	const ::s32 CHARGE_REGEN = 1; //amount per regen
+	const ::s32 CHARGE_RATE = 10; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.5f;
 	const ::f32 secondary_engine_force = 0.05f;
@@ -43,7 +45,9 @@ namespace InterceptorParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 15; // ticks before first shot
 	const ::u32 firing_spread = 1; // degrees
-	const ::f32 shot_speed = 30.0f; // pixels per tick, won't fire if 0
+	const ::s32 firing_cost = 2; // charge cost
+	const ::f32 shot_speed = 30.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 0.4f; // float, seconds
 }
 
 namespace BomberParams
@@ -65,7 +69,9 @@ namespace BomberParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 10; // ticks before first shot
 	const ::u32 firing_spread = 0; // degrees
-	const ::f32 shot_speed = 8.0f; // pixels per tick, won't fire if 0
+	const ::s32 firing_cost = 5; // charge cost
+	const ::f32 shot_speed = 8.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 1.0f; // float, seconds
 }
 
 namespace ScoutParams
@@ -87,7 +93,9 @@ namespace ScoutParams
 	const ::u32 firing_burst = 15; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 5; // degrees
-	const ::f32 shot_speed = 12.0f; // pixels per tick, won't fire if 0
+	const ::s32 firing_cost = 20; // charge cost
+	const ::f32 shot_speed = 12.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 1.0f; // float, seconds
 }
 
 class SmallshipInfo
@@ -109,7 +117,9 @@ class SmallshipInfo
 	u32 firing_burst; // bullets per shot, won't fire if 0
 	u32 firing_delay; // ticks before first shot
 	u32 firing_spread; // degrees
+	s32 firing_cost; // charge cost
 	f32 shot_speed; // pixels per tick, 0 = instant
+	f32 shot_lifetime; // float, seconds
 
 	SmallshipInfo()
 	{
@@ -130,6 +140,8 @@ class SmallshipInfo
 		firing_burst = 1;
 		firing_delay = 1;
 		firing_spread = 1;
+		firing_cost = 1;
 		shot_speed = 3.0f;
+		shot_lifetime = 1.0f;
 	}
 };

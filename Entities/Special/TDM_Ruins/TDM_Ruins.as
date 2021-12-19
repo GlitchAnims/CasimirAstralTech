@@ -5,6 +5,10 @@
 #include "StandardControlsCommon.as"
 #include "RespawnCommandCommon.as"
 #include "GenericButtonCommon.as"
+#include "ChargeCommon.as"
+#include "TeamColour.as"
+
+Random _TDM_ruins_r(67656);
 
 void onInit(CBlob@ this)
 {
@@ -45,6 +49,107 @@ void onTick(CBlob@ this)
 			}
 		}
 	}
+
+	CMap@ map = getMap(); //standard map check
+	if (map is null)
+	{ return; }
+
+	Vec2f thisPos = this.getPosition();
+	f32 radius = 64.0f;
+	u32 gameTime = getGameTime();
+	int teamNum = this.getTeamNum();
+
+	if (isServer() && gameTime % 30 == 0)
+	{
+		s32 chargeAmount = 10.0f;
+
+		CBlob@[] blobsInRadius;
+		map.getBlobsInRadius(thisPos, radius, @blobsInRadius); //tent aura push
+		for (uint i = 0; i < blobsInRadius.length; i++)
+		{
+			CBlob@ b = blobsInRadius[i];
+			if (b is null)
+			{ continue; }
+
+			if (b.getTeamNum() != teamNum)
+			{ continue; }
+
+			if (!b.hasTag(chargeTag) || b.hasTag("dead"))
+			{ continue; }
+
+			addCharge(b, chargeAmount);
+		}
+	}
+
+	if (!isClient())
+	{ return; }
+
+	CBlob@[] blobsInRadius;
+	map.getBlobsInRadius(thisPos, radius, @blobsInRadius); //tent aura push
+	for (uint i = 0; i < blobsInRadius.length; i++)
+	{
+		CBlob@ b = blobsInRadius[i];
+		if (b is null)
+		{ continue; }
+
+		if (b.getTeamNum() != teamNum)
+		{ continue; }
+
+		if (!b.hasTag(chargeTag) || b.hasTag("dead"))
+		{ continue; }
+
+		Vec2f blobPos = b.getPosition();
+
+		Vec2f rayVec = blobPos - thisPos;
+		int steps = rayVec.getLength();
+
+		Vec2f rayNorm = rayVec;
+		rayNorm.Normalize();
+
+		Vec2f rayDeviation = rayNorm;
+		rayDeviation.RotateByDegrees(90);
+		rayDeviation *= 4.0f; //perpendicular particle deviation
+
+		SColor color = getTeamColor(teamNum);
+
+		for(int i = 0; i < steps; i++)
+   		{
+			f32 chance = _TDM_ruins_r.NextFloat(); //chance to not spawn particle
+			if (chance > 0.3f)
+			{ continue; }
+
+			f32 waveTravel = i - gameTime; //forward and backwards wave travel
+			f32 sinInput = waveTravel * 0.2f;
+			f32 stepDeviation = Maths::Sin(sinInput); //particle deviation multiplier
+
+			if (i < 8)
+			{
+				f32 deviationReduction = float(i) / 8.0f;
+				stepDeviation *= deviationReduction;
+			}
+			if (i > (steps - 8))
+			{
+				f32 deviationReduction = -1.0f * ((float(i) - float(steps)) / 8.0f);
+				stepDeviation *= deviationReduction;
+			}
+
+			Vec2f finalRayDeviation = rayDeviation * stepDeviation;
+
+			Vec2f pPos = (rayNorm * i) + finalRayDeviation;
+			pPos += thisPos;
+
+ 	    	CParticle@ p = ParticlePixelUnlimited(pPos, Vec2f_zero, color, true);
+ 	    	if(p !is null)
+  	    	{
+				p.collides = false;
+				p.gravity = Vec2f_zero;
+				p.bounce = 0;
+				p.Z = 8;
+				p.timeout = 3;
+			}
+		}
+		
+	} //for loop end
 }
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)

@@ -1,11 +1,14 @@
 #define SERVER_ONLY
 
+#include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
 
 void onInit(CBlob@ this)
 {
+	this.Tag(chargeTag);
 	this.getCurrentScript().removeIfTag = "dead";
 	this.set_bool("firstTick", true);
+	this.addCommandID( drain_charge_ID ); //SpaceshipGlobal.as
 }
 
 void onTick(CBlob@ this)
@@ -53,4 +56,25 @@ void onTick(CBlob@ this)
 
 		addCharge(this, chargeRegen);
     }
+}
+
+void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
+{
+    if (cmd == this.getCommandID(drain_charge_ID)) // client-to-server charge drain
+    {
+		if (!isServer())
+		{ return; }
+		
+		u16 ownerID;
+		s32 chargeAmount;
+		
+		if (!params.saferead_u16(ownerID)) return;
+		if (!params.saferead_s32(chargeAmount)) return;
+
+		CBlob@ ownerBlob = getBlobByNetworkID(ownerID);
+		if (ownerBlob == null || ownerBlob.hasTag("dead"))
+		{ return; }
+
+		removeCharge(this, chargeAmount);
+	}
 }

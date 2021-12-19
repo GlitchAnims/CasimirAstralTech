@@ -12,7 +12,7 @@ const f32 damage = 1.0f;
 void onInit(CBlob@ this)
 {
 	this.server_SetTimeToDie(2);
-	this.set_f32(shot_lifetime_string, 1.0f); //SpaceshipGlobal.as
+	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
 
 	CShape@ shape = this.getShape();
 	if (shape != null)

@@ -16,6 +16,7 @@ void onInit( CBlob@ this )
 	turret.firing_burst 		= FlakParams::firing_burst;
 	turret.firing_delay 		= FlakParams::firing_delay;
 	turret.firing_spread 		= FlakParams::firing_spread;
+	turret.firing_cost 			= FlakParams::firing_cost;
 	turret.shot_speed 			= FlakParams::shot_speed;
 	this.set("shipInfo", @turret);
 	
@@ -126,6 +127,10 @@ void onTick( CBlob@ this )
 
 
 	//gun logic
+	s32 ownerCharge = ownerBlob.get_s32(absoluteCharge_string);
+
+	s32 spaceChargeCost = turret.firing_cost;
+
 	bool pressed_space = ownerBlob.isKeyPressed(key_action3);
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
@@ -135,10 +140,12 @@ void onTick( CBlob@ this )
 	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
 	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_space && spaceTime >= turret.firing_delay)
+	if (pressed_space && spaceTime >= turret.firing_delay && ownerCharge >= spaceChargeCost)
 	{
 		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
+			removeCharge(ownerBlob, spaceChargeCost, true);
+
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
 

@@ -12,7 +12,7 @@ const f32 damage = 0.2f;
 void onInit(CBlob@ this)
 {
 	this.server_SetTimeToDie(1);
-	this.set_f32(shot_lifetime_string, 1.0f); //SpaceshipGlobal.as
+	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
 
 	CShape@ shape = this.getShape();
 	if (shape != null)
@@ -54,7 +54,7 @@ void onTick(CBlob@ this)
 		}
 		if (isServer()) //bullet range moderation
 		{
-			float lifeTime = this.get_f32(shot_lifetime_string);
+			float lifeTime = this.get_f32(shotLifetimeString);
 			this.server_SetTimeToDie(lifeTime);
 		}
 		this.set_bool(firstTickString, false);

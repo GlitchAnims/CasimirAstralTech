@@ -38,7 +38,9 @@ void onInit( CBlob@ this )
 	ship.firing_burst 				= ScoutParams::firing_burst;
 	ship.firing_delay 				= ScoutParams::firing_delay;
 	ship.firing_spread 				= ScoutParams::firing_spread;
+	ship.firing_cost 				= ScoutParams::firing_cost;
 	ship.shot_speed 				= ScoutParams::shot_speed;
+	ship.shot_lifetime 				= ScoutParams::shot_lifetime;
 	this.set("shipInfo", @ship);
 	
 	//keys setup
@@ -113,6 +115,7 @@ void onTick( CBlob@ this )
 	blobAngle = (blobAngle+360.0f) % 360;
 
 	//gun logic
+	s32 m1ChargeCost = ship.firing_cost;
 	bool pressed_m1 = this.isKeyPressed(key_action1);
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
@@ -129,7 +132,8 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
-			params.write_f32(1.0f); //shot lifetime
+			params.write_f32(ship.shot_lifetime); //shot lifetime
+			params.write_s32(m1ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)

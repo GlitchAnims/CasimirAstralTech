@@ -1,11 +1,10 @@
-//Smallship Include
-
 const string shot_command_ID = "shot";
 const string hit_command_ID = "hit";
+const string drain_charge_ID = "drain_charge";
 
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";
-const string shot_lifetime_string = "shot_lifetime";
+const string shotLifetimeString = "shot_lifetime";
 
 string getBulletName(u8 shotType = 0)
 {
