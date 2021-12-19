@@ -111,6 +111,39 @@ void makeEnergyLink(Vec2f fromPos = Vec2f_zero, Vec2f toPos = Vec2f_zero, int te
 	}
 }
 
+void makeTeamAura(Vec2f auraCenter = Vec2f_zero, int teamNum = 0, Vec2f auraVel = Vec2f_zero, u16 particleNum = 20, f32 radius = 64.0f)
+{
+	SColor color = getTeamColor(teamNum);
+	for(int i = 0; i < particleNum; i++)
+	{
+		u8 alpha = 40 + (170.0f * _sprk_r2.NextFloat()); //randomize alpha
+		color.setAlpha(alpha);
+
+		f32 randomDeviation = (i*0.3f) * _sprk_r2.NextFloat(); //random pixel deviation
+		Vec2f prePos = Vec2f(radius - randomDeviation, 0); //distance
+		prePos.RotateByDegrees(360.0f * _sprk_r2.NextFloat()); //random 360 rotation
+
+		Vec2f pPos = auraCenter + prePos;
+		Vec2f pGrav = -prePos * 0.005f; //particle gravity
+
+		Vec2f pVel = prePos;
+		pVel.Normalize();
+		pVel *= 2.0f;
+		pVel += auraVel;
+
+		CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = pGrav;
+			p.bounce = 0;
+			p.Z = 7;
+			p.timeout = 12;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
+}
+
 SColor getTeamColorWW( int teamNum = -1, SColor color = SColor(255, 255, 0, 0) )
 {
     switch (teamNum)

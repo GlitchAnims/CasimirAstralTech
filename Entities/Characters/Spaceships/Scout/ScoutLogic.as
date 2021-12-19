@@ -108,7 +108,7 @@ void onTick( CBlob@ this )
 	bool pressed_space = this.isKeyPressed(key_action3);
 	u32 spaceTime = this.get_u32( "space_heldTime" );
 
-	float shareLinkRadius = Maths::Clamp(float(spaceTime) / 30.0f, 0.0f, 1.0f);
+	f32 shareLinkRadius = Maths::Clamp(float(spaceTime) / 30.0f, 0.0f, 1.0f);
 	shareLinkRadius *= 64.0f;
 	if (shareLinkRadius > 1)
 	{
@@ -133,35 +133,7 @@ void onTick( CBlob@ this )
 		} //for loop end
 		
 		u16 particleNum = shareLinkRadius / 3;
-		SColor color = getTeamColor(teamNum);
-		for(int i = 0; i < particleNum; i++)
-		{
-			u8 alpha = 40 + (170.0f * _scout_logic_r.NextFloat()); //randomize alpha
-			color.setAlpha(alpha);
-
-			f32 randomDeviation = (i*0.3f) * _scout_logic_r.NextFloat(); //random pixel deviation
-			Vec2f prePos = Vec2f(shareLinkRadius - randomDeviation, 0); //distance
-			prePos.RotateByDegrees(360.0f * _scout_logic_r.NextFloat()); //random 360 rotation
-
-			Vec2f pPos = thisPos + prePos;
-			Vec2f pGrav = -prePos * 0.005f; //particle gravity
-
-			Vec2f pVel = prePos;
-			pVel.Normalize();
-			pVel *= 2.0f;
-			pVel += thisVel;
-
-			CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
-			if(p !is null)
-			{
-				p.collides = false;
-				p.gravity = pGrav;
-				p.bounce = 0;
-				p.Z = 7;
-				p.timeout = 12;
-				p.setRenderStyle(RenderStyle::light);
-			}
-		}
+		makeTeamAura(thisPos, teamNum, thisVel, particleNum, shareLinkRadius);
 	}
 
 	if (pressed_space)
