@@ -144,6 +144,7 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
+			params.write_f32(1.0f); //shot lifetime
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
@@ -182,6 +183,7 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type, see weapon script
+			params.write_f32(1.0f); //shot lifetime
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)

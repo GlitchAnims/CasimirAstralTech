@@ -35,7 +35,7 @@ class TurretInfo
 	}
 };
 
-void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero)
+void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, float lifeTime = 1.0f)
 {
 	if (ownerBlob == null || ownerBlob.hasTag("dead"))
 	{ return; }
@@ -50,5 +50,6 @@ void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, V
 		blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 		blob.SetDamageOwnerPlayer( ownerBlob.getDamageOwnerPlayer() );
 		blob.setVelocity( blobVel );
+		blob.set_f32(shot_lifetime_string, lifeTime);
 	}
 }

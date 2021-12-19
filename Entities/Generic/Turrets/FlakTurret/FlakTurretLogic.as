@@ -143,6 +143,7 @@ void onTick( CBlob@ this )
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
 			u8 shotType = 1; //shot type
+			f32 lifeTime = 1.0f; //shot lifetime
 
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
@@ -157,7 +158,7 @@ void onTick( CBlob@ this )
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds turret speed
 
-				turretFire(this, shotType, firePos, fireVec); //at TurretCommon.as
+				turretFire(this, shotType, firePos, fireVec, lifeTime); //at TurretCommon.as
 			}
 
 			spaceShotTicks = 0;

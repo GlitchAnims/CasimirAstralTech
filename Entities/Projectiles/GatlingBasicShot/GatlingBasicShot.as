@@ -1,19 +1,18 @@
-// Blame Fuzzle.
+// basic shot
 
+#include "SpaceshipGlobal.as"
 #include "Hitters.as";
 #include "ShieldCommon.as";
 #include "CommonFX.as";
 
 Random _gatling_basicshot_r(67521);
 
-const string oldPosString = "old_pos";
-const string firstTickString = "first_tick";
-
 const f32 damage = 0.2f;
 
 void onInit(CBlob@ this)
 {
 	this.server_SetTimeToDie(1);
+	this.set_f32(shot_lifetime_string, 1.0f); //SpaceshipGlobal.as
 
 	CShape@ shape = this.getShape();
 	if (shape != null)
@@ -26,8 +25,8 @@ void onInit(CBlob@ this)
 
 	this.Tag("projectile");
 
-	this.set_Vec2f(oldPosString, Vec2f_zero);
-	this.set_bool(firstTickString, true);
+	this.set_Vec2f(oldPosString, Vec2f_zero); //SpaceshipGlobal.as
+	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
 	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
@@ -44,20 +43,28 @@ void onTick(CBlob@ this)
 	
 	f32 travelDist = thisVel.getLength();
 	Vec2f futurePos = thisPos + thisVel;
+	
+	const bool is_client = isClient();
 
-	if (isClient()) //muzzle flash
+	if (this.get_bool(firstTickString))
 	{
-		if (this.get_bool(firstTickString))
+		if (is_client)
 		{
 			doMuzzleFlash(thisPos, thisVel);
-			this.set_bool(firstTickString, false);
 		}
-
+		if (isServer()) //bullet range moderation
+		{
+			float lifeTime = this.get_f32(shot_lifetime_string);
+			this.server_SetTimeToDie(lifeTime);
+		}
+		this.set_bool(firstTickString, false);
+	}
+	if (is_client)
+	{
 		Vec2f thisOldPos = this.get_Vec2f(oldPosString);
 		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
 	}
-	
 	
 	CBlob@[] blobsAtPos;
 	map.getBlobsAtPosition(thisPos, @blobsAtPos); //check to see if inside an enemy blob
@@ -109,7 +116,7 @@ void onTick(CBlob@ this)
 	if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
 	{
 		this.setPosition(futurePos);
-		if (isClient())
+		if (is_client)
 		{
 			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _gatling_basicshot_r.NextFloat()), 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()));
 		}

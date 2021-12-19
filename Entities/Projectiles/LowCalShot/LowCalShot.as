@@ -1,19 +1,18 @@
-// Blame Fuzzle.
+// small artillery
 
+#include "SpaceshipGlobal.as"
 #include "Hitters.as";
 #include "ShieldCommon.as";
 #include "CommonFX.as";
 
 Random _artillery_minishot_r(33388);
 
-const string oldPosString = "old_pos";
-const string firstTickString = "first_tick";
-
 const f32 damage = 1.0f;
 
 void onInit(CBlob@ this)
 {
-	this.server_SetTimeToDie(1);
+	this.server_SetTimeToDie(2);
+	this.set_f32(shot_lifetime_string, 1.0f); //SpaceshipGlobal.as
 
 	CShape@ shape = this.getShape();
 	if (shape != null)
@@ -26,8 +25,8 @@ void onInit(CBlob@ this)
 
 	this.Tag("projectile");
 
-	this.set_Vec2f(oldPosString, Vec2f_zero);
-	this.set_bool(firstTickString, true);
+	this.set_Vec2f(oldPosString, Vec2f_zero); //SpaceshipGlobal.as
+	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
 	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);

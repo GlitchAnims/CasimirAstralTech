@@ -16,11 +16,13 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		
 		u16 ownerID;
 		u8 shotType;
+		f32 lifeTime;
 		Vec2f blobPos;
 		Vec2f blobVel;
 		
 		if (!params.saferead_u16(ownerID)) return;
 		if (!params.saferead_u8(shotType)) return;
+		if (!params.saferead_f32(lifeTime)) return;
 
 		CBlob@ ownerBlob = getBlobByNetworkID(ownerID);
 		if (ownerBlob == null || ownerBlob.hasTag("dead"))
@@ -47,6 +49,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				blob.setVelocity( blobVel );
+				blob.set_f32(shot_lifetime_string, lifeTime);
 			}
 		}
 	}
