@@ -11,7 +11,7 @@
 #include "Help.as"
 #include "CommonFX.as"
 
-Random _interceptor_logic_r(44440);
+Random _scout_logic_r(23388);
 void onInit( CBlob@ this )
 {
 	this.set_s32(absoluteCharge_string, 0);
@@ -19,26 +19,26 @@ void onInit( CBlob@ this )
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= InterceptorParams::CHARGE_START * InterceptorParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= InterceptorParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= InterceptorParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= InterceptorParams::CHARGE_RATE;
+		chargeInfo.charge 			= ScoutParams::CHARGE_START * ScoutParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= ScoutParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= ScoutParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= ScoutParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 	
 	SmallshipInfo ship;
-	ship.main_engine_force 			= InterceptorParams::main_engine_force;
-	ship.secondary_engine_force 	= InterceptorParams::secondary_engine_force;
-	ship.rcs_force 					= InterceptorParams::rcs_force;
-	ship.ship_turn_speed 			= InterceptorParams::ship_turn_speed;
-	ship.ship_drag 					= InterceptorParams::ship_drag;
-	ship.max_speed 					= InterceptorParams::max_speed;
+	ship.main_engine_force 			= ScoutParams::main_engine_force;
+	ship.secondary_engine_force 	= ScoutParams::secondary_engine_force;
+	ship.rcs_force 					= ScoutParams::rcs_force;
+	ship.ship_turn_speed 			= ScoutParams::ship_turn_speed;
+	ship.ship_drag 					= ScoutParams::ship_drag;
+	ship.max_speed 					= ScoutParams::max_speed;
 	
-	ship.firing_rate 				= InterceptorParams::firing_rate;
-	ship.firing_burst 				= InterceptorParams::firing_burst;
-	ship.firing_delay 				= InterceptorParams::firing_delay;
-	ship.firing_spread 				= InterceptorParams::firing_spread;
-	ship.shot_speed 				= InterceptorParams::shot_speed;
+	ship.firing_rate 				= ScoutParams::firing_rate;
+	ship.firing_burst 				= ScoutParams::firing_burst;
+	ship.firing_delay 				= ScoutParams::firing_delay;
+	ship.firing_spread 				= ScoutParams::firing_spread;
+	ship.shot_speed 				= ScoutParams::shot_speed;
 	this.set("shipInfo", @ship);
 	
 	//keys setup
@@ -48,8 +48,6 @@ void onInit( CBlob@ this )
 
 	this.set_u32( "m1_shotTime", 0 );
 	this.set_u32( "m2_shotTime", 0 );
-
-	this.set_bool( "leftCannonTurn", false);
 
 	this.set_bool("shifted", false);
 	
@@ -128,9 +126,6 @@ void onTick( CBlob@ this )
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
-			bool leftCannon = this.get_bool( "leftCannonTurn" );
-			this.set_bool( "leftCannonTurn", !leftCannon);
-
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(1); //shot type
@@ -138,13 +133,13 @@ void onTick( CBlob@ this )
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8, 5.5f * leftMult); //barrel pos
+				Vec2f firePos = Vec2f(8, -5.0f); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
-				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _interceptor_logic_r.NextFloat()) ); //shot spread
+				//as scout has a shotgun, randomize bullet speed a bit
+				Vec2f fireVec = Vec2f(0.7f + (0.3f * _scout_logic_r.NextFloat()) ,0) * ship.shot_speed;
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _scout_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
@@ -221,8 +216,8 @@ void blast( Vec2f pos , int amount)
 
 	for (int i = 0; i < amount; i++)
     {
-        Vec2f vel(_interceptor_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_interceptor_logic_r.NextFloat() * 360.0f);
+        Vec2f vel(_scout_logic_r.NextFloat() * 3.0f, 0);
+        vel.RotateBy(_scout_logic_r.NextFloat() * 360.0f);
 
         CParticle@ p = ParticleAnimated("GenericBlast6.png", 
 									pos, 

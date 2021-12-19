@@ -7,14 +7,13 @@
 #include "PixelOffsets.as"
 #include "RunnerTextures.as"
 #include "CommonFX.as"
-#include "ShieldCommon.as"
 
 const string up_fire = "forward_burn";
 const string down_fire = "backward_burn";
 const string left_fire = "port_burn";
 const string right_fire = "starboard_burn";
 
-Random _interceptor_anim_r(04444);
+Random _scout_anim_r(23177);
 
 void onInit(CSprite@ this)
 {
@@ -59,7 +58,7 @@ void LoadSprites(CSprite@ this)
 		upFire.SetVisible(false);
 		upFire.SetRelativeZ(-1.1f);
 		//upFire.RotateBy(0, Vec2f_zero);
-		upFire.SetOffset(Vec2f(6, 0));
+		upFire.SetOffset(Vec2f(7, 0));
 	}
 	if (downFire !is null)
 	{
@@ -70,7 +69,7 @@ void LoadSprites(CSprite@ this)
 		downFire.SetRelativeZ(-1.2f);
 		downFire.ScaleBy(0.5f, 0.5f);
 		downFire.RotateBy(180, Vec2f_zero);
-		downFire.SetOffset(Vec2f(-7, 0));
+		downFire.SetOffset(Vec2f(-6, 0));
 	}
 	if (leftFire !is null)
 	{
@@ -81,7 +80,7 @@ void LoadSprites(CSprite@ this)
 		leftFire.SetRelativeZ(-1.3f);
 		leftFire.ScaleBy(0.3f, 0.3f);
 		leftFire.RotateBy(270, Vec2f_zero);
-		leftFire.SetOffset(Vec2f(3, 7));
+		leftFire.SetOffset(Vec2f(4, 9));
 	}
 	if (rightFire !is null)
 	{
@@ -92,7 +91,7 @@ void LoadSprites(CSprite@ this)
 		rightFire.SetRelativeZ(-1.4f);
 		rightFire.ScaleBy(0.3f, 0.3f);
 		rightFire.RotateBy(90, Vec2f_zero);
-		rightFire.SetOffset(Vec2f(3, -7));
+		rightFire.SetOffset(Vec2f(4, -9));
 	}
 	
 }
@@ -162,13 +161,13 @@ void onTick(CSprite@ this)
 
 		for(int i = 0; i <= particleNum; i++)
 	    {
-			u8 alpha = 200.0f + (55.0f * _interceptor_anim_r.NextFloat()); //randomize alpha
+			u8 alpha = 200.0f + (55.0f * _scout_anim_r.NextFloat()); //randomize alpha
 			color.setAlpha(alpha);
 
 			f32 pRatio = float(i) / float(particleNum);
 			f32 pAngle = (pRatio*2.0f) - 1.0f;
 
-			Vec2f pVel = trailNorm * 1.5f;
+			Vec2f pVel = trailNorm;
 			pVel.RotateByDegrees(swingMaxAngle*pAngle);
 			pVel *= 3.0f - Maths::Abs(pAngle);
 
@@ -181,7 +180,7 @@ void onTick(CSprite@ this)
 	   	        p.gravity = Vec2f_zero;
 	            p.bounce = 0;
 	            p.Z = 7;
-	            p.timeout = 30.0f + (15.0f * _interceptor_anim_r.NextFloat());
+	            p.timeout = 30.0f + (15.0f * _scout_anim_r.NextFloat());
 				p.setRenderStyle(RenderStyle::light);
 	    	}
 		}

@@ -7,7 +7,6 @@
 #include "PixelOffsets.as"
 #include "RunnerTextures.as"
 #include "CommonFX.as"
-#include "ShieldCommon.as"
 
 const string up_fire = "forward_burn";
 const string down_fire = "backward_burn";
