@@ -13,8 +13,11 @@ void onInit(CBlob@ this)
 	//TDM classes
 	addPlayerClass(this, "Knight", "$knight_class_icon$", "knight", "Hack and Slash.");
 	addPlayerClass(this, "Archer", "$archer_class_icon$", "archer", "The Ranged Advantage.");
-	addPlayerClass(this, "Fighter", "$knight_class_icon$", "fighter", "Hack and Slash.");
-	addPlayerClass(this, "Martyr", "$archer_class_icon$", "martyr", "The Ranged Advantage.");
+	addPlayerClass(this, "Fighter", "", "fighter", "Hack and Slash.");
+	addPlayerClass(this, "Interceptor", "", "interceptor", "The Ranged Advantage.");
+	addPlayerClass(this, "Bomber", "", "bomber", "The Ranged Advantage.");
+	addPlayerClass(this, "Scout", "", "scout", "The Ranged Advantage.");
+	addPlayerClass(this, "Martyr", "", "martyr", "The Ranged Advantage.");
 	this.getShape().SetStatic(true);
 	this.getShape().getConsts().mapCollisions = false;
 	this.addCommandID("class menu");

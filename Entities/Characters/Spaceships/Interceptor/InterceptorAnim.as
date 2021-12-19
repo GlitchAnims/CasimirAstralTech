@@ -1,4 +1,4 @@
-// Knight animations
+// Interceptor animations
 
 #include "SmallshipCommon.as";
 #include "RunnerAnimCommon.as";
@@ -14,7 +14,7 @@ const string down_fire = "backward_burn";
 const string left_fire = "port_burn";
 const string right_fire = "starboard_burn";
 
-Random _fighter_anim_r(14861);
+Random _interceptor_anim_r(04444);
 
 void onInit(CSprite@ this)
 {
@@ -59,7 +59,7 @@ void LoadSprites(CSprite@ this)
 		upFire.SetVisible(false);
 		upFire.SetRelativeZ(-1.1f);
 		//upFire.RotateBy(0, Vec2f_zero);
-		upFire.SetOffset(Vec2f(8, 0));
+		upFire.SetOffset(Vec2f(6, 0));
 	}
 	if (downFire !is null)
 	{
@@ -70,7 +70,7 @@ void LoadSprites(CSprite@ this)
 		downFire.SetRelativeZ(-1.2f);
 		downFire.ScaleBy(0.5f, 0.5f);
 		downFire.RotateBy(180, Vec2f_zero);
-		downFire.SetOffset(Vec2f(-6, 0));
+		downFire.SetOffset(Vec2f(-7, 0));
 	}
 	if (leftFire !is null)
 	{
@@ -81,7 +81,7 @@ void LoadSprites(CSprite@ this)
 		leftFire.SetRelativeZ(-1.3f);
 		leftFire.ScaleBy(0.3f, 0.3f);
 		leftFire.RotateBy(270, Vec2f_zero);
-		leftFire.SetOffset(Vec2f(0, 5));
+		leftFire.SetOffset(Vec2f(3, 7));
 	}
 	if (rightFire !is null)
 	{
@@ -92,7 +92,7 @@ void LoadSprites(CSprite@ this)
 		rightFire.SetRelativeZ(-1.4f);
 		rightFire.ScaleBy(0.3f, 0.3f);
 		rightFire.RotateBy(90, Vec2f_zero);
-		rightFire.SetOffset(Vec2f(0, -5));
+		rightFire.SetOffset(Vec2f(3, -7));
 	}
 	
 }
@@ -119,273 +119,9 @@ void onTick(CSprite@ this)
 	SmallshipInfo@ ship;
 	if (!blob.get( "shipInfo", @ship )) 
 	{ return; }
-	
-	/*
-	bool knocked = isKnocked(blob);
 
-	bool shieldState = isShieldState(knight.state);
-	bool specialShieldState = isSpecialShieldState(knight.state);
-	bool swordState = isSwordState(knight.state);
 
-	bool pressed_a1 = blob.isKeyPressed(key_action1);
-	bool pressed_a2 = blob.isKeyPressed(key_action2);
-
-	bool walking = (blob.isKeyPressed(key_left) || blob.isKeyPressed(key_right));
-
-	aimpos = blob.getAimPos();
-	bool inair = (!blob.isOnGround() && !blob.isOnLadder());
-
-	Vec2f vel = blob.getVelocity();
-
-	if (blob.hasTag("dead"))
-	{
-		if (this.animation.name != "dead")
-		{
-			this.RemoveSpriteLayer(shiny_layer);
-			this.SetAnimation("dead");
-		}
-		Vec2f oldvel = blob.getOldVelocity();
-
-		//TODO: trigger frame one the first time we server_Die()()
-		if (vel.y < -1.0f)
-		{
-			this.SetFrameIndex(1);
-		}
-		else if (vel.y > 1.0f)
-		{
-			this.SetFrameIndex(3);
-		}
-		else
-		{
-			this.SetFrameIndex(2);
-		}
-		return;
-	}
-
-	// get the angle of aiming with mouse
-	Vec2f vec;
-	int direction = blob.getAimDirection(vec);
-
-	// set facing
-	bool facingLeft = this.isFacingLeft();
-	// animations
-	bool ended = this.isAnimationEnded() || this.isAnimation("shield_raised");
-	bool wantsChopLayer = false;
-	s32 chopframe = 0;
-	f32 chopAngle = 0.0f;
-
-	const bool left = blob.isKeyPressed(key_left);
-	const bool right = blob.isKeyPressed(key_right);
-	const bool up = blob.isKeyPressed(key_up);
-	const bool down = blob.isKeyPressed(key_down);
-
-	bool shinydot = false;
-
-	if (knocked)
-	{
-		if (inair)
-		{
-			this.SetAnimation("knocked_air");
-		}
-		else
-		{
-			this.SetAnimation("knocked");
-		}
-	}
-	else if (blob.hasTag("seated"))
-	{
-		this.SetAnimation("crouch");
-	}
-	else
-	{
-		switch(knight.state)
-		{
-			case KnightStates::shieldgliding:
-				this.SetAnimation("shield_glide");
-			break;
-
-			case KnightStates::shielddropping:
-				this.SetAnimation("shield_drop");
-			break;
-
-			case KnightStates::resheathing_slash:
-				this.SetAnimation("resheath_slash");
-			break;
-
-			case KnightStates::resheathing_cut:
-				this.SetAnimation("draw_sword");
-			break;
-
-			case KnightStates::sword_cut_mid:
-				this.SetAnimation("strike_mid");
-			break;
-
-			case KnightStates::sword_cut_mid_down:
-				this.SetAnimation("strike_mid_down");
-			break;
-
-			case KnightStates::sword_cut_up:
-				this.SetAnimation("strike_up");
-			break;
-
-			case KnightStates::sword_cut_down:
-				this.SetAnimation("strike_down");
-			break;
-
-			case KnightStates::sword_power:
-			case KnightStates::sword_power_super:
-			{
-				this.SetAnimation("strike_power");
-
-				if (knight.swordTimer <= 1)
-					this.animation.SetFrameIndex(0);
-
-				u8 mintime = 6;
-				u8 maxtime = 8;
-				if (knight.swordTimer >= mintime && knight.swordTimer <= maxtime)
-				{
-					wantsChopLayer = true;
-					chopframe = knight.swordTimer - mintime;
-					chopAngle = -vec.Angle();
-				}
-			}
-			break;
-
-			case KnightStates::sword_drawn:
-			{
-				if (knight.swordTimer < KnightVars::slash_charge)
-				{
-					this.SetAnimation("draw_sword");
-				}
-				else if (knight.swordTimer < KnightVars::slash_charge_level2)
-				{
-					this.SetAnimation("strike_power_ready");
-					this.animation.frame = 0;
-				}
-				else if (knight.swordTimer < KnightVars::slash_charge_limit)
-				{
-					this.SetAnimation("strike_power_ready");
-					this.animation.frame = 1;
-					shinydot = true;
-				}
-				else
-				{
-					this.SetAnimation("draw_sword");
-				}
-			}
-			break;
-
-			case KnightStates::shielding:
-			{
-				if (!isShieldEnabled(blob))
-					break;
-
-				if (walking)
-				{
-					if (direction == 0)
-					{
-						this.SetAnimation("shield_run");
-					}
-					else if (direction == -1)
-					{
-						this.SetAnimation("shield_run_up");
-					}
-					else if (direction == 1)
-					{
-						this.SetAnimation("shield_run_down");
-					}
-				}
-				else
-				{
-					this.SetAnimation("shield_raised");
-
-					if (direction == 1)
-					{
-						this.animation.frame = 2;
-					}
-					else if (direction == -1)
-					{
-						if (vec.y > -0.97)
-						{
-							this.animation.frame = 1;
-						}
-						else
-						{
-							this.animation.frame = 3;
-						}
-					}
-					else
-					{
-						this.animation.frame = 0;
-					}
-				}
-			}
-			break;
-
-			default:
-			{
-				if (inair)
-				{
-					RunnerMoveVars@ moveVars;
-					if (!blob.get("moveVars", @moveVars))
-					{
-						return;
-					}
-					f32 vy = vel.y;
-					if (vy < -0.0f && moveVars.walljumped)
-					{
-						this.SetAnimation("run");
-					}
-					else
-					{
-						this.SetAnimation("fall");
-						this.animation.timer = 0;
-
-						if (vy < -1.5)
-						{
-							this.animation.frame = 0;
-						}
-						else if (vy > 1.5)
-						{
-							this.animation.frame = 2;
-						}
-						else
-						{
-							this.animation.frame = 1;
-						}
-					}
-				}
-				else if (walking || 
-					(blob.isOnLadder() && (blob.isKeyPressed(key_up) || blob.isKeyPressed(key_down))))
-				{
-					this.SetAnimation("run");
-				}
-				else
-				{
-					defaultIdleAnim(this, blob, direction);
-				}
-			}
-		}
-	}
-
-	//set the shiny dot on the sword
-
-	CSpriteLayer@ shiny = this.getSpriteLayer(shiny_layer);
-
-	if (shiny !is null)
-	{
-		shiny.SetVisible(shinydot);
-		if (shinydot)
-		{
-			f32 range = (KnightVars::slash_charge_limit - KnightVars::slash_charge_level2);
-			f32 count = (knight.swordTimer - KnightVars::slash_charge_level2);
-			f32 ratio = count / range;
-			shiny.RotateBy(10, Vec2f());
-			shiny.SetOffset(Vec2f(12, -2 + ratio * 8));
-		}
-	}*/
-
-	//set engine burns to correct places
+	//set engine burns to correct visibility
 
 	CSpriteLayer@ upFire	= this.getSpriteLayer(up_fire);
 	CSpriteLayer@ downFire	= this.getSpriteLayer(down_fire);
@@ -402,11 +138,9 @@ void onTick(CSprite@ this)
 	if (rightFire !is null)
 	{ rightFire.SetVisible(ship.starboard_thrust); }
 
-
-
 	if (mainEngine)
 	{
-		Vec2f engineOffset = Vec2f(-8.0f, 0);
+		Vec2f engineOffset = Vec2f(-6.0f, 0);
 		engineOffset.RotateByDegrees(blobAngle);
 		Vec2f trailPos = blobPos + engineOffset;
 
@@ -428,13 +162,13 @@ void onTick(CSprite@ this)
 
 		for(int i = 0; i <= particleNum; i++)
 	    {
-			u8 alpha = 200.0f + (55.0f * _fighter_anim_r.NextFloat()); //randomize alpha
+			u8 alpha = 200.0f + (55.0f * _interceptor_anim_r.NextFloat()); //randomize alpha
 			color.setAlpha(alpha);
 
 			f32 pRatio = float(i) / float(particleNum);
 			f32 pAngle = (pRatio*2.0f) - 1.0f;
 
-			Vec2f pVel = trailNorm;
+			Vec2f pVel = trailNorm * 1.5f;
 			pVel.RotateByDegrees(swingMaxAngle*pAngle);
 			pVel *= 3.0f - Maths::Abs(pAngle);
 
@@ -447,93 +181,9 @@ void onTick(CSprite@ this)
 	   	        p.gravity = Vec2f_zero;
 	            p.bounce = 0;
 	            p.Z = 7;
-	            p.timeout = 30.0f + (15.0f * _fighter_anim_r.NextFloat());
+	            p.timeout = 30.0f + (15.0f * _interceptor_anim_r.NextFloat());
 				p.setRenderStyle(RenderStyle::light);
 	    	}
 		}
 	}
-
-
-	//set the head anim
-	/*
-	if (knocked)
-	{
-		blob.Tag("dead head");
-	}
-	else if (blob.isKeyPressed(key_action1))
-	{
-		blob.Tag("attack head");
-		blob.Untag("dead head");
-	}
-	else
-	{
-		blob.Untag("attack head");
-		blob.Untag("dead head");
-	}*/
-
 }
-
-/*
-void onGib(CSprite@ this)
-{
-	if (g_kidssafe)
-	{
-		return;
-	}
-
-	CBlob@ blob = this.getBlob();
-	Vec2f pos = blob.getPosition();
-	Vec2f vel = blob.getVelocity();
-	vel.y -= 3.0f;
-	f32 hp = Maths::Min(Maths::Abs(blob.getHealth()), 2.0f) + 1.0f;
-	const u8 team = blob.getTeamNum();
-	CParticle@ Body     = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 0, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
-	CParticle@ Arm      = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp - 0.2 , 80), 1, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
-	CParticle@ Shield   = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 2, 0, Vec2f(16, 16), 2.0f, 0, "Sounds/material_drop.ogg", team);
-	CParticle@ Sword    = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp + 1 , 80), 3, 0, Vec2f(16, 16), 2.0f, 0, "Sounds/material_drop.ogg", team);
-}
-
-
-// render cursors
-
-void DrawCursorAt(Vec2f position, string& in filename)
-{
-	position = getMap().getAlignedWorldPos(position);
-	if (position == Vec2f_zero) return;
-	position = getDriver().getScreenPosFromWorldPos(position - Vec2f(1, 1));
-	GUI::DrawIcon(filename, position, getCamera().targetDistance * getDriver().getResolutionScaleFactor());
-}
-
-const string cursorTexture = "Entities/Characters/Sprites/TileCursor.png";
-
-void onRender(CSprite@ this)
-{
-	CBlob@ blob = this.getBlob();
-	if (!blob.isMyPlayer())
-	{
-		return;
-	}
-	if (getHUD().hasButtons())
-	{
-		return;
-	}
-
-	// draw tile cursor
-
-	if (blob.isKeyPressed(key_action1))
-	{
-		CMap@ map = blob.getMap();
-		Vec2f position = blob.getPosition();
-		Vec2f cursor_position = blob.getAimPos();
-		Vec2f surface_position;
-		map.rayCastSolid(position, cursor_position, surface_position);
-		Vec2f vector = surface_position - position;
-		f32 distance = vector.getLength();
-		Tile tile = map.getTile(surface_position);
-
-		if ((map.isTileSolid(tile) || map.isTileGrass(tile.type)) && map.getSectorAtPosition(surface_position, "no build") is null && distance < 16.0f)
-		{
-			DrawCursorAt(surface_position, cursorTexture);
-		}
-	}
-}*/

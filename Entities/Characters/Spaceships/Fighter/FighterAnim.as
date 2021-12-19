@@ -1,4 +1,4 @@
-// Knight animations
+// Fighter animations
 
 #include "SmallshipCommon.as";
 #include "RunnerAnimCommon.as";
@@ -385,7 +385,7 @@ void onTick(CSprite@ this)
 		}
 	}*/
 
-	//set engine burns to correct places
+	//set engine burns to correct visibility
 
 	CSpriteLayer@ upFire	= this.getSpriteLayer(up_fire);
 	CSpriteLayer@ downFire	= this.getSpriteLayer(down_fire);
