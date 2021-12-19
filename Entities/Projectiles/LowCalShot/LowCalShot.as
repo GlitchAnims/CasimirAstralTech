@@ -4,12 +4,12 @@
 #include "ShieldCommon.as";
 #include "CommonFX.as";
 
-Random _gatling_basicshot_r(67521);
+Random _artillery_minishot_r(33388);
 
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";
 
-const f32 damage = 0.2f;
+const f32 damage = 1.0f;
 
 void onInit(CBlob@ this)
 {
@@ -18,7 +18,7 @@ void onInit(CBlob@ this)
 	CShape@ shape = this.getShape();
 	if (shape != null)
 	{
-		shape.getConsts().mapCollisions = false;
+		shape.getConsts().mapCollisions = true;
 		shape.getConsts().bullet = true;
 		shape.getConsts().net_threshold_multiplier = 4.0f;
 		shape.SetGravityScale(0.0f);
@@ -57,23 +57,6 @@ void onTick(CBlob@ this)
 		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
 	}
-	
-	
-	CBlob@[] blobsAtPos;
-	map.getBlobsAtPosition(thisPos, @blobsAtPos); //check to see if inside an enemy blob
-	for (uint i = 0; i < blobsAtPos.length; i++)
-	{
-		CBlob@ b = blobsAtPos[i];
-		if (b is null)
-		{ continue; }
-
-		if (!doesCollideWithBlob(this, b))
-		{ continue; }
-
-		this.server_Hit(b, thisPos, thisVel, damage, Hitters::arrow, false);
-		this.server_Die();
-		return;
-	}
 
 	Vec2f wallPos = Vec2f_zero;
 	bool hitWall = map.rayCastSolidNoBlobs(thisPos, futurePos, wallPos); //if there's a wall, end the travel early
@@ -100,7 +83,7 @@ void onTick(CBlob@ this)
 
 			thisPos = hi.hitpos;
 			this.setPosition(thisPos);
-			this.server_Hit(b, thisPos, thisVel, damage, Hitters::arrow, false);
+			this.server_Hit(b, thisPos, thisVel, damage, Hitters::cata_stones, false);
 			this.server_Die();
 			return;
 		}
@@ -111,7 +94,7 @@ void onTick(CBlob@ this)
 		this.setPosition(futurePos);
 		if (isClient())
 		{
-			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _gatling_basicshot_r.NextFloat()), 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()));
+			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _artillery_minishot_r.NextFloat()), 1.0f + (0.2f * _artillery_minishot_r.NextFloat()));
 		}
 		this.server_Die();
 	}
@@ -139,11 +122,12 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 	Vec2f trailNorm = trailVec;
 	trailNorm.Normalize();
 
-	SColor color = SColor(255,255,255,255);
+	u8 colorValue = 255.0f * _artillery_minishot_r.NextFloat();
+	SColor color = SColor(255,colorValue,colorValue,colorValue);
 
 	for(int i = 0; i <= steps; i++)
    	{
-		if (_gatling_basicshot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		if (_artillery_minishot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
@@ -171,36 +155,33 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 	Vec2f flashNorm = flashVec;
 	flashNorm.Normalize();
 
-	const int particleNum = 20; //particle amount
-
-	SColor color = SColor(255,255,255,255);
+	const int particleNum = 5; //particle amount
 
 	for(int i = 0; i < particleNum; i++)
    	{
-		u8 alpha = 40 + (170.0f * _gatling_basicshot_r.NextFloat()); //randomize alpha
-		color.setAlpha(alpha);
-
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + _gatling_basicshot_r.NextFloat();
+		pVel *= 0.2f + _artillery_minishot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * _gatling_basicshot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * _artillery_minishot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
-    	CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		f32 pAngle = 360.0f * _artillery_minishot_r.NextFloat();
+
+		CParticle@ p = ParticleAnimated("GenericSmoke3.png", pPos, pVel, pAngle, 0.8f, 2, 0, true);
     	if(p !is null)
     	{
 			p.collides = false;
 			p.gravity = Vec2f_zero;
 			p.bounce = 0;
 			p.Z = 8;
-			p.timeout = 2.0f + (6.0f * _gatling_basicshot_r.NextFloat());
+			p.timeout = 10;
 		}
 	}
 	
-	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * _gatling_basicshot_r.NextFloat()));
+	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * _artillery_minishot_r.NextFloat()));
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
@@ -222,6 +203,24 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 	);
 }
 
+void onCollision( CBlob@ this, CBlob@ blob, bool solid )
+{
+	if ((this == null || blob == null) && solid)
+	{
+		this.server_Die();
+		return;
+	}
+
+	if (!doesCollideWithBlob(this, blob))
+	{ return; }
+	
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+
+	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::cata_stones, false);
+	this.server_Die();
+}
+
 void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ targetBlob, u8 customData )
 {
 	if (!isClient())
@@ -229,11 +228,10 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 	if (targetBlob.hasTag("hull"))
 	{
-		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()), 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()));
+		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * _artillery_minishot_r.NextFloat()), 1.0f + (0.2f * _artillery_minishot_r.NextFloat()));
 	}
 	else if (targetBlob.hasTag("flesh"))
 	{
-		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * _gatling_basicshot_r.NextFloat()), 1.2f );
+		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * _artillery_minishot_r.NextFloat()), 1.2f );
 	}
-
 }

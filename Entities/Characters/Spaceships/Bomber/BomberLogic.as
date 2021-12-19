@@ -133,7 +133,7 @@ void onTick( CBlob@ this )
 
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(1); //shot type
+			params.write_u8(2); //shot type
 
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)

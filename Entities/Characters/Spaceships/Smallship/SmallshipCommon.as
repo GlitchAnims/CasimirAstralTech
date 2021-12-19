@@ -61,11 +61,11 @@ namespace BomberParams
 	const ::f32 ship_drag = 0.5f; // air drag
 	const ::f32 max_speed = 10.f; // 0 = infinite speed
 	//gun general
-	const ::u32 firing_rate = 10; // ticks per shot, won't fire if 0
+	const ::u32 firing_rate = 20; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 10; // ticks before first shot
 	const ::u32 firing_spread = 0; // degrees
-	const ::f32 shot_speed = 10.0f; // pixels per tick, won't fire if 0
+	const ::f32 shot_speed = 8.0f; // pixels per tick, won't fire if 0
 }
 
 namespace ScoutParams

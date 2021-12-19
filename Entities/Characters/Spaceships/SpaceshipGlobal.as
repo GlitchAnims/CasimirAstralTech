@@ -22,7 +22,7 @@ string getBulletName(u8 shotType = 0)
 
 		case 2:
 		{
-			blobName = "bee";
+			blobName = "artillery_minishot";
 		}
 		break;
 		default: return blobName;
