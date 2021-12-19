@@ -10,6 +10,7 @@
 #include "ShieldCommon.as"
 #include "Help.as"
 #include "CommonFX.as"
+#include "TeamColour.as"
 
 Random _scout_logic_r(23388);
 void onInit( CBlob@ this )
@@ -47,6 +48,7 @@ void onInit( CBlob@ this )
 
 	this.set_u32( "m1_heldTime", 0 );
 	this.set_u32( "m2_heldTime", 0 );
+	this.set_u32( "space_heldTime", 0 );
 
 	this.set_u32( "m1_shotTime", 0 );
 	this.set_u32( "m2_shotTime", 0 );
@@ -92,16 +94,90 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 void onTick( CBlob@ this )
 {
 	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
-	//if (!isClient()) return;
+	if (!isClient()) return;
 	if (this.isInInventory()) return;
+
+	CMap@ map = getMap(); //standard map check
+	if (map is null)
+	{ return; }
+
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+	int teamNum = this.getTeamNum();
+
+	bool pressed_space = this.isKeyPressed(key_action3);
+	u32 spaceTime = this.get_u32( "space_heldTime" );
+
+	float shareLinkRadius = Maths::Clamp(float(spaceTime) / 30.0f, 0.0f, 1.0f);
+	shareLinkRadius *= 64.0f;
+	if (shareLinkRadius > 1)
+	{
+		CBlob@[] blobsInRadius;
+		map.getBlobsInRadius(thisPos, shareLinkRadius, @blobsInRadius); //charge aura
+		for (uint i = 0; i < blobsInRadius.length; i++)
+		{
+			CBlob@ b = blobsInRadius[i];
+			if (b is null)
+			{ continue; }
+			if (b is this)
+			{ continue; }
+
+			if (b.getTeamNum() != teamNum || b.hasTag("dead"))
+			{ continue; }
+
+			if (!b.hasTag(chargeTag) || b.hasTag(denyChargeInputTag))
+			{ continue; }
+
+			Vec2f blobPos = b.getPosition();
+			makeEnergyLink(thisPos, blobPos, teamNum);
+		} //for loop end
+		
+		u16 particleNum = shareLinkRadius / 3;
+		SColor color = getTeamColor(teamNum);
+		for(int i = 0; i < particleNum; i++)
+		{
+			u8 alpha = 40 + (170.0f * _scout_logic_r.NextFloat()); //randomize alpha
+			color.setAlpha(alpha);
+
+			f32 randomDeviation = (i*0.3f) * _scout_logic_r.NextFloat(); //random pixel deviation
+			Vec2f prePos = Vec2f(shareLinkRadius - randomDeviation, 0); //distance
+			prePos.RotateByDegrees(360.0f * _scout_logic_r.NextFloat()); //random 360 rotation
+
+			Vec2f pPos = thisPos + prePos;
+			Vec2f pGrav = -prePos * 0.005f; //particle gravity
+
+			Vec2f pVel = prePos;
+			pVel.Normalize();
+			pVel *= 2.0f;
+			pVel += thisVel;
+
+			CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+			if(p !is null)
+			{
+				p.collides = false;
+				p.gravity = pGrav;
+				p.bounce = 0;
+				p.Z = 7;
+				p.timeout = 12;
+				p.setRenderStyle(RenderStyle::light);
+			}
+		}
+	}
+
+	if (pressed_space)
+	{ 
+		if (spaceTime < 30)
+		{ spaceTime++; }
+	}
+	else if (spaceTime > 0)
+	{ spaceTime--; }
+	this.set_u32( "space_heldTime", spaceTime );
+
+	// vvvvvvvvvvvvvv PLAYER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	if (!this.isMyPlayer()) return;
 
     SmallshipInfo@ ship;
 	if (!this.get( "shipInfo", @ship )) 
-	{ return; }
-	
-	CPlayer@ thisPlayer = this.getPlayer();
-	if ( thisPlayer is null )
 	{ return; }
 
 	SpaceshipVars@ moveVars;
@@ -109,10 +185,10 @@ void onTick( CBlob@ this )
         return;
     }
 
-	Vec2f thisPos = this.getPosition();
-	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
+
+	s32 thisCharge = this.get_s32(absoluteCharge_string);
 
 	//gun logic
 	s32 m1ChargeCost = ship.firing_cost;
@@ -154,6 +230,69 @@ void onTick( CBlob@ this )
 			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 
 			m1ShotTicks = 0;
+		}
+	}
+
+	u32 gameTime = getGameTime();
+	u16 thisNetID = this.getNetworkID();
+
+	const u32 spaceActivationRate = 20; //ticks per activation
+
+	const s32 spaceChargeConsumption = 2; //charge consumed per activation
+	const s32 spaceChargeAmount = 5; //charge consumed per blob
+
+	if (shareLinkRadius > 1 && (gameTime + thisNetID) % spaceActivationRate == 0 && thisCharge >= spaceChargeConsumption)
+	{
+		CBitStream params1;
+		params1.write_u16(thisNetID); //ownerID
+		params1.write_s32(spaceChargeConsumption);
+		this.SendCommandOnlyServer(this.getCommandID(drain_charge_ID), params1);
+		CBitStream params2;
+		params2.write_u16(thisNetID); //ownerID
+		params2.write_s32(spaceChargeAmount);
+		
+		thisCharge -= spaceChargeConsumption;
+
+		bool foundTargets = false;
+		CBlob@[] blobsInRadius;
+		map.getBlobsInRadius(thisPos, shareLinkRadius, @blobsInRadius); //tent aura push
+		for (uint i = 0; i < blobsInRadius.length; i++)
+		{
+			if (thisCharge <= 0) //charge reduces per loop. Stop if ran out
+			{ break; }
+			CBlob@ b = blobsInRadius[i];
+			if (b is null)
+			{ continue; }
+			if (b is this)
+			{ continue; }
+
+			if (b.getTeamNum() != teamNum || b.hasTag("dead") || !b.hasTag(chargeTag) || b.hasTag(denyChargeInputTag))
+			{ continue; }
+
+			s32 targetCharge = b.get_s32(absoluteCharge_string);
+			s32 targetMaxCharge = b.get_s32(absoluteMaxCharge_string);
+			if (targetCharge >= targetMaxCharge)
+			{ continue; }
+
+			s32 availableCharge = thisCharge > spaceChargeAmount ? spaceChargeAmount : thisCharge;
+			s32 targetChargeSpace = targetMaxCharge - targetCharge;
+			
+			if (availableCharge <= targetChargeSpace)
+			{
+				thisCharge -= availableCharge;
+			}
+			else
+			{
+				thisCharge -= targetChargeSpace;
+			}
+			
+			params2.write_u16(b.getNetworkID()); //target ID
+			foundTargets = true;
+		}
+		
+		if (foundTargets)
+		{
+			this.SendCommandOnlyServer(this.getCommandID(transfer_charge_ID), params2);
 		}
 	}
 

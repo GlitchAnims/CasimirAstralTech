@@ -1,5 +1,3 @@
-#define SERVER_ONLY
-
 #include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
 
@@ -7,21 +5,25 @@ void onInit(CBlob@ this)
 {
 	this.Tag(chargeTag);
 	this.getCurrentScript().removeIfTag = "dead";
-	this.set_bool("firstTick", true);
+	this.set_bool("chargeFirstTick", true);
 	this.addCommandID( drain_charge_ID ); //SpaceshipGlobal.as
+	this.addCommandID( transfer_charge_ID ); //SpaceshipGlobal.as
 }
 
 void onTick(CBlob@ this)
 {
+	if (!isServer()) //SERVER ONLY
+	{ return; }
+
     ChargeInfo@ chargeInfo;
 	if (!this.get( "chargeInfo", @chargeInfo )) 
 	{ return; }
 
-	if (this.get_bool("firstTick")) //set starting charge
+	if (this.get_bool("chargeFirstTick")) //set starting charge
 	{
 		updateAbsoluteCharge(this, chargeInfo.charge);
 		updateAbsoluteMaxCharge(this, chargeInfo.chargeMax);
-		this.set_bool("firstTick", false);
+		this.set_bool("chargeFirstTick", false);
 	}
 
 	s32 updateRate = chargeInfo.chargeRate; //if rate is 0, pause onTick forever
@@ -76,5 +78,30 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		{ return; }
 
 		removeCharge(this, chargeAmount);
+	}
+	else if (cmd == this.getCommandID(transfer_charge_ID))
+	{
+		if (!isServer())
+		{ return; }
+		
+		u16 fromBlobID; //always send this one first
+		u16 toBlobID;
+		s32 chargeAmount;
+		
+		if (!params.saferead_u16(fromBlobID)) return;
+		if (!params.saferead_s32(chargeAmount)) return;
+
+		CBlob@ fromBlob = getBlobByNetworkID(fromBlobID);
+		if (fromBlob == null || fromBlob.hasTag("dead"))
+		{ return; }
+
+		while (params.saferead_u16(toBlobID)) //immediately stops if something fails
+		{
+			CBlob@ toBlob = getBlobByNetworkID(toBlobID);
+			if (toBlob == null || toBlob.hasTag("dead"))
+			{ continue; }
+
+			transferCharge(fromBlob, toBlob, chargeAmount);
+		}
 	}
 }

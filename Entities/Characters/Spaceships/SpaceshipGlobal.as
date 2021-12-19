@@ -1,6 +1,5 @@
 const string shot_command_ID = "shot";
 const string hit_command_ID = "hit";
-const string drain_charge_ID = "drain_charge";
 
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";

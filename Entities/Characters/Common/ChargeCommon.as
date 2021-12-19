@@ -1,5 +1,9 @@
 
 const string chargeTag = "holds_charge";
+const string denyChargeInputTag = "deny_charge_input";
+
+const string drain_charge_ID = "drain_charge";
+const string transfer_charge_ID = "transfer_charge";
 
 const string absoluteCharge_string = "absolute_charge";
 const string absoluteMaxCharge_string = "absolute_max_charge";
