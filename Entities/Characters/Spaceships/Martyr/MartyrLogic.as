@@ -58,7 +58,7 @@ void onInit( CBlob@ this )
 	
 	this.Tag("player");
 	this.Tag("hull");
-	this.Tag("ignore crouch");
+	this.Tag(mediumTag);
 	
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");

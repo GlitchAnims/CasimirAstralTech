@@ -1,3 +1,9 @@
+#include "SpaceshipGlobal.as"
+
+void onInit( CBlob@ this )
+{
+	this.Tag(smallTag);
+}
 // character was placed in crate
 void onThisAddToInventory(CBlob@ this, CBlob@ inventoryBlob)
 {
@@ -18,8 +24,8 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 	int thisTeamNum = this.getTeamNum();
 	int targetTeamNum = blob.getTeamNum();
 
-	bool targetIsMedium = blob.hasTag("mediumship");
-	bool targetIsBig = blob.hasTag("bigship");
+	bool targetIsMedium = blob.hasTag(mediumTag);
+	bool targetIsBig = blob.hasTag(bigTag);
 
 	if (thisTeamNum == targetTeamNum)
 	{

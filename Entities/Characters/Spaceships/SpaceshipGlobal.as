@@ -5,6 +5,10 @@ const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";
 const string shotLifetimeString = "shot_lifetime";
 
+const string smallTag = "small_ship";
+const string mediumTag = "medium_ship";
+const string bigTag = "big_ship";
+
 string getBulletName(u8 shotType = 0)
 {
     string blobName = "bomb";

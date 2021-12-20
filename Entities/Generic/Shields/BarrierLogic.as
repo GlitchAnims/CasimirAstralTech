@@ -37,6 +37,7 @@ void onTick( CSprite@ this )
 	CBlob@ thisBlob = this.getBlob();
 	if (thisBlob == null)
 	{ return; }
+	this.SetZ(-100.0f);
 
 	if (!thisBlob.get_bool("active"))
 	{
