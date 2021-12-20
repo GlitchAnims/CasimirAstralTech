@@ -6,8 +6,8 @@ namespace MartyrParams
 {
 	//charge
 	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
-	const ::s32 CHARGE_MAX = 100; //max charge amount
-	const ::s32 CHARGE_REGEN = 1; //amount per regen
+	const ::s32 CHARGE_MAX = 500; //max charge amount
+	const ::s32 CHARGE_REGEN = 3; //amount per regen
 	const ::s32 CHARGE_RATE = 10; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.02f;
