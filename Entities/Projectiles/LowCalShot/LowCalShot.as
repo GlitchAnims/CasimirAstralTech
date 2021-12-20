@@ -7,7 +7,7 @@
 
 Random _artillery_minishot_r(33388);
 
-const f32 damage = 100.0f;
+const f32 damage = 1.0f;
 
 void onInit(CBlob@ this)
 {
