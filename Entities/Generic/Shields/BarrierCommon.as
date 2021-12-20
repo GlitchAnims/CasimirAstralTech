@@ -1,3 +1,4 @@
+const string shield_toggle_ID = "shield_toggle";
 
 bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel = Vec2f_zero)
 {
@@ -17,24 +18,12 @@ bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel
 
 	f32 angle = dir.getAngleDegrees();
 	f32 thisAngle = thisVel.getAngleDegrees();
-	print ("angle: "+ angle);
-	print ("thisAngle: "+ thisAngle);
 	
 	f32 angleDiff = Maths::Abs(angle - thisAngle);
-	print ("angleDiff: "+ angleDiff);
 	angleDiff = (angleDiff + 180) % 360 - 180;
-	//angleDiff = Maths::FMod(angleDiff + 180, 360.0f) - 180;
-	print ("angleDiff2: "+ angleDiff);
-	print ("<<<<<<<<<>>>>>>>>>");
 
 	if (angleDiff > -90 && angleDiff < 90)
-	{ 
-		print ("blocked");
-		print ("-----------------");
-		return false;
-	}
-	print ("passed");
-	print ("-----------------");
+	{ return false; }
 
 	return true;
 }
