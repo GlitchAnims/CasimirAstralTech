@@ -2,7 +2,7 @@
 
 #include "SpaceshipGlobal.as"
 #include "Hitters.as";
-#include "ShieldCommon.as";
+#include "BarrierCommon.as";
 #include "CommonFX.as";
 
 Random _artillery_minishot_r(33388);
@@ -81,6 +81,10 @@ void onTick(CBlob@ this)
 			{ continue; }
 
 			thisPos = hi.hitpos;
+
+			if(doesBypassBarrier(b, thisPos, thisVel))
+			{ continue; }
+
 			this.setPosition(thisPos);
 			this.server_Hit(b, thisPos, thisVel, damage, Hitters::cata_stones, false);
 			this.server_Die();
@@ -197,12 +201,13 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 		&&
 		(
 			blob.hasTag("flesh") ||
-			blob.hasTag("hull")
+			blob.hasTag("hull") ||
+			blob.hasTag("barrier")
 		)
 	);
 }
 
-void onCollision( CBlob@ this, CBlob@ blob, bool solid )
+void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f collisionPos )
 {
 	if ((this == null || blob == null) && solid)
 	{
@@ -212,9 +217,15 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid )
 
 	if (!doesCollideWithBlob(this, blob))
 	{ return; }
-	
+
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
+
+	if (blob.hasTag("barrier"))
+	{
+		if(doesBypassBarrier(blob, collisionPos, thisVel))
+		{ return; }
+	}
 
 	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::cata_stones, false);
 	this.server_Die();

@@ -2,7 +2,7 @@
 
 #include "SpaceshipGlobal.as"
 #include "Hitters.as";
-#include "ShieldCommon.as";
+#include "BarrierCommon.as";
 #include "CommonFX.as";
 
 Random _gatling_basicshot_r(67521);
@@ -65,22 +65,6 @@ void onTick(CBlob@ this)
 		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
 	}
-	
-	CBlob@[] blobsAtPos;
-	map.getBlobsAtPosition(thisPos, @blobsAtPos); //check to see if inside an enemy blob
-	for (uint i = 0; i < blobsAtPos.length; i++)
-	{
-		CBlob@ b = blobsAtPos[i];
-		if (b is null)
-		{ continue; }
-
-		if (!doesCollideWithBlob(this, b))
-		{ continue; }
-
-		this.server_Hit(b, thisPos, thisVel, damage, Hitters::arrow, false);
-		this.server_Die();
-		return;
-	}
 
 	Vec2f wallPos = Vec2f_zero;
 	bool hitWall = map.rayCastSolidNoBlobs(thisPos, futurePos, wallPos); //if there's a wall, end the travel early
@@ -106,6 +90,10 @@ void onTick(CBlob@ this)
 			{ continue; }
 
 			thisPos = hi.hitpos;
+
+			if(doesBypassBarrier(b, thisPos, thisVel))
+			{ continue; }
+
 			this.setPosition(thisPos);
 			this.server_Hit(b, thisPos, thisVel, damage, Hitters::arrow, false);
 			this.server_Die();
@@ -224,9 +212,34 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 		&&
 		(
 			blob.hasTag("flesh") ||
-			blob.hasTag("hull")
+			blob.hasTag("hull") ||
+			blob.hasTag("barrier")
 		)
 	);
+}
+
+void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f collisionPos )
+{
+	if ((this == null || blob == null) && solid)
+	{
+		this.server_Die();
+		return;
+	}
+
+	if (!doesCollideWithBlob(this, blob))
+	{ return; }
+
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+
+	if (blob.hasTag("barrier"))
+	{
+		if(doesBypassBarrier(blob, collisionPos, thisVel))
+		{ return; }
+	}
+
+	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::arrow, false);
+	this.server_Die();
 }
 
 void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ targetBlob, u8 customData )
