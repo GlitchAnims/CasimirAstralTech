@@ -13,6 +13,8 @@ const string down_fire = "backward_burn";
 const string left_fire = "port_burn";
 const string right_fire = "starboard_burn";
 
+const string gravity_bubble = "grav_effect";
+
 Random _interceptor_anim_r(04444);
 
 void onInit(CSprite@ this)
@@ -93,6 +95,20 @@ void LoadSprites(CSprite@ this)
 		rightFire.RotateBy(90, Vec2f_zero);
 		rightFire.SetOffset(Vec2f(3, -7));
 	}
+
+	this.RemoveSpriteLayer(gravity_bubble);
+	CSpriteLayer@ gravityBubble = this.addSpriteLayer(gravity_bubble, "Sparkle2.png", 16, 16);
+	if (gravityBubble !is null)
+	{
+		Animation@ anim = gravityBubble.addAnimation("default", 2, true);
+		int[] frames = {0, 1, 2, 3, 4};
+		anim.AddFrames(frames);
+		gravityBubble.SetVisible(false);
+		gravityBubble.SetRelativeZ(-0.5f);
+		gravityBubble.ScaleBy(3.0f, 3.0f);
+		//gravityBubble.RotateBy(0, Vec2f_zero);
+		gravityBubble.SetOffset(Vec2f(0, 0));
+	}
 	
 }
 
@@ -136,6 +152,18 @@ void onTick(CSprite@ this)
 	{ leftFire.SetVisible(ship.port_thrust); }
 	if (rightFire !is null)
 	{ rightFire.SetVisible(ship.starboard_thrust); }
+
+	CSpriteLayer@ gravityBubble	= this.getSpriteLayer(gravity_bubble);
+
+	bool isGravActive = blob.get_bool("grav_bubble");
+	if (gravityBubble !is null)
+	{ 
+		gravityBubble.SetVisible(isGravActive);
+		if (isGravActive)
+		{
+			gravityBubble.RotateBy(10, Vec2f_zero);
+		}
+	}
 
 	if (mainEngine)
 	{
@@ -183,6 +211,24 @@ void onTick(CSprite@ this)
 	            p.timeout = 30.0f + (15.0f * _interceptor_anim_r.NextFloat());
 				p.setRenderStyle(RenderStyle::light);
 	    	}
+		}
+	}
+
+	if (isGravActive)
+	{
+		CParticle@ p = ParticleAnimated("Sparkle2.png", 
+								blobPos, 
+								Vec2f_zero, 
+								_interceptor_anim_r.NextFloat() * 360.0f, //angle
+								2.0f, //scale
+								2, //animate speed
+								0.0f, 
+								true );
+									
+		if(p !is null) //bail if we stop getting particles
+		{
+			p.collides = false;
+			p.Z = -5.0f;
 		}
 	}
 }

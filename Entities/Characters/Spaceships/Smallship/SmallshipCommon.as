@@ -45,7 +45,7 @@ namespace InterceptorParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 15; // ticks before first shot
 	const ::u32 firing_spread = 1; // degrees
-	const ::s32 firing_cost = 2; // charge cost
+	const ::s32 firing_cost = 1; // charge cost
 	const ::f32 shot_speed = 30.0f; // pixels per tick, 0 = instant
 	const ::f32 shot_lifetime = 0.4f; // float, seconds
 }

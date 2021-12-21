@@ -49,11 +49,12 @@ void onInit( CBlob@ this )
 	this.set_u32( "m2_heldTime", 0 );
 
 	this.set_u32( "m1_shotTime", 0 );
-	this.set_u32( "m2_shotTime", 0 );
+	this.set_u32( "m2_shotTime", 500 );
 
 	this.set_bool( "leftCannonTurn", false);
 
 	this.set_bool("shifted", false);
+	this.set_bool("grav_bubble", false);
 	
 	this.Tag("player");
 	this.Tag("hull");
@@ -77,11 +78,14 @@ void onInit( CBlob@ this )
 	this.getCurrentScript().removeIfTag = "dead";
 	
 
-	/*if(isClient())
+	if(isClient())
 	{
-		this.getSprite().SetEmitSound("engine_loop.ogg");
-		this.getSprite().SetEmitSoundPaused(true);
-	}*/
+		CSprite@ thisSprite = this.getSprite();
+		thisSprite.SetEmitSound("gatling_windup.ogg");
+		thisSprite.SetEmitSoundPaused(false);
+		thisSprite.SetEmitSoundVolume(0);
+		thisSprite.SetEmitSoundSpeed(0);
+	}
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -96,7 +100,9 @@ void onTick( CBlob@ this )
 	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	//if (!isClient()) return;
 	if (this.isInInventory()) return;
-	if (!this.isMyPlayer()) return;
+	if (!isClient()) return;
+
+	const bool is_myPlayer = this.isMyPlayer();
 
     SmallshipInfo@ ship;
 	if (!this.get( "shipInfo", @ship )) 
@@ -116,9 +122,12 @@ void onTick( CBlob@ this )
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 
+	s32 thisCharge = this.get_s32(absoluteCharge_string);
+
 	//gun logic
 	s32 m1ChargeCost = ship.firing_cost;
-	bool pressed_m1 = this.isKeyPressed(key_action1);
+	s32 m2ChargeCost = 10;
+	bool pressed_m1 = this.isKeyPressed(key_action1) && !this.get_bool("grav_bubble"); //if bubble is in effect, force false
 	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
 	u32 m1Time = this.get_u32( "m1_heldTime");
@@ -127,7 +136,9 @@ void onTick( CBlob@ this )
 	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
 	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
-	if (pressed_m1 && m1Time >= ship.firing_delay)
+	f32 m1FiringDelay = ship.firing_delay;
+
+	if (is_myPlayer && pressed_m1 && m1Time >= m1FiringDelay)
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
@@ -162,33 +173,89 @@ void onTick( CBlob@ this )
 		}
 	}
 
-	if (pressed_m1)
-	{ m1Time++; }
-	else { m1Time = 0; }
+	if ( (pressed_m2 || m2ShotTicks < 30) && thisCharge >= m2ChargeCost )
+	{
+		if (is_myPlayer && getGameTime() % 10 == 0)
+		{
+			CBitStream params;
+			params.write_u16(this.getNetworkID()); //ownerID
+			params.write_s32(m2ChargeCost);
+			this.SendCommandOnlyServer(this.getCommandID(drain_charge_ID), params);
+		}
+
+		moveVars.engineFactor *= 0.0f;
+		moveVars.maxSpeedFactor *= 1.5f;
+
+		Vec2f aimVec = this.getAimPos() - thisPos;
+		Vec2f aimNorm = aimVec;
+		aimNorm.Normalize();
+		
+		this.setVelocity(thisVel + (aimNorm*1.0f));
+
+		if (!this.get_bool("grav_bubble"))
+		{
+			this.set_bool("grav_bubble", true);
+			m2ShotTicks = 0;
+		}
+	}
+	else
+	{
+		this.set_bool("grav_bubble", false);
+	}
+
+	//timer logic
+	if (pressed_m1) //this one's special because of Interceptor's gatling windup
+	{
+		if (m1Time < m1FiringDelay)
+		{ m1Time++; }
+	}
+	else 
+	{
+		if (m1Time > 0)
+		{ m1Time--; }
+	}
 	
 	if (pressed_m2)
-	{ m2Time++; }
+	{
+		if (m2Time < 500)
+		{ m2Time++; }
+	}
 	else { m2Time = 0; }
 	this.set_u32( "m1_heldTime", m1Time );
 	this.set_u32( "m2_heldTime", m2Time );
 
-	m1ShotTicks++;
-	//m2ShotTicks++;
+	if (m1ShotTicks < 500)
+	{
+		m1ShotTicks++;
+	}
+	if (m2ShotTicks < 500)
+	{
+		m2ShotTicks++;
+	}
 	this.set_u32( "m1_shotTime", m1ShotTicks );
 	this.set_u32( "m2_shotTime", m2ShotTicks );
 
+	f32 windupPercentage = float(m1Time) / m1FiringDelay;
 	//sound logic
-	/*Vec2f vel = this.getVelocity();
-	float posVelX = Maths::Abs(vel.x);
-	float posVelY = Maths::Abs(vel.y);
-	if(posVelX > 2.9f)
+	CSprite@ thisSprite = this.getSprite();
+	if(windupPercentage <= 0.0f)
 	{
-		this.getSprite().SetEmitSoundVolume(3.0f);
+		if (!thisSprite.getEmitSoundPaused())
+		{
+			thisSprite.SetEmitSoundPaused(true);
+		}
+		thisSprite.SetEmitSoundVolume(0.0f);
+		thisSprite.SetEmitSoundSpeed(0.0f);
 	}
 	else
 	{
-		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
-	}*/
+		if (thisSprite.getEmitSoundPaused())
+		{
+			thisSprite.SetEmitSoundPaused(false);
+		}
+		thisSprite.SetEmitSoundVolume(windupPercentage);
+		thisSprite.SetEmitSoundSpeed(windupPercentage);
+	}
 }
 
 
