@@ -29,8 +29,10 @@ class TDMPNGLoader : PNGLoader
 
 		switch (pixel.color)
 		{
-			case tdm_colors::tradingpost_1: autotile(offset); spawnBlob(map, "tradingpost", offset, 0); break;
-			case tdm_colors::tradingpost_2: autotile(offset); spawnBlob(map, "tradingpost", offset, 1); break;
+			//case tdm_colors::tradingpost_1: autotile(offset); spawnBlob(map, "tradingpost", offset, 0); break;
+			//case tdm_colors::tradingpost_2: autotile(offset); spawnBlob(map, "tradingpost", offset, 1); break;
+			case tdm_colors::tradingpost_1: autotile(offset); spawnBlob(map, "martyr", offset, 0); break;
+			case tdm_colors::tradingpost_2: autotile(offset); spawnBlob(map, "martyr", offset, 1); break;
 		};
 	}
 };
