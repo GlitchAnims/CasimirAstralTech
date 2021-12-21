@@ -8,13 +8,6 @@ Random _mediumship_takeover_r(99766);
 
 void onInit( CBlob@ this )
 {
-	this.Tag("barrier");
-	this.getShape().SetGravityScale(0.0f);
-	this.getShape().getConsts().mapCollisions = false;
-
-	this.set_bool("active", false);
-	this.set_u32("ownerBlobID", 0);
-
 	AddIconToken("$takeover_ship_icon$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 0);
 	AddIconToken("$quit_ship_icon$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 1);
 

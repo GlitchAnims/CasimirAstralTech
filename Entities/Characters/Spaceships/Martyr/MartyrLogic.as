@@ -281,8 +281,10 @@ void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
 {
-    if (( hitterBlob.getName() == "wraith" || hitterBlob.getName() == "orb" ) && hitterBlob.getTeamNum() == this.getTeamNum())
-        return 0;
+    if (customData == Hitters::suicide)
+	{
+		return 0;
+	}
 
 	if (isClient())
 	{

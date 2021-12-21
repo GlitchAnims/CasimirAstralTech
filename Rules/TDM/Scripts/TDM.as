@@ -3,6 +3,7 @@
 
 #define SERVER_ONLY
 
+#include "SpaceshipGlobal.as"
 #include "TDM_Structs.as";
 #include "RulesCore.as";
 #include "RespawnSystem.as";
@@ -613,6 +614,59 @@ shared class TDMCore : RulesCore
 			{
 				team_wins_on_end = -1;
 			}
+		}
+
+		//clear the winning team - we'll find that ourselves
+		@winteam = null;
+		winteamIndex = -1;
+
+		//set up an array of which teams are alive
+		array<bool> teams_alive;
+		s32 teams_alive_count = 0;
+		for (int i = 0; i < teams.length; i++)
+			teams_alive.push_back(false);
+
+		CBlob@[] mediumShips;
+		getBlobsByTag("medium_ship", @mediumShips);
+		for (uint i = 0; i < mediumShips.length; i++) //check with each mediumship
+		{
+			CBlob@ b = mediumShips[i];
+			s32 team = b.getTeamNum();
+			if
+			(
+				b !is null &&
+				!b.hasTag("dead") && //blob alive
+				team >= 0 && team < teams.length //team sensible
+			)
+			{
+				if (!teams_alive[team])
+				{
+					teams_alive[team] = true;
+					teams_alive_count++;
+				}
+			}
+		}
+
+		//only one team remains!
+		if (teams_alive_count == 1)
+		{
+			for (int i = 0; i < teams.length; i++)
+			{
+				if (teams_alive[i])
+				{
+					@winteam = cast < TDMTeamInfo@ > (teams[i]);
+					winteamIndex = i;
+					team_wins_on_end = i;
+				}
+			}
+		}
+		//no teams survived, draw
+		if (teams_alive_count == 0)
+		{
+			rules.SetTeamWon(-1);   //game over!
+			rules.SetCurrentState(GAME_OVER);
+			rules.SetGlobalMessage("It's a tie!");
+			return;
 		}
 
 		//sudden death mode - check if anyone survives
