@@ -150,7 +150,7 @@ void onTick( CBlob@ this )
 
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(1); //shot type
+			params.write_u8(2); //shot type
 			params.write_f32(ship.shot_lifetime); //shot lifetime
 			params.write_s32(m1ChargeCost); //charge drain
 
@@ -191,7 +191,7 @@ void onTick( CBlob@ this )
 		{
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(1); //shot type, see weapon script
+			params.write_u8(2); //shot type, see SpaceshipGlobal.as
 			params.write_f32(1.0f); //shot lifetime
 			params.write_s32(m2ChargeCost); //charge drain
 

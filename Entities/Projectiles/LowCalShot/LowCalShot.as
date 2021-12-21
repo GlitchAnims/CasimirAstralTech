@@ -44,14 +44,23 @@ void onTick(CBlob@ this)
 	f32 travelDist = thisVel.getLength();
 	Vec2f futurePos = thisPos + thisVel;
 
-	if (isClient()) //muzzle flash
+	const bool is_client = isClient();
+
+	if (this.get_bool(firstTickString))
 	{
-		if (this.get_bool(firstTickString))
+		if (is_client)
 		{
 			doMuzzleFlash(thisPos, thisVel);
-			this.set_bool(firstTickString, false);
 		}
-
+		if (isServer()) //bullet range moderation
+		{
+			float lifeTime = this.get_f32(shotLifetimeString);
+			this.server_SetTimeToDie(lifeTime);
+		}
+		this.set_bool(firstTickString, false);
+	}
+	if (is_client)
+	{
 		Vec2f thisOldPos = this.get_Vec2f(oldPosString);
 		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
@@ -95,7 +104,7 @@ void onTick(CBlob@ this)
 	if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
 	{
 		this.setPosition(futurePos);
-		if (isClient())
+		if (is_client)
 		{
 			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _artillery_minishot_r.NextFloat()), 1.0f + (0.2f * _artillery_minishot_r.NextFloat()));
 		}

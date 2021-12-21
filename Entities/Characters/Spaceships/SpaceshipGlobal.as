@@ -18,7 +18,7 @@ string getBulletName(u8 shotType = 0)
 	{
 		case 0:
 		{
-			blobName = "orb";
+			blobName = "flak_shot";
 		}
 		break;
 

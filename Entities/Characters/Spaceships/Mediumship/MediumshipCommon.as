@@ -19,9 +19,9 @@ namespace MartyrParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 0; // degrees
-	const ::s32 firing_cost = 3; // charge cost
-	const ::f32 shot_speed = 20.0f; // pixels per tick, 0 = instant
-	const ::f32 shot_lifetime = 1.0f; // float, seconds
+	const ::s32 firing_cost = 6; // charge cost
+	const ::f32 shot_speed = 18.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 1.3f; // float, seconds
 }
 
 class MediumshipInfo

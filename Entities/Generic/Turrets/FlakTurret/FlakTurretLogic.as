@@ -149,8 +149,8 @@ void onTick( CBlob@ this )
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
-			u8 shotType = 1; //shot type
-			f32 lifeTime = 1.0f; //shot lifetime
+			u8 shotType = 0; //shot type
+			f32 lifeTime = 0.5f + (3.0f * _flak_turret_logic_r.NextFloat()); //shot lifetime
 
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
@@ -163,7 +163,7 @@ void onTick( CBlob@ this )
 				Vec2f fireVec = Vec2f(1.0f,0) * turret.shot_speed; 
 				f32 randomSpread = turret.firing_spread * (1.0f - (2.0f * _flak_turret_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
-				fireVec += thisVel; //adds turret speed
+				fireVec += ownerBlob.getVelocity(); //adds owner ship speed
 
 				turretFire(this, shotType, firePos, fireVec, lifeTime); //at TurretCommon.as
 			}

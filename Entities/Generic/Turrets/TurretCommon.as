@@ -4,14 +4,14 @@
 
 namespace FlakParams
 {
-	const ::f32 turret_turn_speed = 10.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 turret_turn_speed = 8.0f; // degrees per tick, 0 = instant (30 ticks a second)
 
 	const ::u32 firing_rate = 8; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
-	const ::u32 firing_spread = 4; // degrees
-	const ::s32 firing_cost = 4; // charge cost
-	const ::f32 shot_speed = 10.0f; // pixels per tick, won't fire if 0
+	const ::u32 firing_spread = 8; // degrees
+	const ::s32 firing_cost = 2; // charge cost
+	const ::f32 shot_speed = 5.0f; // pixels per tick, won't fire if 0
 }
 
 class TurretInfo
