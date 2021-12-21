@@ -214,10 +214,10 @@ void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
 		p.lighting = false;
 	}
 		
-	u16 particleNum = XORRandom(5)+5;
+	u16 particleNum = 10;
 	for (int i = 0; i < particleNum; i++)
     {
-        Vec2f pOffset(_railgun_shot_r.NextFloat() * 16.0f, 0);
+        Vec2f pOffset(_railgun_shot_r.NextFloat() * 24.0f, 0);
         pOffset.RotateBy(_railgun_shot_r.NextFloat() * 360.0f);
 
         CParticle@ p2 = ParticleAnimated("GenericSmoke1.png", 
@@ -225,7 +225,7 @@ void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
 									Vec2f_zero, 
 									_railgun_shot_r.NextFloat() * 360.0f, 
 									0.5f + (_railgun_shot_r.NextFloat() * 0.5f), 
-									XORRandom(3)+1, 
+									XORRandom(4)+2, 
 									0.0f, 
 									false );
 									

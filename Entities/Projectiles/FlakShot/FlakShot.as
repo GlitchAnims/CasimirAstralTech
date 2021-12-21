@@ -171,7 +171,7 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 
 		f32 pAngle = 360.0f * _flak_shot_r.NextFloat();
 
-		CParticle@ p = ParticleAnimated("GenericBlast1.png", pPos, pVel, pAngle, 0.3f, 1, 0, true);
+		CParticle@ p = ParticleAnimated("GenericBlast6.png", pPos, pVel, pAngle, 0.5f, 1, 0, true);
     	if(p !is null)
     	{
 			p.collides = false;
