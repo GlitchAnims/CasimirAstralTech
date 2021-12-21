@@ -82,6 +82,8 @@ void onInit( CBlob@ this )
 	{
 		this.getSprite().SetEmitSound("engine_loop.ogg");
 		this.getSprite().SetEmitSoundPaused(false);
+		this.getSprite().SetEmitSoundVolume(0);
+		this.getSprite().SetEmitSoundSpeed(0);
 	}
 }
 
@@ -191,8 +193,8 @@ void onTick( CBlob@ this )
 		{
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(2); //shot type, see SpaceshipGlobal.as
-			params.write_f32(1.0f); //shot lifetime
+			params.write_u8(5); //shot type, see SpaceshipGlobal.as
+			params.write_f32(1.2f); //shot lifetime
 			params.write_s32(m2ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;

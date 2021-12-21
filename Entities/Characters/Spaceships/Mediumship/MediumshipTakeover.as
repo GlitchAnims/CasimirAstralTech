@@ -77,7 +77,7 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 	{
 		CBitStream params;
 		params.write_u16(caller.getNetworkID()); //parasite blobID
-		caller.CreateGenericButton("$takeover_ship_icon$", Vec2f(0, 0), this, this.getCommandID(takeover_command_ID), getTranslatedString("Takeover ship"), params);
+		caller.CreateGenericButton("$takeover_ship_icon$", Vec2f(0, 8), this, this.getCommandID(takeover_command_ID), getTranslatedString("Takeover ship"), params);
 	}
 }
 
