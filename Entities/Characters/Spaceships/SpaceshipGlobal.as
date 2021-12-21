@@ -1,5 +1,7 @@
 const string shot_command_ID = "shot";
 const string hit_command_ID = "hit";
+const string takeover_command_ID = "ship_takeover";
+const string quit_ship_command_ID = "ship_quit";
 
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";

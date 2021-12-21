@@ -1,6 +1,7 @@
 
 // Simple rules logic script
 
+#include "PlayerInfo"
 #define SERVER_ONLY
 
 void onInit(CRules@ this)
@@ -9,6 +10,31 @@ void onInit(CRules@ this)
 	{
 		this.set_string("default class", "builder");
 	}
+	PlayerInfo@[] playerList;
+	this.set("playerList", playerList);
+
+	updatePlayerList(this);
+	//getPlayersCount()
+}
+
+void updatePlayerList( CRules@ this )
+{
+	int playerCount = getPlayersCount();
+	if (playerCount <= 0)
+	{ return; }
+
+	PlayerInfo@[] playerList;
+	if (!this.get( "playerList", @playerList )) 
+	{ return; }
+
+	for (int i = 0; i < playerCount; i++)
+	{
+		CPlayer@ newPlayer = getPlayer(i);
+		PlayerInfo@ player = playerList[i];
+
+		if (player )
+	}
+	
 }
 
 void onPlayerRequestSpawn(CRules@ this, CPlayer@ player)
@@ -53,3 +79,9 @@ Vec2f getSpawnLocation(CPlayer@ player)
 
 	return Vec2f(0, 0);
 }
+
+void onNewPlayerJoin( CRules@ this, CPlayer@ player )
+{
+	updatePlayerList
+}
+

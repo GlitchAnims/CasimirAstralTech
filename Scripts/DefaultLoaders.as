@@ -13,7 +13,7 @@ void LoadDefaultMapLoaders()
 	}
 	else if (sv_gamemode == "TDM" || sv_gamemode == "tdm")
 	{
-		RegisterFileExtensionScript("Scripts/MapLoaders/LoadTDMPNG.as", "png");
+		RegisterFileExtensionScript("Scripts/MapLoaders/LoadCasimirPNG.as", "png");
 	}
 	else
 	{

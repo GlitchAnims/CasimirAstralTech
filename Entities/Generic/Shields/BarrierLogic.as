@@ -198,10 +198,10 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 		else if (!enoughCharge)//only denies button if shield isn't active
 		{
 			buttonDescString = "Cannot activate shield, charge below 25%!";
-			caller.CreateGenericButton("$shield_blocked$", Vec2f(0, -16), this, 0, getTranslatedString(buttonDescString));
+			caller.CreateGenericButton("$shield_blocked$", Vec2f(0, -12), this, 0, getTranslatedString(buttonDescString));
 			return;
 		}
-		caller.CreateGenericButton(buttonIconString, Vec2f(0, -16), this, this.getCommandID(shield_toggle_ID), getTranslatedString(buttonDescString));
+		caller.CreateGenericButton(buttonIconString, Vec2f(0, -12), this, this.getCommandID(shield_toggle_ID), getTranslatedString(buttonDescString));
 	}
 }
 

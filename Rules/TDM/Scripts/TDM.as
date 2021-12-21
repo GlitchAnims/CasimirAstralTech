@@ -469,7 +469,7 @@ shared class TDMCore : RulesCore
 
 	void AddPlayer(CPlayer@ player, u8 team = 0, string default_config = "")
 	{
-		TDMPlayerInfo p(player.getUsername(), player.getTeamNum(), player.isBot() ? "knight" : (XORRandom(512) >= 256 ? "knight" : "archer"));
+		TDMPlayerInfo p(player.getUsername(), player.getTeamNum(), "fighter");
 		players.push_back(p);
 		ChangeTeamPlayerCount(p.team, 1);
 	}
