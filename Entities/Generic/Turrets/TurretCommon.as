@@ -9,7 +9,7 @@ namespace FlakParams
 	const ::u32 firing_rate = 8; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
-	const ::u32 firing_spread = 8; // degrees
+	const ::u32 firing_spread = 12; // degrees
 	const ::s32 firing_cost = 2; // charge cost
 	const ::f32 shot_speed = 5.0f; // pixels per tick, won't fire if 0
 }

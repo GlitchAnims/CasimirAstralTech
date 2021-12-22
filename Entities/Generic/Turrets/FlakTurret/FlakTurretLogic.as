@@ -145,16 +145,21 @@ void onTick( CBlob@ this )
 		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
 			removeCharge(ownerBlob, spaceChargeCost, true);
-
 			bool leftCannon = this.get_bool( "leftCannonTurn" );
 			this.set_bool( "leftCannonTurn", !leftCannon);
 
+			f32 aimDist = aimVec.getLength();	//detonation zone
 			u8 shotType = 0; //shot type
-			f32 lifeTime = 0.5f + (3.0f * _flak_turret_logic_r.NextFloat()); //shot lifetime
 
+			f32 minLifetime = 0.5f; //minimum detonation time
+			f32 lifeTime = Maths::Max((aimDist / turret.shot_speed) / getTicksASecond(), minLifetime*2); //shot lifetime
+			
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
+				f32 lifeTimeRandom = 1.0f - (2.0f * _flak_turret_logic_r.NextFloat()); //lifetime variation
+				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f); 
+
 				f32 leftMult = leftCannon ? 1.0f : -1.0f;
 				Vec2f firePos = Vec2f(8.0f, 0.0f * leftMult); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
