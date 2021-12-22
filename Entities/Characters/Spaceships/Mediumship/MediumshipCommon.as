@@ -11,10 +11,10 @@ namespace MartyrParams
 	const ::s32 CHARGE_RATE = 10; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.02f;
-	const ::f32 secondary_engine_force = 0.1f;
-	const ::f32 rcs_force = 0.1f;
-	const ::f32 ship_turn_speed = 3.0f; // degrees per tick, 0 = instant (30 ticks a second)
-	const ::f32 ship_drag = 1.0f; // air drag
+	const ::f32 secondary_engine_force = 0.015f;
+	const ::f32 rcs_force = 0.01f;
+	const ::f32 ship_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_drag = 0.2f; // air drag
 	const ::f32 max_speed = 5.0f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 4; // ticks per shot, won't fire if 0

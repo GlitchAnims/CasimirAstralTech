@@ -55,14 +55,14 @@ void LoadSprites(CSprite@ this)
 	this.RemoveSpriteLayer(left_fire2);
 	this.RemoveSpriteLayer(right_fire1);
 	this.RemoveSpriteLayer(right_fire2);
-	CSpriteLayer@ upFire1 		= this.addSpriteLayer(up_fire1, "Flash1.png", 32, 32);
-	CSpriteLayer@ upFire2 		= this.addSpriteLayer(up_fire2, "Flash1.png", 32, 32);
-	CSpriteLayer@ downFire1 	= this.addSpriteLayer(down_fire1, "Flash1.png", 32, 32);
-	CSpriteLayer@ downFire2 	= this.addSpriteLayer(down_fire2, "Flash1.png", 32, 32);
-	CSpriteLayer@ leftFire1 	= this.addSpriteLayer(left_fire1, "Flash1.png", 32, 32);
-	CSpriteLayer@ leftFire2 	= this.addSpriteLayer(left_fire2, "Flash1.png", 32, 32);
-	CSpriteLayer@ rightFire1 	= this.addSpriteLayer(right_fire1, "Flash1.png", 32, 32);
-	CSpriteLayer@ rightFire2 	= this.addSpriteLayer(right_fire2, "Flash1.png", 32, 32);
+	CSpriteLayer@ upFire1 		= this.addSpriteLayer(up_fire1, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ upFire2 		= this.addSpriteLayer(up_fire2, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ downFire1 	= this.addSpriteLayer(down_fire1, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ downFire2 	= this.addSpriteLayer(down_fire2, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ leftFire1 	= this.addSpriteLayer(left_fire1, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ leftFire2 	= this.addSpriteLayer(left_fire2, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ rightFire1 	= this.addSpriteLayer(right_fire1, "ThrustFlash.png", 27, 27);
+	CSpriteLayer@ rightFire2 	= this.addSpriteLayer(right_fire2, "ThrustFlash.png", 27, 27);
 	if (upFire1 !is null)
 	{
 		Animation@ anim = upFire1.addAnimation("default", 2, true);
@@ -70,8 +70,8 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		upFire1.SetVisible(false);
 		upFire1.SetRelativeZ(-1.1f);
-		//upFire1.RotateBy(0, Vec2f_zero);
-		upFire1.SetOffset(Vec2f(32, 10.0f));
+		upFire1.RotateBy(-90, Vec2f_zero);
+		upFire1.SetOffset(Vec2f(9.5f, 32.0f));
 	}
 	if (upFire2 !is null)
 	{
@@ -80,8 +80,8 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		upFire2.SetVisible(false);
 		upFire2.SetRelativeZ(-1.1f);
-		//upFire2.RotateBy(0, Vec2f_zero);
-		upFire2.SetOffset(Vec2f(32.0f, -10.0f));
+		upFire2.RotateBy(-90, Vec2f_zero);
+		upFire2.SetOffset(Vec2f(-9.5f, 32.0f));
 	}
 	if (downFire1 !is null)
 	{
@@ -91,8 +91,8 @@ void LoadSprites(CSprite@ this)
 		downFire1.SetVisible(false);
 		downFire1.SetRelativeZ(-1.2f);
 		downFire1.ScaleBy(0.5f, 0.5f);
-		//downFire1.RotateBy(0, Vec2f_zero);
-		downFire1.SetOffset(Vec2f(-32.0f, 3.0f));
+		downFire1.RotateBy(90, Vec2f_zero);
+		downFire1.SetOffset(Vec2f(3.5f, -33.0f));
 	}
 	if (downFire2 !is null)
 	{
@@ -102,8 +102,8 @@ void LoadSprites(CSprite@ this)
 		downFire2.SetVisible(false);
 		downFire2.SetRelativeZ(-1.2f);
 		downFire2.ScaleBy(0.5f, 0.5f);
-		//downFire2.RotateBy(0, Vec2f_zero);
-		downFire2.SetOffset(Vec2f(-32.0f, -3.0f));
+		downFire2.RotateBy(90, Vec2f_zero);
+		downFire2.SetOffset(Vec2f(-3.5f, -30.0f));
 	}
 	if (leftFire1 !is null)
 	{
@@ -113,8 +113,8 @@ void LoadSprites(CSprite@ this)
 		leftFire1.SetVisible(false);
 		leftFire1.SetRelativeZ(-1.3f);
 		leftFire1.ScaleBy(0.3f, 0.3f);
-		leftFire1.RotateBy(90, Vec2f_zero);
-		leftFire1.SetOffset(Vec2f(-27.5f, -7.0f));
+		leftFire1.RotateBy(180, Vec2f_zero);
+		leftFire1.SetOffset(Vec2f(-7.5f, -27.5f));
 	}
 	if (leftFire2 !is null)
 	{
@@ -124,8 +124,8 @@ void LoadSprites(CSprite@ this)
 		leftFire2.SetVisible(false);
 		leftFire2.SetRelativeZ(-1.3f);
 		leftFire2.ScaleBy(0.3f, 0.3f);
-		leftFire2.RotateBy(90, Vec2f_zero);
-		leftFire2.SetOffset(Vec2f(28.0f, -16.0f));
+		leftFire2.RotateBy(180, Vec2f_zero);
+		leftFire2.SetOffset(Vec2f(-16.5f, 28.0f));
 	}
 	if (rightFire1 !is null)
 	{
@@ -135,8 +135,8 @@ void LoadSprites(CSprite@ this)
 		rightFire1.SetVisible(false);
 		rightFire1.SetRelativeZ(-1.4f);
 		rightFire1.ScaleBy(0.3f, 0.3f);
-		rightFire1.RotateBy(90, Vec2f_zero);
-		rightFire1.SetOffset(Vec2f(-27.5f, 7.0f));
+		//rightFire1.RotateBy(180, Vec2f_zero);
+		rightFire1.SetOffset(Vec2f(7.5f, -27.5f));
 	}
 	if (rightFire2 !is null)
 	{
@@ -146,8 +146,8 @@ void LoadSprites(CSprite@ this)
 		rightFire2.SetVisible(false);
 		rightFire2.SetRelativeZ(-1.4f);
 		rightFire2.ScaleBy(0.3f, 0.3f);
-		rightFire2.RotateBy(90, Vec2f_zero);
-		rightFire2.SetOffset(Vec2f(28.0f, 16.0f));
+		//rightFire2.RotateBy(180, Vec2f_zero);
+		rightFire2.SetOffset(Vec2f(16.5f, 28.0f));
 	}
 	
 }
@@ -462,15 +462,38 @@ void onTick(CSprite@ this)
 	bool rightFrontEngine = ship.starboardBow_thrust;
 	bool rightBackEngine = ship.starboardQuarter_thrust;
 
+	f32 leftFlipDegrees = facingLeft ? 180.0f : 0.0f;
 	if (upFire1 !is null) //forward engines
-	{ upFire1.SetVisible(mainEngine); }
+	{
+		upFire1.SetVisible(mainEngine);
+
+		upFire1.ResetTransform();
+		upFire1.RotateBy(-90.0f + leftFlipDegrees, Vec2f_zero);
+	}
 	if (upFire2 !is null)
-	{ upFire2.SetVisible(mainEngine); }
+	{
+		upFire2.SetVisible(mainEngine);
+
+		upFire2.ResetTransform();
+		upFire2.RotateBy(-90 + leftFlipDegrees, Vec2f_zero);
+	}
 
 	if (downFire1 !is null) //backwards engines
-	{ downFire1.SetVisible(secEngine); }
+	{
+		downFire1.SetVisible(secEngine);
+
+		downFire1.ResetTransform();
+		downFire1.ScaleBy(0.5f, 0.5f);
+		downFire1.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
+	}
 	if (downFire2 !is null)
-	{ downFire2.SetVisible(secEngine); }
+	{
+		downFire2.SetVisible(secEngine);
+
+		downFire2.ResetTransform();
+		downFire2.ScaleBy(0.5f, 0.5f);
+		downFire2.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
+	}
 	
 	if (leftFire1 !is null)//left side engines
 	{ leftFire1.SetVisible(leftEngine || leftFrontEngine); }
@@ -485,25 +508,24 @@ void onTick(CSprite@ this)
 
 	if (mainEngine)
 	{
-		f32 leftMult = facingLeft ? -1.0f : 1.0f;
-		Vec2f engineOffset = Vec2f(-32.0f * leftMult, -10.0f);
+		Vec2f engineOffset = Vec2f(9.5f , 32.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		Vec2f trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 4, blobVel, blobAngle, facingLeft, teamNum);
+		makeEngineTrail(trailPos, 4, blobVel, blobAngle, teamNum);
 
-		engineOffset = Vec2f(-32.0f * leftMult, 10.0f);
+		engineOffset = Vec2f(-9.5f, 32.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 4, blobVel, blobAngle, facingLeft, teamNum);
+		makeEngineTrail(trailPos, 4, blobVel, blobAngle, teamNum);
 	}
 
 }
 
-void makeEngineTrail(Vec2f trailPos = Vec2f_zero, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, bool facingLeft = false, int teamNum = 0)
+void makeEngineTrail(Vec2f trailPos = Vec2f_zero, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, int teamNum = 0)
 {
-	Vec2f trailNorm = Vec2f(facingLeft ? 1.0f : -1.0f, 0);
+	Vec2f trailNorm = Vec2f(0, 1.0f);
 	trailNorm.RotateByDegrees(blobAngle);
 
 	u32 gameTime = getGameTime();

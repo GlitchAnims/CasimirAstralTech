@@ -123,8 +123,8 @@ void onTick( CBlob@ this )
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
-	f32 blobAngle = this.getAngleDegrees();
-	blobAngle = (blobAngle+360.0f) % 360;
+	f32 blobAngle = this.getAngleDegrees() + 270;
+	blobAngle = Maths::Abs(blobAngle) % 360;
 	int teamNum = this.getTeamNum();
 	bool facingLeft = this.isFacingLeft();
 	bool isMyPlayer = this.isMyPlayer();
@@ -160,11 +160,11 @@ void onTick( CBlob@ this )
 			for (uint i = 0; i < bulletCount; i ++)
 			{
 				f32 cannonMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(facingLeft ? -9.0f : 9.0f, 9.5 * cannonMult); //barrel pos
+				Vec2f firePos = Vec2f(9.0f, 9.5 * cannonMult); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
-				Vec2f fireVec = Vec2f(facingLeft ? -1.0f : 1.0f,0) * ship.shot_speed; 
+				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
 				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
@@ -183,7 +183,7 @@ void onTick( CBlob@ this )
 	f32 cannonLoad = (float(m2Time) / float(mainCannonDelay)) * m2Mult; //load percentage
 	if (pressed_m2 && cannonLoad <= 1.0f)
 	{
-		Vec2f firePos = Vec2f(facingLeft ? -11.0f : 11.0f, 0); //barrel pos
+		Vec2f firePos = Vec2f(11.0f, 0); //barrel pos
 		firePos.RotateByDegrees(blobAngle);
 		firePos += thisPos; //fire pos
 
@@ -200,7 +200,7 @@ void onTick( CBlob@ this )
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				Vec2f fireVec = Vec2f(facingLeft ? -1.0f : 1.0f,0) * ship.shot_speed; 
+				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
 				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed

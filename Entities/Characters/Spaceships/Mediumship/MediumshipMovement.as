@@ -90,11 +90,11 @@ void onTick(CMovement@ this)
 	f32 blobAngle = thisBlob.getAngleDegrees();
 	blobAngle = Maths::Abs(blobAngle) % 360;
 
-	if (blobAngle > 90 && blobAngle <= 270 && !thisBlob.isFacingLeft()) //flips ship if aiming left
+	if (blobAngle > 180 && !thisBlob.isFacingLeft()) //flips ship if aiming left
 	{
 		thisBlob.SetFacingLeft(true);
 	}
-	else if ((blobAngle <= 90 || blobAngle > 270) && thisBlob.isFacingLeft())
+	else if (blobAngle <= 180 && thisBlob.isFacingLeft())
 	{
 		thisBlob.SetFacingLeft(false);
 	}
@@ -133,8 +133,8 @@ void onTick(CMovement@ this)
 
 		if(up)
 		{
-			Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
-			thrustVel.RotateByDegrees(blobAngle);
+			Vec2f thrustVel = Vec2f(0, -ship.main_engine_force);
+			//thrustVel.RotateByDegrees(blobAngle);
 			forward += thrustVel;
 			ship.forward_thrust = true;
 		}
@@ -143,8 +143,8 @@ void onTick(CMovement@ this)
 
 		if(down)
 		{
-			Vec2f thrustVel = Vec2f(ship.secondary_engine_force, 0);
-			thrustVel.RotateByDegrees(blobAngle + 180.0f);
+			Vec2f thrustVel = Vec2f(0, ship.secondary_engine_force);
+			//thrustVel.RotateByDegrees(blobAngle);
 			backward += thrustVel;
 			ship.backward_thrust = true;
 		}
@@ -160,18 +160,18 @@ void onTick(CMovement@ this)
 
 			if(left)
 			{
-				Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
-				thrustVel.RotateByDegrees(blobAngle + 270.0f);
+				Vec2f thrustVel = Vec2f(-ship.rcs_force, 0);
+				//thrustVel.RotateByDegrees(blobAngle);
 				port += thrustVel;
 
-				if (facingLeft)
+				if (!facingLeft)
 				{ ship.port_thrust = true; }
 				else
 				{ ship.starboard_thrust = true; }
 			}
 			else
 			{
-				if (facingLeft)
+				if (!facingLeft)
 				{ ship.port_thrust = false; }
 				else
 				{ ship.starboard_thrust = false; }
@@ -180,17 +180,17 @@ void onTick(CMovement@ this)
 			if(right)
 			{
 				Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
-				thrustVel.RotateByDegrees(blobAngle + 90.0f);
+				//thrustVel.RotateByDegrees(blobAngle);
 				starboard += thrustVel;
 
-				if (!facingLeft)
+				if (facingLeft)
 				{ ship.port_thrust = true; }
 				else
 				{ ship.starboard_thrust = true; }
 			}
 			else
 			{
-				if (!facingLeft)
+				if (facingLeft)
 				{ ship.port_thrust = false; }
 				else
 				{ ship.starboard_thrust = false; }
@@ -203,7 +203,7 @@ void onTick(CMovement@ this)
 
 			if(left)
 			{
-				addedSpin += ship.rcs_force*0.5f;
+				addedSpin -= ship.rcs_force;
 
 				if (!facingLeft)
 				{
@@ -232,7 +232,7 @@ void onTick(CMovement@ this)
 			
 			if(right)
 			{
-				addedSpin -= ship.rcs_force*0.5f;
+				addedSpin += ship.rcs_force;
 
 				if (facingLeft)
 				{
@@ -260,15 +260,24 @@ void onTick(CMovement@ this)
 			}
 		}
 
+		
+		if (isShifting) //does not divide thrust if using rotational thrust
+		{
+			forward /= float(keysPressedAmount); //divide thrust between multiple sides
+			backward /= float(keysPressedAmount);
+			port /= float(keysPressedAmount);
+			starboard /= float(keysPressedAmount);
+		}
 		Vec2f addedVel = Vec2f_zero;
-		addedVel += forward / float(keysPressedAmount); //divide thrust between multiple sides
-		addedVel += backward / float(keysPressedAmount);
-		addedVel += port / float(keysPressedAmount);
-		addedVel += starboard / float(keysPressedAmount);
-		addedSpin /= float(keysPressedAmount);
+		addedVel += forward; 
+		addedVel += backward;
+		addedVel += port;
+		addedVel += starboard;
+		
+		addedVel.RotateByDegrees(blobAngle); //rotate thrust to match ship
 		
 		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
-		blobSpinVel += addedSpin * moveVars.engineFactor;
+		blobSpinVel += addedSpin * moveVars.engineFactor; //spin velocity also affected by engine force
 	}
 	else
 	{
