@@ -185,6 +185,7 @@ void onTick( CBlob@ this )
 
 		moveVars.engineFactor *= 0.0f;
 		moveVars.maxSpeedFactor *= 1.5f;
+		moveVars.dragFactor *= 10.0f;
 
 		Vec2f aimVec = this.getAimPos() - thisPos;
 		Vec2f aimNorm = aimVec;

@@ -454,25 +454,33 @@ void onTick(CSprite@ this)
 	CSpriteLayer@ rightFire2	= this.getSpriteLayer(right_fire2);
 
 	bool mainEngine = ship.forward_thrust;
-	if (upFire1 !is null)
+	bool secEngine = ship.backward_thrust;
+	bool leftEngine = ship.port_thrust;
+	bool leftFrontEngine = ship.portBow_thrust;
+	bool leftBackEngine = ship.portQuarter_thrust;
+	bool rightEngine = ship.starboard_thrust;
+	bool rightFrontEngine = ship.starboardBow_thrust;
+	bool rightBackEngine = ship.starboardQuarter_thrust;
+
+	if (upFire1 !is null) //forward engines
 	{ upFire1.SetVisible(mainEngine); }
 	if (upFire2 !is null)
 	{ upFire2.SetVisible(mainEngine); }
-	bool backEngine = ship.backward_thrust;
-	if (downFire1 !is null)
-	{ downFire1.SetVisible(backEngine); }
+
+	if (downFire1 !is null) //backwards engines
+	{ downFire1.SetVisible(secEngine); }
 	if (downFire2 !is null)
-	{ downFire2.SetVisible(backEngine); }
-
-	if (leftFire1 !is null)
-	{ leftFire1.SetVisible(ship.port_thrust || ship.portBow_thrust); }
+	{ downFire2.SetVisible(secEngine); }
+	
+	if (leftFire1 !is null)//left side engines
+	{ leftFire1.SetVisible(leftEngine || leftFrontEngine); }
 	if (leftFire2 !is null)
-	{ leftFire2.SetVisible(ship.port_thrust || ship.portQuarter_thrust); }
+	{ leftFire2.SetVisible(leftEngine || leftBackEngine); }
 
-	if (rightFire1 !is null)
-	{ rightFire1.SetVisible(ship.starboard_thrust || ship.starboardBow_thrust); }
+	if (rightFire1 !is null)//right side engines
+	{ rightFire1.SetVisible(rightEngine || rightFrontEngine); }
 	if (rightFire2 !is null)
-	{ rightFire2.SetVisible(ship.starboard_thrust || ship.starboardQuarter_thrust); }
+	{ rightFire2.SetVisible(rightEngine || rightBackEngine); }
 
 
 	if (mainEngine)

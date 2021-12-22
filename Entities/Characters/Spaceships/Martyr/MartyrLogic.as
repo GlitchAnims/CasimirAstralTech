@@ -29,7 +29,9 @@ void onInit( CBlob@ this )
 	
 	MediumshipInfo ship;
 	ship.main_engine_force 			= MartyrParams::main_engine_force;
+	ship.secondary_engine_force 	= MartyrParams::secondary_engine_force;
 	ship.rcs_force 					= MartyrParams::rcs_force;
+	ship.ship_turn_speed 			= MartyrParams::ship_turn_speed;
 	ship.ship_drag 					= MartyrParams::ship_drag;
 	ship.max_speed 					= MartyrParams::max_speed;
 	
@@ -68,9 +70,7 @@ void onInit( CBlob@ this )
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
-	//no spinning
-	this.getShape().SetRotationsAllowed(false);
-	//this.getShape().SetGravityScale(0);
+	this.getShape().SetGravityScale(0);
 
 	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	

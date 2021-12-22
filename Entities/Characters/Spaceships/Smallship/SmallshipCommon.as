@@ -90,10 +90,10 @@ namespace ScoutParams
 	const ::f32 max_speed = 15.f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 60; // ticks per shot, won't fire if 0
-	const ::u32 firing_burst = 12; // bullets per shot, won't fire if 0
+	const ::u32 firing_burst = 15; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 6; // degrees
-	const ::s32 firing_cost = 20; // charge cost
+	const ::s32 firing_cost = 25; // charge cost
 	const ::f32 shot_speed = 12.0f; // pixels per tick, 0 = instant
 	const ::f32 shot_lifetime = 1.0f; // float, seconds
 }
