@@ -151,13 +151,13 @@ void onTick( CBlob@ this )
 			f32 aimDist = aimVec.getLength();	//detonation zone
 			u8 shotType = 0; //shot type
 
-			f32 minLifetime = 0.5f; //minimum detonation time
+			f32 minLifetime = 0.25f; //minimum detonation time
 			f32 lifeTime = Maths::Max((aimDist / turret.shot_speed) / getTicksASecond(), minLifetime*2); //shot lifetime
 			
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 lifeTimeRandom = 1.0f - (2.0f * _flak_turret_logic_r.NextFloat()); //lifetime variation
+				f32 lifeTimeRandom = 0.5f - _flak_turret_logic_r.NextFloat(); //lifetime variation
 				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f); 
 
 				f32 leftMult = leftCannon ? 1.0f : -1.0f;

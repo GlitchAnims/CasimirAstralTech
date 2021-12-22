@@ -125,7 +125,7 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 	Vec2f trailNorm = trailVec;
 	trailNorm.Normalize();
 
-	for(int i = 0; i <= steps; i++)
+	for(int i = 0; i <= steps; i += 2)
    	{
 		if (_flak_shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
 		{ continue; }

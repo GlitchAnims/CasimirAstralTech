@@ -13,7 +13,7 @@ namespace FighterParams
 	const ::f32 main_engine_force = 0.25f;
 	const ::f32 secondary_engine_force = 0.18f;
 	const ::f32 rcs_force = 0.15f;
-	const ::f32 ship_turn_speed = 8.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_turn_speed = 12.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.1f; // air drag
 	const ::f32 max_speed = 15.0f; // 0 = infinite speed
 	//gun general
@@ -29,15 +29,15 @@ namespace FighterParams
 namespace InterceptorParams
 {
 	//charge
-	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
-	const ::s32 CHARGE_MAX = 300; //max charge amount
+	const ::f32 CHARGE_START = 0.2f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 270; //max charge amount
 	const ::s32 CHARGE_REGEN = 0; //amount per regen
 	const ::s32 CHARGE_RATE = 0; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.4f;
 	const ::f32 secondary_engine_force = 0.1f;
 	const ::f32 rcs_force = 0.1f;
-	const ::f32 ship_turn_speed = 12.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_turn_speed = 10.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.1f; // air drag
 	const ::f32 max_speed = 20.0f; // 0 = infinite speed
 	//gun general
