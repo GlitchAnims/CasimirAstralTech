@@ -164,14 +164,14 @@ void onTick(CMovement@ this)
 				//thrustVel.RotateByDegrees(blobAngle);
 				port += thrustVel;
 
-				if (!facingLeft)
+				if (facingLeft)
 				{ ship.port_thrust = true; }
 				else
 				{ ship.starboard_thrust = true; }
 			}
 			else
 			{
-				if (!facingLeft)
+				if (facingLeft)
 				{ ship.port_thrust = false; }
 				else
 				{ ship.starboard_thrust = false; }
@@ -183,14 +183,14 @@ void onTick(CMovement@ this)
 				//thrustVel.RotateByDegrees(blobAngle);
 				starboard += thrustVel;
 
-				if (facingLeft)
+				if (!facingLeft)
 				{ ship.port_thrust = true; }
 				else
 				{ ship.starboard_thrust = true; }
 			}
 			else
 			{
-				if (facingLeft)
+				if (!facingLeft)
 				{ ship.port_thrust = false; }
 				else
 				{ ship.starboard_thrust = false; }
@@ -205,7 +205,7 @@ void onTick(CMovement@ this)
 			{
 				addedSpin -= ship.rcs_force;
 
-				if (!facingLeft)
+				if (facingLeft)
 				{
 					ship.portBow_thrust = true;
 					ship.starboardQuarter_thrust = true;
@@ -218,7 +218,7 @@ void onTick(CMovement@ this)
 			}
 			else
 			{
-				if (!facingLeft)
+				if (facingLeft)
 				{
 					ship.portBow_thrust = false;
 					ship.starboardQuarter_thrust = false;
@@ -234,7 +234,7 @@ void onTick(CMovement@ this)
 			{
 				addedSpin += ship.rcs_force;
 
-				if (facingLeft)
+				if (!facingLeft)
 				{
 					ship.portBow_thrust = true;
 					ship.starboardQuarter_thrust = true;
@@ -247,7 +247,7 @@ void onTick(CMovement@ this)
 			}
 			else
 			{
-				if (facingLeft)
+				if (!facingLeft)
 				{
 					ship.portBow_thrust = false;
 					ship.starboardQuarter_thrust = false;

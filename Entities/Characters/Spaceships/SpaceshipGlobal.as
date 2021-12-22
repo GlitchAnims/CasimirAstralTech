@@ -11,6 +11,9 @@ const string smallTag = "small_ship";
 const string mediumTag = "medium_ship";
 const string bigTag = "big_ship";
 
+const string activeBoolString = "active";
+const string activeTimeString = "active_time";
+
 string getBulletName(u8 shotType = 0)
 {
     string blobName = "bomb";

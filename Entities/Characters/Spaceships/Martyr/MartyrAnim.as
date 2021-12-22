@@ -113,8 +113,8 @@ void LoadSprites(CSprite@ this)
 		leftFire1.SetVisible(false);
 		leftFire1.SetRelativeZ(-1.3f);
 		leftFire1.ScaleBy(0.3f, 0.3f);
-		leftFire1.RotateBy(180, Vec2f_zero);
-		leftFire1.SetOffset(Vec2f(-7.5f, -27.5f));
+		//leftFire1.RotateBy(180, Vec2f_zero);
+		leftFire1.SetOffset(Vec2f(7.5f, -27.5f));
 	}
 	if (leftFire2 !is null)
 	{
@@ -124,8 +124,8 @@ void LoadSprites(CSprite@ this)
 		leftFire2.SetVisible(false);
 		leftFire2.SetRelativeZ(-1.3f);
 		leftFire2.ScaleBy(0.3f, 0.3f);
-		leftFire2.RotateBy(180, Vec2f_zero);
-		leftFire2.SetOffset(Vec2f(-16.5f, 28.0f));
+		//leftFire2.RotateBy(180, Vec2f_zero);
+		leftFire2.SetOffset(Vec2f(16.5f, 28.0f));
 	}
 	if (rightFire1 !is null)
 	{
@@ -135,8 +135,8 @@ void LoadSprites(CSprite@ this)
 		rightFire1.SetVisible(false);
 		rightFire1.SetRelativeZ(-1.4f);
 		rightFire1.ScaleBy(0.3f, 0.3f);
-		//rightFire1.RotateBy(180, Vec2f_zero);
-		rightFire1.SetOffset(Vec2f(7.5f, -27.5f));
+		rightFire1.RotateBy(180, Vec2f_zero);
+		rightFire1.SetOffset(Vec2f(-7.5f, -27.5f));
 	}
 	if (rightFire2 !is null)
 	{
@@ -146,8 +146,8 @@ void LoadSprites(CSprite@ this)
 		rightFire2.SetVisible(false);
 		rightFire2.SetRelativeZ(-1.4f);
 		rightFire2.ScaleBy(0.3f, 0.3f);
-		//rightFire2.RotateBy(180, Vec2f_zero);
-		rightFire2.SetOffset(Vec2f(16.5f, 28.0f));
+		rightFire2.RotateBy(180, Vec2f_zero);
+		rightFire2.SetOffset(Vec2f(-16.5f, 28.0f));
 	}
 	
 }

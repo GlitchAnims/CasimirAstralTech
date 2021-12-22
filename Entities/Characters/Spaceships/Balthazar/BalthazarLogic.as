@@ -20,28 +20,28 @@ void onInit( CBlob@ this )
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= MartyrParams::CHARGE_START * MartyrParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= MartyrParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= MartyrParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= MartyrParams::CHARGE_RATE;
+		chargeInfo.charge 			= BalthazarParams::CHARGE_START * BalthazarParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= BalthazarParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= BalthazarParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= BalthazarParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 	
 	MediumshipInfo ship;
-	ship.main_engine_force 			= MartyrParams::main_engine_force;
-	ship.secondary_engine_force 	= MartyrParams::secondary_engine_force;
-	ship.rcs_force 					= MartyrParams::rcs_force;
-	ship.ship_turn_speed 			= MartyrParams::ship_turn_speed;
-	ship.ship_drag 					= MartyrParams::ship_drag;
-	ship.max_speed 					= MartyrParams::max_speed;
+	ship.main_engine_force 			= BalthazarParams::main_engine_force;
+	ship.secondary_engine_force 	= BalthazarParams::secondary_engine_force;
+	ship.rcs_force 					= BalthazarParams::rcs_force;
+	ship.ship_turn_speed 			= BalthazarParams::ship_turn_speed;
+	ship.ship_drag 					= BalthazarParams::ship_drag;
+	ship.max_speed 					= BalthazarParams::max_speed;
 	
-	ship.firing_rate 				= MartyrParams::firing_rate;
-	ship.firing_burst 				= MartyrParams::firing_burst;
-	ship.firing_delay 				= MartyrParams::firing_delay;
-	ship.firing_spread 				= MartyrParams::firing_spread;
-	ship.firing_cost 				= MartyrParams::firing_cost;
-	ship.shot_speed 				= MartyrParams::shot_speed;
-	ship.shot_lifetime 				= MartyrParams::shot_lifetime;
+	ship.firing_rate 				= BalthazarParams::firing_rate;
+	ship.firing_burst 				= BalthazarParams::firing_burst;
+	ship.firing_delay 				= BalthazarParams::firing_delay;
+	ship.firing_spread 				= BalthazarParams::firing_spread;
+	ship.firing_cost 				= BalthazarParams::firing_cost;
+	ship.shot_speed 				= BalthazarParams::shot_speed;
+	ship.shot_lifetime 				= BalthazarParams::shot_lifetime;
 	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
@@ -61,6 +61,7 @@ void onInit( CBlob@ this )
 	this.Tag("player");
 	this.Tag("hull");
 	this.Tag(mediumTag);
+	this.Tag(denyChargeInputTag);
 	
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");
@@ -123,7 +124,7 @@ void onTick( CBlob@ this )
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
-	f32 blobAngle = this.getAngleDegrees() + 270;
+	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = Maths::Abs(blobAngle) % 360;
 	int teamNum = this.getTeamNum();
 	bool facingLeft = this.isFacingLeft();
@@ -147,9 +148,6 @@ void onTick( CBlob@ this )
 	{
 		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
 		{
-			bool leftCannon = this.get_bool( "leftCannonTurn" ); //this is used if the "gun" has 2 firing positions
-			this.set_bool( "leftCannonTurn", !leftCannon);
-
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(2); //shot type
@@ -159,12 +157,11 @@ void onTick( CBlob@ this )
 			uint bulletCount = ship.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 cannonMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(9.0f, 9.5 * cannonMult); //barrel pos
+				Vec2f firePos = Vec2f(facingLeft ? -7.5 : 7.5f, -32); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
-				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
+				Vec2f fireVec = Vec2f(0,-1.0) * ship.shot_speed; 
 				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
@@ -177,7 +174,8 @@ void onTick( CBlob@ this )
 			m1ShotTicks = 0;
 		}
 	}
-	
+
+	/* disabled for now
 	s32 mainCannonDelay = 60; //ticks before firing main cannon
 	f32 m2Mult = thisCharge >= m2ChargeCost ? 1.0f : 0.0f;
 	f32 cannonLoad = (float(m2Time) / float(mainCannonDelay)) * m2Mult; //load percentage
@@ -210,7 +208,7 @@ void onTick( CBlob@ this )
 			}
 			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 		}
-	}
+	}*/
 
 	if (pressed_m1)
 	{ m1Time++; }
@@ -222,22 +220,12 @@ void onTick( CBlob@ this )
 	this.set_u32( "m1_heldTime", m1Time );
 	this.set_u32( "m2_heldTime", m2Time );
 
-	m1ShotTicks++;
+	if (m1ShotTicks < 500)
+	{ m1ShotTicks++; }
 	this.set_u32( "m1_shotTime", m1ShotTicks );
 
 	//sound logic
-	/*Vec2f vel = this.getVelocity();
-	float posVelX = Maths::Abs(vel.x);
-	float posVelY = Maths::Abs(vel.y);
-	if(posVelX > 3.0f)
-	{
-		this.getSprite().SetEmitSoundVolume(3.0f);
-	}
-	else
-	{
-		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
-	}*/
-
+	/*
 	if(cannonLoad > 1.0f)
 	{
 		this.getSprite().SetEmitSoundVolume(0.0f);
@@ -246,7 +234,7 @@ void onTick( CBlob@ this )
 	{
 		this.getSprite().SetEmitSoundVolume(2.0f * cannonLoad);
 		this.getSprite().SetEmitSoundSpeed(2.0f * cannonLoad);
-	}
+	}*/
 }
 
 void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, f32 mult = 0.0f, int teamNum = 0)
@@ -351,7 +339,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 	int teamNum = ownerBlob.getTeamNum();
 
 	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("TURRETSLOT1");
-	AttachmentPoint@ slot2 = attachments.getAttachmentPointByName("TURRETSLOT2");
+	AttachmentPoint@ linkSlot = attachments.getAttachmentPointByName("LINKSLOT");
 	AttachmentPoint@ shieldSlot = attachments.getAttachmentPointByName("SHIELDSLOT");
 
 	if (slot1 != null)
@@ -370,18 +358,18 @@ void spawnAttachments(CBlob@ ownerBlob)
 			}
 		}
 	}
-	if (slot2 != null)
+	if (linkSlot != null)
 	{
-		Vec2f slotOffset = slot2.offset;
-		CBlob@ turret = slot2.getOccupied();
+		Vec2f slotOffset = linkSlot.offset;
+		CBlob@ turret = linkSlot.getOccupied();
 		if (turret == null)
 		{
-			CBlob@ blob = server_CreateBlob( turretName , teamNum, ownerPos + slotOffset);
+			CBlob@ blob = server_CreateBlob( "ship_sharelink" , teamNum, ownerPos + slotOffset);
 			if (blob !is null)
 			{
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
-				ownerBlob.server_AttachTo(blob, slot2);
+				ownerBlob.server_AttachTo(blob, linkSlot);
 				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
 			}
 		}
