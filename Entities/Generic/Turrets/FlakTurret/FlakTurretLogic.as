@@ -34,8 +34,6 @@ void onInit( CBlob@ this )
 	this.set_u32( "m2_shotTime", 0 );
 
 	this.set_bool( "leftCannonTurn", false);
-
-	this.set_bool("shifted", false);
 	
 	this.Tag("npc");
 	//this.Tag("hull");

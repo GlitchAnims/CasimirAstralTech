@@ -335,7 +335,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 	{ return; }
 
 	Vec2f ownerPos = ownerBlob.getPosition();
-	string turretName = "turret_flak";
+	string turretName = "turret_gatling";
 	int teamNum = ownerBlob.getTeamNum();
 
 	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("TURRETSLOT1");

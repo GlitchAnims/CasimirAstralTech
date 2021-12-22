@@ -10,14 +10,14 @@ Random _flak_turret_logic_r(98444);
 void onInit( CBlob@ this )
 {
 	TurretInfo turret;
-	turret.turret_turn_speed 	= FlakParams::turret_turn_speed;
+	turret.turret_turn_speed 	= GatlingParams::turret_turn_speed;
 	
-	turret.firing_rate 			= FlakParams::firing_rate;
-	turret.firing_burst 		= FlakParams::firing_burst;
-	turret.firing_delay 		= FlakParams::firing_delay;
-	turret.firing_spread 		= FlakParams::firing_spread;
-	turret.firing_cost 			= FlakParams::firing_cost;
-	turret.shot_speed 			= FlakParams::shot_speed;
+	turret.firing_rate 			= GatlingParams::firing_rate;
+	turret.firing_burst 		= GatlingParams::firing_burst;
+	turret.firing_delay 		= GatlingParams::firing_delay;
+	turret.firing_spread 		= GatlingParams::firing_spread;
+	turret.firing_cost 			= GatlingParams::firing_cost;
+	turret.shot_speed 			= GatlingParams::shot_speed;
 	this.set("shipInfo", @turret);
 	
 	/*ManaInfo manaInfo;
@@ -28,14 +28,7 @@ void onInit( CBlob@ this )
 	this.set_u32("ownerBlobID", 0);
 
 	this.set_u32( "space_heldTime", 0 );
-	this.set_u32( "m2_heldTime", 0 );
-
 	this.set_u32( "space_shotTime", 0 );
-	this.set_u32( "m2_shotTime", 0 );
-
-	this.set_bool( "leftCannonTurn", false);
-
-	this.set_bool("shifted", false);
 	
 	this.Tag("npc");
 	//this.Tag("hull");
@@ -57,11 +50,14 @@ void onInit( CBlob@ this )
 	this.getCurrentScript().removeIfTag = "dead";
 	
 
-	/*if(isClient())
+	if(isClient())
 	{
-		this.getSprite().SetEmitSound("engine_loop.ogg");
-		this.getSprite().SetEmitSoundPaused(true);
-	}*/
+		CSprite@ thisSprite = this.getSprite();
+		thisSprite.SetEmitSound("gatling_windup.ogg");
+		thisSprite.SetEmitSoundPaused(false);
+		thisSprite.SetEmitSoundVolume(0);
+		thisSprite.SetEmitSoundSpeed(0);
+	}
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -125,43 +121,29 @@ void onTick( CBlob@ this )
 		blobAngle = this.getAngleDegrees();
 	}
 
-
 	//gun logic
 	s32 ownerCharge = ownerBlob.get_s32(absoluteCharge_string);
-
 	s32 spaceChargeCost = turret.firing_cost;
 
 	bool pressed_space = ownerBlob.isKeyPressed(key_action3);
-	bool pressed_m2 = this.isKeyPressed(key_action2);
-	
 	u32 spaceTime = this.get_u32( "space_heldTime");
-	u32 m2Time = this.get_u32( "m2_heldTime");
 
 	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
-	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
+	u32 spaceFiringDelay = turret.firing_delay;
 
-	if (pressed_space && spaceTime >= turret.firing_delay && ownerCharge >= spaceChargeCost)
+	if (pressed_space && spaceTime >= spaceFiringDelay && ownerCharge >= spaceChargeCost)
 	{
 		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
 			removeCharge(ownerBlob, spaceChargeCost, true);
-			bool leftCannon = this.get_bool( "leftCannonTurn" );
-			this.set_bool( "leftCannonTurn", !leftCannon);
 
-			f32 aimDist = aimVec.getLength();	//detonation zone
-			u8 shotType = 0; //shot type
-
-			f32 minLifetime = 0.25f; //minimum detonation time
-			f32 lifeTime = Maths::Max((aimDist / turret.shot_speed) / getTicksASecond(), minLifetime*2); //shot lifetime
+			u8 shotType = 1; //shot type
+			f32 lifeTime = 0.8; //shot lifetime
 			
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 lifeTimeRandom = 0.5f - _flak_turret_logic_r.NextFloat(); //lifetime variation
-				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f); 
-
-				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8.0f, 0.0f * leftMult); //barrel pos
+				Vec2f firePos = Vec2f(8.0f, 0.0f); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
@@ -177,40 +159,47 @@ void onTick( CBlob@ this )
 		}
 	}
 
-	if (pressed_space)
-	{ spaceTime++; }
-	else { spaceTime = 0; }
-	
-	if (pressed_m2)
-	{ m2Time++; }
-	else { m2Time = 0; }
+	if (pressed_space) //this one's special because of gatling windup
+	{
+		if (spaceTime < spaceFiringDelay)
+		{ spaceTime++; }
+	}
+	else 
+	{
+		if (spaceTime > 0)
+		{ spaceTime--; }
+	}
 	this.set_u32( "space_heldTime", spaceTime );
-	this.set_u32( "m2_heldTime", m2Time );
+	
 
-	if (spaceShotTicks < 1000)
+	if (spaceShotTicks < 500)
 	{
 		spaceShotTicks++;
 		this.set_u32( "space_shotTime", spaceShotTicks );
 	}
 
-	if (m2ShotTicks < 1000)
-	{
-		//m2ShotTicks++;
-		this.set_u32( "m2_shotTime", m2ShotTicks );
-	}
-
 	//sound logic
-	/*Vec2f vel = this.getVelocity();
-	float posVelX = Maths::Abs(vel.x);
-	float posVelY = Maths::Abs(vel.y);
-	if(posVelX > 2.9f)
+	f32 windupPercentage = float(spaceTime) / spaceFiringDelay;
+	//sound logic
+	CSprite@ thisSprite = this.getSprite();
+	if(windupPercentage <= 0.0f)
 	{
-		this.getSprite().SetEmitSoundVolume(3.0f);
+		if (!thisSprite.getEmitSoundPaused())
+		{
+			thisSprite.SetEmitSoundPaused(true);
+		}
+		thisSprite.SetEmitSoundVolume(0.0f);
+		thisSprite.SetEmitSoundSpeed(0.0f);
 	}
 	else
 	{
-		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
-	}*/
+		if (thisSprite.getEmitSoundPaused())
+		{
+			thisSprite.SetEmitSoundPaused(false);
+		}
+		thisSprite.SetEmitSoundVolume(windupPercentage);
+		thisSprite.SetEmitSoundSpeed(windupPercentage);
+	}
 }
 
 

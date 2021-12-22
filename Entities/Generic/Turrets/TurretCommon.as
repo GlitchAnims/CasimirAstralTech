@@ -14,6 +14,18 @@ namespace FlakParams
 	const ::f32 shot_speed = 10.0f; // pixels per tick, won't fire if 0
 }
 
+namespace GatlingParams
+{
+	const ::f32 turret_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+
+	const ::u32 firing_rate = 3; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 2; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 30; // ticks before first shot
+	const ::u32 firing_spread = 5; // degrees
+	const ::s32 firing_cost = 4; // charge cost
+	const ::f32 shot_speed = 20.0f; // pixels per tick, won't fire if 0
+}
+
 class TurretInfo
 {
 	f32 turret_turn_speed; // degrees per tick, 0 = instant (30 ticks a second)
