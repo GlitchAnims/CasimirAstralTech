@@ -91,8 +91,11 @@ void onTick(CBlob@ this)
 
 			thisPos = hi.hitpos;
 
-			if(doesBypassBarrier(b, thisPos, thisVel))
-			{ continue; }
+			if (b.hasTag("barrier"))
+			{
+				if(doesBypassBarrier(b, thisPos, thisVel))
+				{ continue; }
+			}
 
 			this.setPosition(thisPos);
 			this.server_Hit(b, thisPos, thisVel, damage, Hitters::cata_stones, false);
