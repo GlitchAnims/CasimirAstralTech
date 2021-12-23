@@ -8,8 +8,10 @@ namespace tdm_colors
 {
 	enum color
 	{
-		tradingpost_1 = 0xFF8888FF,
-		tradingpost_2 = 0xFFFF8888
+		martyr_1 = 0xFF8888FF,
+		martyr_2 = 0xFFFF8888,
+		balthazar_1 = 0xFF7888FF,
+		balthazar_2 = 0xFFFF7888
 	};
 }
 
@@ -29,10 +31,10 @@ class TDMPNGLoader : PNGLoader
 
 		switch (pixel.color)
 		{
-			//case tdm_colors::tradingpost_1: autotile(offset); spawnBlob(map, "tradingpost", offset, 0); break;
-			//case tdm_colors::tradingpost_2: autotile(offset); spawnBlob(map, "tradingpost", offset, 1); break;
-			case tdm_colors::tradingpost_1: autotile(offset); spawnBlob(map, "martyr", offset, 0); break;
-			case tdm_colors::tradingpost_2: autotile(offset); spawnBlob(map, "martyr", offset, 1); break;
+			case tdm_colors::martyr_1: autotile(offset); spawnBlob(map, "martyr", offset, 0); break;
+			case tdm_colors::martyr_2: autotile(offset); spawnBlob(map, "martyr", offset, 1); break;
+			case tdm_colors::balthazar_1: autotile(offset); spawnBlob(map, "balthazar", offset, 0); break;
+			case tdm_colors::balthazar_2: autotile(offset); spawnBlob(map, "balthazar", offset, 1); break;
 		};
 	}
 };
