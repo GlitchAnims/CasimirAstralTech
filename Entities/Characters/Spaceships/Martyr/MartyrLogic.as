@@ -210,6 +210,34 @@ void onTick( CBlob@ this )
 			}
 			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
 		}
+
+		if (isMyPlayer)
+		{
+			Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
+			fireVec.RotateByDegrees(blobAngle); //shot vector
+			fireVec += thisVel; //adds ship speed
+
+			Vec2f pPos = firePos;
+
+			SColor color = SColor(255, 255, 10, 10);
+			for(int alpha = 255; alpha > 1; alpha -=3) //when alpha reaches 0, cut the loop
+			{
+				color.setAlpha(alpha);
+
+				CParticle@ p = ParticlePixelUnlimited(pPos, Vec2f_zero, color, true);
+				if(p !is null)
+				{
+					p.collides = false;
+					p.gravity = Vec2f_zero;
+					p.bounce = 0;
+					p.Z = 7;
+					p.timeout = 0;
+					p.setRenderStyle(RenderStyle::light);
+				}
+
+				pPos += fireVec * 0.1f; //update pos each step
+			}
+		}
 	}
 
 	if (pressed_m1)
@@ -286,6 +314,10 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
     if (customData == Hitters::suicide)
 	{
 		return 0;
+	}
+	else if (customData == Hitters::arrow)
+	{
+		damage *= 0.25;
 	}
 
 	if (isClient())

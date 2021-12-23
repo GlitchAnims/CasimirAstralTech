@@ -275,6 +275,10 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 	{
 		return 0;
 	}
+	else if (customData == Hitters::arrow)
+	{
+		damage *= 0.25;
+	}
 
 	if (isClient())
 	{
