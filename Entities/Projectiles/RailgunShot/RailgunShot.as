@@ -7,7 +7,7 @@
 
 Random _railgun_shot_r(95995);
 
-const f32 damage = 7.0f;
+const f32 damage = 10.0f;
 
 void onInit(CBlob@ this)
 {

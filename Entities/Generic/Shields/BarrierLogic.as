@@ -99,7 +99,7 @@ void onTick( CBlob@ this )
 	if ((getGameTime() + this.getNetworkID()) % (rate + 1) != 0) //overcomplicated way to spread about the ticks
 	{ return; }
 
-	if (!removeCharge(ownerBlob, regen*2, true))
+	if (!removeCharge(ownerBlob, regen, true))
 	{
 		this.server_Die();
 	}
@@ -124,7 +124,9 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 			return 0;
 		}
 
-		if (!removeCharge(ownerBlob, damage*5, true))
+		finalDamage = damage*5;
+
+		if (!removeCharge(ownerBlob, finalDamage, true))
 		{
 			this.server_Die();
 		}

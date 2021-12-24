@@ -17,13 +17,13 @@ namespace MartyrParams
 	const ::f32 ship_drag = 0.2f; // air drag
 	const ::f32 max_speed = 5.0f; // 0 = infinite speed
 	//gun general
-	const ::u32 firing_rate = 4; // ticks per shot, won't fire if 0
+	const ::u32 firing_rate = 5; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 0; // degrees
 	const ::s32 firing_cost = 6; // charge cost
-	const ::f32 shot_speed = 18.0f; // pixels per tick, 0 = instant
-	const ::f32 shot_lifetime = 1.3f; // float, seconds
+	const ::f32 shot_speed = 18.0f; // pixels per tick, won't fire if 0
+	const ::f32 shot_lifetime = 1.1f; // float, seconds
 }
 
 namespace BalthazarParams
@@ -41,7 +41,7 @@ namespace BalthazarParams
 	const ::f32 ship_drag = 0.2f; // air drag
 	const ::f32 max_speed = 4.0f; // 0 = infinite speed
 	//gun general
-	const ::u32 firing_rate = 8; // ticks per shot, won't fire if 0
+	const ::u32 firing_rate = 9; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 2; // degrees

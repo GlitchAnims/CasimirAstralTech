@@ -194,7 +194,7 @@ void onTick( CBlob@ this )
 			CBitStream params;
 			params.write_u16(this.getNetworkID()); //ownerID
 			params.write_u8(5); //shot type, see SpaceshipGlobal.as
-			params.write_f32(1.2f); //shot lifetime
+			params.write_f32(1.5f); //shot lifetime
 			params.write_s32(m2ChargeCost); //charge drain
 
 			uint bulletCount = ship.firing_burst;

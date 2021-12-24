@@ -5,7 +5,7 @@
 namespace FighterParams
 {
 	//charge
-	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
+	const ::f32 CHARGE_START = 0.1f; //percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 150; //max charge amount
 	const ::s32 CHARGE_REGEN = 1; //amount per regen
 	const ::s32 CHARGE_RATE = 20; //ticks per regen
@@ -29,8 +29,8 @@ namespace FighterParams
 namespace InterceptorParams
 {
 	//charge
-	const ::f32 CHARGE_START = 0.2f; //percentage charge to start with (0.0f - 1.0f)
-	const ::s32 CHARGE_MAX = 270; //max charge amount
+	const ::f32 CHARGE_START = 0.1f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 220; //max charge amount
 	const ::s32 CHARGE_REGEN = 0; //amount per regen
 	const ::s32 CHARGE_RATE = 0; //ticks per regen
 	// ship general
@@ -56,7 +56,7 @@ namespace BomberParams
 	const ::f32 CHARGE_START = 0.0f; //percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 200; //max charge amount
 	const ::s32 CHARGE_REGEN = 1; //amount per regen
-	const ::s32 CHARGE_RATE = 20; //ticks per regen
+	const ::s32 CHARGE_RATE = 120; //ticks per regen
 	// ship general
 	const ::f32 main_engine_force = 0.1f;
 	const ::f32 secondary_engine_force = 0.07f;
@@ -69,15 +69,15 @@ namespace BomberParams
 	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 0; // ticks before first shot
 	const ::u32 firing_spread = 0; // degrees
-	const ::s32 firing_cost = 4; // charge cost
+	const ::s32 firing_cost = 5; // charge cost
 	const ::f32 shot_speed = 12.0f; // pixels per tick, 0 = instant
-	const ::f32 shot_lifetime = 1.3f; // float, seconds
+	const ::f32 shot_lifetime = 1.0f; // float, seconds
 }
 
 namespace ScoutParams
 {
 	//charge
-	const ::f32 CHARGE_START = 0.5f; //percentage charge to start with (0.0f - 1.0f)
+	const ::f32 CHARGE_START = 0.1f; //percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 300; //max charge amount
 	const ::s32 CHARGE_REGEN = 3; //amount per regen
 	const ::s32 CHARGE_RATE = 20; //ticks per regen

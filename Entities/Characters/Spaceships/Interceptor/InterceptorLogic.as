@@ -191,7 +191,7 @@ void onTick( CBlob@ this )
 		Vec2f aimNorm = aimVec;
 		aimNorm.Normalize();
 		
-		this.setVelocity(thisVel + (aimNorm*1.0f));
+		this.setVelocity(thisVel + (aimNorm*1.5f));
 
 		if (!this.get_bool("grav_bubble"))
 		{
