@@ -19,77 +19,9 @@ void onInit(CBlob@ this)
 	this.set_f32("throw ourvel scale", 1.0f);
 }
 
-bool ActivateBlob(CBlob@ this, CBlob@ blob, Vec2f pos, Vec2f vector, Vec2f vel)
-{
-	bool shouldthrow = true;
-	bool done = false;
-
-	if (!blob.hasTag("activated") || blob.hasTag("dont deactivate"))
-	{
-		string carriedname = blob.getName();
-		string[]@ names;
-
-		if (this.get("names to activate", @names))
-		{
-			for (uint step = 0; step < names.length; ++step)
-			{
-				if (names[step] == carriedname)
-				{
-					//if compatible
-					if (getNet().isServer() && blob.hasTag("activatable"))
-					{
-						blob.SendCommand(blob.getCommandID("activate"));
-					}
-
-					blob.Tag("activated");//just in case
-					shouldthrow = false;
-					this.Tag(blob.getName() + " done activate");
-
-					// move ouit of inventory if its the case
-					if (blob.isInInventory())
-					{
-						this.server_Pickup(blob);
-					}
-					done = true;
-				}
-			}
-		}
-	}
-
-	//throw it if it's already lit or we cant light it
-	if (getNet().isServer() && !blob.hasTag("custom throw") && shouldthrow && this.getCarriedBlob() is blob)
-	{
-		DoThrow(this, blob, pos, vector, vel);
-		done = true;
-	}
-
-	return done;
-}
-
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
-	if (cmd == this.getCommandID("activate/throw"))
-	{
-		Vec2f pos = params.read_Vec2f();
-		Vec2f vector = params.read_Vec2f();
-		Vec2f vel = params.read_Vec2f();
-		CBlob @carried = this.getCarriedBlob();
-		if (carried !is null)
-		{
-			ActivateBlob(this, carried, pos, vector, vel);
-		}
-		else // search in inv
-		{
-			CInventory@ inv = this.getInventory();
-			for (int i = 0; i < inv.getItemsCount(); i++)
-			{
-				CBlob @blob = inv.getItem(i);
-				if (ActivateBlob(this, blob, pos, vector, vel))
-					return;
-			}
-		}
-	}
-	else if (cmd == this.getCommandID("throw"))
+	if (cmd == this.getCommandID("throw"))
 	{
 		Vec2f pos = params.read_Vec2f();
 		Vec2f vector = params.read_Vec2f();
@@ -148,16 +80,22 @@ void DoThrow(CBlob@ this, CBlob@ carried, Vec2f pos, Vec2f vector, Vec2f selfVel
 
 Vec2f getThrowVelocity(CBlob@ this, Vec2f vector, Vec2f selfVelocity, f32 this_vel_affect = 0.1f)
 {
-	Vec2f vel = vector;
-	f32 len = vel.Normalize();
-	vel *= DEFAULT_THROW_VEL;
-	vel *= this.get_f32("throw scale");
-	vel += selfVelocity * this_vel_affect; // blob velocity
+	const f32 minThrowDist = 8.0f;
+	const f32 maxThrowDist = minThrowDist + 32.0f;
+	Vec2f aimVec = vector;
+	f32 aimLength = Maths::Min(aimVec.getLength(), maxThrowDist);
 
-	f32 closeDist = this.getRadius() + 64.0f;
-	if (selfVelocity.getLengthSquared() < 0.1f && len < closeDist)
-	{
-		vel *= len / closeDist;
+	Vec2f aimNorm = aimVec;
+	aimNorm.Normalize();
+
+	if (aimLength > minThrowDist)
+	{ 
+		aimLength -= minThrowDist;
 	}
-	return vel;
+
+	f32 throwSpeed = (aimLength / maxThrowDist) * DEFAULT_THROW_VEL;
+	Vec2f throwVel = aimNorm * throwSpeed;
+	throwVel += selfVelocity; //adds owner velocity
+
+	return throwVel;
 }
