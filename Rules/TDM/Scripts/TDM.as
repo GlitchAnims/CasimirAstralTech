@@ -769,6 +769,24 @@ shared class TDMCore : RulesCore
 
 			rules.SetTeamWon(winteamIndex);   //game over!
 			rules.SetCurrentState(GAME_OVER);
+			string teamName = "";
+			switch (winteamIndex) //return a team name
+			{
+				case 0: teamName = "Blue";
+				break;
+
+				case 1: teamName = "Red";
+				break;
+
+				case 2: teamName = "Green";
+				break;
+
+				case 3: teamName = "Purple";
+				break;
+
+				default: teamName = "blank";
+			}
+			rules.SetGlobalMessage(teamName +" team wins the game!");
 		}
 	}
 

@@ -124,7 +124,7 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 			return 0;
 		}
 
-		finalDamage = damage*5;
+		u32 finalDamage = damage*5;
 
 		if (!removeCharge(ownerBlob, finalDamage, true))
 		{
