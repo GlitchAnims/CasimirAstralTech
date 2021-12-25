@@ -1,5 +1,7 @@
 #include "TeamColour.as"
 
+const f32 simplePi = 3.1415f;
+
 Random _sprk_r2(12432);
 void makeManaDrainParticles( Vec2f pPos, int amount )
 {
@@ -177,4 +179,55 @@ SColor getTeamColorWW( int teamNum = -1, SColor color = SColor(255, 255, 0, 0) )
 		}
     
     return color;
+}
+
+void drawParticleLine( Vec2f pos1 = Vec2f_zero, Vec2f pos2 = Vec2f_zero, Vec2f pVel = Vec2f_zero, SColor color = SColor(255, 255, 255, 255), u8 timeout = 0, f32 pixelStagger = 1.0f)
+{
+	Vec2f lineVec = pos2 - pos1;
+	Vec2f lineNorm = lineVec;
+	lineNorm.Normalize();
+
+	f32 lineLength = lineVec.getLength();
+
+	for(f32 i = 0; i < lineLength; i += pixelStagger) 
+	{
+		Vec2f pPos = (lineNorm * i) + pos1;
+
+		CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 7;
+			p.timeout = timeout;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
+}
+
+void drawParticleCircle( Vec2f circlePos = Vec2f_zero, f32 radius = 0, Vec2f pVel = Vec2f_zero, SColor color = SColor(255, 255, 255, 255), u8 timeout = 0, f32 pixelStagger = 1.0f)
+{
+	radius = Maths::Max(radius, 4.0f);
+
+	f32 circumference = (radius*2) * simplePi;
+	f32 degreesPerStep = 360.0f / circumference;
+
+	for(f32 i = 0; i < circumference; i += pixelStagger) 
+	{
+		Vec2f circleDeviation = Vec2f(1.0f, 0) * radius;
+		circleDeviation.RotateByDegrees(degreesPerStep*i);
+		Vec2f pPos = circleDeviation + circlePos;
+
+		CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 7;
+			p.timeout = timeout;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
 }

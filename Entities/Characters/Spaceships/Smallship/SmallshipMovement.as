@@ -67,14 +67,13 @@ void onTick(CMovement@ this)
 
 	Vec2f aimPos = thisBlob.getAimPos();
 	Vec2f aimVec = aimPos - pos;
-	f32 aimAngle = aimVec.getAngleDegrees();
-	aimAngle *= -1.0f;
+	f32 aimAngle = -aimVec.getAngleDegrees();
 
 	if (blobAngle != aimAngle) //aiming logic
 	{
 		f32 turnSpeed = ship.ship_turn_speed * moveVars.turnSpeedFactor; //multiplier for turn speed
 
-		f32 angleDiff = blobAngle - aimAngle;
+		f32 angleDiff = Maths::Abs(blobAngle - aimAngle);
 		angleDiff = (angleDiff + 180) % 360 - 180;
 
 		if (turnSpeed <= 0 || (angleDiff < turnSpeed && angleDiff > -turnSpeed)) //if turn difference is smaller than turn speed, snap to it
@@ -84,7 +83,6 @@ void onTick(CMovement@ this)
 		else
 		{
 			f32 turnAngle = angleDiff > 0 ? -turnSpeed : turnSpeed; //either left or right turn
-			thisBlob.setAngleDegrees(blobAngle + turnAngle);
 			thisBlob.setAngleDegrees(blobAngle + turnAngle);
 		}
 		blobAngle = thisBlob.getAngleDegrees();
