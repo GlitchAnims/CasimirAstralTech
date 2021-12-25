@@ -53,14 +53,15 @@ void onTick(CBlob@ this)
 		}
 	}
 
+	
 	CBlob@ ownerBlob = this.getInventoryBlob();
-	if (ownerBlob == null || ownerBlob.hasTag("dead"))
+	if (ownerBlob == null || !ownerBlob.hasTag(smallTag))
 	{ return; }
 
-	if (isServer() && gameTime % 15 == 0)
+	/*if (isServer() && gameTime % 15 == 0)
 	{
 		removeCharge(ownerBlob, 1, true);
-	}
+	}*/
 
 	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
@@ -76,33 +77,34 @@ void onTick(CBlob@ this)
 	if (ownerPlayer == null)
 	{ return; }
 	int playerPing = ownerPlayer.getPing();
+	u32 pingTicks = (float(playerPing) / 1000.0f) * getTicksASecond();
 
-	ComputerTargetInfo compInfo;
+	/*ComputerTargetInfo compInfo;
 	compInfo.current_pos = ownerBlob.getPosition(); //this tick position
 	compInfo.last_pos = ownerBlob.getOldPosition(); //last tick position
 	compInfo.current_vel = ownerBlob.getVelocity(); //this tick velocity
 	compInfo.last_vel = ownerBlob.getOldVelocity(); //last tick velocity
 
-	u32 pingTicks = (float(playerPing) / 1000.0f) * getTicksASecond();
+	
 	u8 gameTimeCast = gameTime;
 	u8 varID = gameTimeCast + pingTicks;
 	string varName = "ownerInfo" + varID;
 	this.set(varName, compInfo);
 
 	if (!this.get( "ownerInfo"+gameTimeCast, @compInfo )) 
-	{ return; }
+	{ return; }*/
 
-	Vec2f ownerPos = compInfo.current_pos;
-	Vec2f ownerVel = compInfo.current_vel;
+	Vec2f ownerPos = ownerBlob.getPosition();
+	Vec2f ownerVel = ownerBlob.getVelocity();
 	f32 shotSpeed = ship.shot_speed;
 	f32 ownerAngle = ownerBlob.getAngleDegrees();
 	ownerAngle = Maths::Abs(ownerAngle) % 360;
 	int teamNum = ownerBlob.getTeamNum();
 	
-	Vec2f aimVec = Vec2f(256.0f, 0);
+	Vec2f aimVec = Vec2f(300.0f, 0);
 	aimVec.RotateByDegrees(ownerAngle); //owner aim vector
 	makeBlobTriangle(ownerPos, ownerAngle, Vec2f(8.0f, 6.0f)); //owner triangle
-	drawParticleLine( ownerPos, aimVec + ownerPos, Vec2f_zero, greenConsoleColor, 0, shotSpeed); //owner aim line
+	drawParticleLine( ownerPos, aimVec + ownerPos, Vec2f_zero, greenConsoleColor, 0, shotSpeed/2); //owner aim line
 
 	CBlob@[] smallships;
 	getBlobsByTag(smallTag, @smallships);
@@ -125,22 +127,18 @@ void onTick(CBlob@ this)
 		f32 targetDist = targetVec.getLength();
 		if (targetDist > 512) //too far away, don't continue rendering
 		{ continue; }
+
 		f32 travelTicks = targetDist / shotSpeed;
-
 		Vec2f futureTargetPos = bPos + (bVel*travelTicks);
+		
 		targetVec = futureTargetPos - ownerPos;
-		f32 leadPipAngle = -targetVec.getAngleDegrees();
+		targetDist = targetVec.getLength();
+		travelTicks = targetDist / shotSpeed;
+		futureTargetPos = bPos + (bVel*travelTicks);
 
-		f32 angleDiff = Maths::Abs(leadPipAngle - ownerAngle);
-		angleDiff = (angleDiff + 180) % 360 - 180;
-		SColor color = greenConsoleColor;
-		if (angleDiff < 1.5f && angleDiff > -1.5f)
-		{
-			color = SColor(255, 255, 50, 50);
-		}
 		makeBlobTriangle(bPos, bAngle, Vec2f(8.0f, 6.0f)); //enemy triangle
-		drawParticleLine( bPos, futureTargetPos, Vec2f_zero, color, 0, 3.0f);
-		drawParticleCircle( futureTargetPos, 8.0f, Vec2f_zero, color, 0, 4.0f);
+		drawParticleLine( bPos, futureTargetPos, Vec2f_zero, greenConsoleColor, 0, 3.0f);
+		drawParticleCircle( futureTargetPos, 8.0f, Vec2f_zero, greenConsoleColor, 0, 4.0f);
 	}
 
 	/*
