@@ -99,7 +99,10 @@ void onTick(CBlob@ this)
 	ownerAngle = Maths::Abs(ownerAngle) % 360;
 	int teamNum = ownerBlob.getTeamNum();
 	
-	makeBlobTriangle(ownerPos, ownerAngle, Vec2f(8.0f, 6.0f));
+	Vec2f aimVec = Vec2f(256.0f, 0);
+	aimVec.RotateByDegrees(ownerAngle); //owner aim vector
+	makeBlobTriangle(ownerPos, ownerAngle, Vec2f(8.0f, 6.0f)); //owner triangle
+	drawParticleLine( ownerPos, aimVec + ownerPos, Vec2f_zero, greenConsoleColor, 0, shotSpeed); //owner aim line
 
 	CBlob@[] smallships;
 	getBlobsByTag(smallTag, @smallships);
