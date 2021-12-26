@@ -120,13 +120,35 @@ void onTick(CBlob@ this)
 		Vec2f bPos = b.getPosition();
 		Vec2f bVel = b.getVelocity() - ownerVel;
 		bPos += bVel * playerPing;
-		f32 bAngle = b.getAngleDegrees();
-		//f32 bSpeed = bVel.getLength();
 
 		Vec2f targetVec = bPos - ownerPos;
 		f32 targetDist = targetVec.getLength();
 		if (targetDist > 512) //too far away, don't continue rendering
 		{ continue; }
+
+		/*f32 targetVecAngle = targetVec.getAngleDegrees() + 360;
+		print ("targetVecAngle: "+targetVecAngle);
+		f32 bVelAngle = (bVel.getAngleDegrees() + 180) % 360;
+		print ("bVelAngle: "+bVelAngle);
+		f32 pivotAngle = Maths::Abs(targetVecAngle - bVelAngle) % 360;
+		//pivotAngle = (pivotAngle + 180) % 360 - 180; 				// a
+		print ("pivotAngle: "+pivotAngle);
+
+		f32 a_b = bVel.getLength(); 								// a_b
+		f32 b_c = a_b * Maths::Sin(-pivotAngle * radianConversion); 	// b_c
+
+		f32 a_c = Maths::Pow(a_b, 2) - Maths::Pow(b_c, 2);			// a_c
+		a_c = Maths::Sqrt(a_c);
+
+		f32 c_d = Maths::Pow(shotSpeed, 2) - Maths::Pow(b_c, 2); 	//c_d
+		c_d = Maths::Sqrt(c_d);
+
+		f32 finalAngle = Maths::ASin(b_c / shotSpeed); 				//finalAngle
+		finalAngle /= radianConversion;
+
+		Vec2f predictionVec = Vec2f(400.0, 0).RotateByDegrees(finalAngle-targetVecAngle);
+		predictionVec += ownerPos;
+		drawParticleLine( ownerPos, predictionVec, Vec2f_zero, greenConsoleColor, 0, 4.0f);*/
 
 		f32 travelTicks = targetDist / shotSpeed;
 		Vec2f futureTargetPos = bPos + (bVel*travelTicks);
@@ -136,8 +158,9 @@ void onTick(CBlob@ this)
 		travelTicks = targetDist / shotSpeed;
 		futureTargetPos = bPos + (bVel*travelTicks);
 
+		f32 bAngle = b.getAngleDegrees();
 		makeBlobTriangle(bPos, bAngle, Vec2f(8.0f, 6.0f)); //enemy triangle
-		drawParticleLine( bPos, futureTargetPos, Vec2f_zero, greenConsoleColor, 0, 3.0f);
+		drawParticleLine( bPos, futureTargetPos, Vec2f_zero, greenConsoleColor, 0, 3.0f); //primary pip
 		drawParticleCircle( futureTargetPos, 8.0f, Vec2f_zero, greenConsoleColor, 0, 4.0f);
 	}
 
