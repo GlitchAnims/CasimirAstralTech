@@ -14,6 +14,10 @@ void onInit(CBlob@ this)
 {
 	this.CreateRespawnPoint("ruins", Vec2f(0.0f, 16.0f));
 	AddIconToken("$change_class$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 12, 2);
+
+	AddIconToken("$ballistics_calc$", "BallisticsCalculator.png", Vec2f(16, 8), 0);
+	AddIconToken("$nav_comp$", "NavComp.png", Vec2f(16, 8), 0);
+
 	//TDM classes
 	//addPlayerClass(this, "Knight", "$knight_class_icon$", "knight", "Hack and Slash.");
 	//addPlayerClass(this, "Archer", "$archer_class_icon$", "archer", "The Ranged Advantage.");

@@ -169,7 +169,7 @@ shared class TDMSpawns : RespawnSystem
 		CBlob@[] spawns;
 		CBlob@[] teamspawns;
 
-		if (getBlobsByName("tdm_spawn", @spawns))
+		if (getBlobsByName("team_station", @spawns))
 		{
 			for (uint step = 0; step < spawns.length; ++step)
 			{
@@ -522,7 +522,7 @@ shared class TDMCore : RulesCore
 
 	void SetupBases()
 	{
-		const string base_name = "tdm_spawn";
+		const string base_name = "team_station";
 		// destroy all previous spawns if present
 		CBlob@[] oldBases;
 		getBlobsByName(base_name, @oldBases);
