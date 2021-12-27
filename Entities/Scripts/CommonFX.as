@@ -5,6 +5,7 @@ const f32 radianConversion = (Maths::Pi/180);
 
 const SColor greenConsoleColor = SColor(200, 0, 255, 0);
 const SColor redConsoleColor = SColor(200, 255, 20, 20);
+const SColor yellowConsoleColor = SColor(200, 255, 255, 0);
 
 Random _sprk_r2(12432);
 void makeManaDrainParticles( Vec2f pPos, int amount )
@@ -224,6 +225,44 @@ void drawParticleCircle( Vec2f circlePos = Vec2f_zero, f32 radius = 0, Vec2f pVe
 		Vec2f pPos = circleDeviation + circlePos;
 
 		CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 7;
+			p.timeout = timeout;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
+}
+void drawParticlePartialCircle( Vec2f circlePos = Vec2f_zero, f32 radius = 0, f32 percentage = 1.0f, f32 angle = 0.0f, SColor color = SColor(255, 255, 255, 255), u8 timeout = 0, f32 pixelStagger = 1.0f)
+{
+	if (percentage == 0 || percentage > 1 || percentage < -1)
+	{
+		print ("invalid circle percentage");
+		return;
+	}
+
+	radius = Maths::Max(radius, 4.0f);
+
+	f32 circumference = (radius*2) * simplePi;
+	f32 degreesPerStep = 360.0f / circumference;
+
+	if (percentage < 0) //invert
+	{
+		degreesPerStep *= -1.0f;
+	}
+
+	f32 totalCircumference = circumference * Maths::Abs(percentage);
+
+	for(f32 i = 0; i < totalCircumference; i += pixelStagger) 
+	{
+		Vec2f circleDeviation = Vec2f(radius, 0);
+		circleDeviation.RotateByDegrees((degreesPerStep*i) + angle);
+		Vec2f pPos = circleDeviation + circlePos;
+
+		CParticle@ p = ParticlePixelUnlimited(pPos, Vec2f_zero, color, true);
 		if(p !is null)
 		{
 			p.collides = false;

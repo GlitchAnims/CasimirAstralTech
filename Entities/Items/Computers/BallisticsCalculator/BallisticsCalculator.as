@@ -58,10 +58,10 @@ void onTick(CBlob@ this)
 	if (ownerBlob == null || !ownerBlob.hasTag(smallTag))
 	{ return; }
 
-	/*if (isServer() && gameTime % 15 == 0)
+	if (isServer() && gameTime % 45 == 0)
 	{
 		removeCharge(ownerBlob, 1, true);
-	}*/
+	}
 
 	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
