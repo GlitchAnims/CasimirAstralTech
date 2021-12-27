@@ -52,6 +52,12 @@ string getBulletName(u8 shotType = 0)
 			blobName = "railgun_shot";
 		}
 		break;
+
+		case 6:
+		{
+			blobName = "missile_aa";
+		}
+		break;
 		default: return blobName;
 	}
     return blobName;

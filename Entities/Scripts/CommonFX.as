@@ -1,6 +1,10 @@
 #include "TeamColour.as"
 
 const f32 simplePi = 3.1415f;
+const f32 radianConversion = (Maths::Pi/180);
+
+const SColor greenConsoleColor = SColor(200, 0, 255, 0);
+const SColor redConsoleColor = SColor(200, 255, 20, 20);
 
 Random _sprk_r2(12432);
 void makeManaDrainParticles( Vec2f pPos, int amount )

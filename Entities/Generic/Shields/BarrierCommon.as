@@ -5,13 +5,13 @@ bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel
 	if (barrier == null || barrier.hasTag("dead") || !barrier.get_bool("active") || thisPos == Vec2f_zero)
 	{ return true; }
 
-	Vec2f blobPos = barrier.getPosition();
-	f32 blobRadius = barrier.getRadius();
+	Vec2f barrierPos = barrier.getPosition();
+	f32 barrierRadius = barrier.getRadius();
 
-	Vec2f dir = blobPos - thisPos;
+	Vec2f dir = barrierPos - thisPos;
 
 	f32 distanceFromCenter = dir.Length();
-	distanceFromCenter /= blobRadius;
+	distanceFromCenter /= barrierRadius;
 	
 	if (distanceFromCenter < 0.9f)
 	{ return true;}

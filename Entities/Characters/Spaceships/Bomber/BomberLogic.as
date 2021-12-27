@@ -162,6 +162,37 @@ void onTick( CBlob@ this )
 		}
 	}
 
+	if (pressed_m2 && m2Time >= ship.firing_delay)
+	{
+		if (m2ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
+		{
+			CBitStream params;
+			params.write_u16(this.getNetworkID()); //ownerID
+			params.write_u8(6); //shot type
+			params.write_f32(30.0); //shot lifetime
+			params.write_s32(12); //charge drain
+
+			uint bulletCount = 1;
+			for (uint i = 0; i < bulletCount; i ++)
+			{
+				Vec2f firePos = Vec2f(6.0f, 0); //barrel pos
+				firePos.RotateByDegrees(blobAngle);
+				firePos += thisPos; //fire pos
+
+				Vec2f fireVec = Vec2f(1.0f,0) * 4.0f; 
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _bomber_logic_r.NextFloat()) ); //shot spread
+				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
+				fireVec += thisVel; //adds ship speed
+
+				params.write_Vec2f(firePos); //shot position
+				params.write_Vec2f(fireVec); //shot velocity
+			}
+			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
+
+			m2ShotTicks = 0;
+		}
+	}
+
 	if (pressed_m1)
 	{ m1Time++; }
 	else { m1Time = 0; }
@@ -173,7 +204,7 @@ void onTick( CBlob@ this )
 	this.set_u32( "m2_heldTime", m2Time );
 
 	m1ShotTicks++;
-	//m2ShotTicks++;
+	m2ShotTicks++;
 	this.set_u32( "m1_shotTime", m1ShotTicks );
 	this.set_u32( "m2_shotTime", m2ShotTicks );
 

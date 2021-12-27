@@ -26,9 +26,7 @@ class ComputerTargetInfo
 	}
 }
 
-const SColor greenConsoleColor = SColor(200, 0, 255, 0);
-
-void makeBlobTriangle( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f scale = Vec2f(1.0f, 1.0f) )
+void makeBlobTriangle( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f scale = Vec2f(1.0f, 1.0f), f32 particleStepDistance = 2.0f, SColor color = greenConsoleColor )
 {
 	if (blobPos == Vec2f_zero)
 	{ return; }
@@ -54,11 +52,48 @@ void makeBlobTriangle( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f s
 		Vec2f pos1 = vertexPos[i];
 		Vec2f pos2 = vertexPos[i+1];
 
-		drawParticleLine( pos1, pos2, Vec2f_zero, greenConsoleColor, 0, 2.0f);
+		drawParticleLine( pos1, pos2, Vec2f_zero, color, 0, particleStepDistance);
 	}
 	
 }
 
+void makeTargetSquare( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f scale = Vec2f(1.0f, 1.0f), f32 cornerSeparation = 1.0f, f32 particleStepDistance = 2.0f, SColor color = greenConsoleColor)
+{
+	if (blobPos == Vec2f_zero)
+	{ return; }
+
+	Vec2f[] vertexPos =
+	{
+		Vec2f(1.0f, 0.0), 		//			O
+		Vec2f(1.0f, 1.0), 		//			|
+		Vec2f(0.0f, 1.0) 		//		O---O
+	};
+
+	for(int i = 0; i < vertexPos.length(); i++)
+	{
+		vertexPos[i].x *= scale.x;
+		vertexPos[i].y *= scale.y;
+		//vertexPos[i] += blobPos;
+	}
+
+	Vec2f separationVec = Vec2f(cornerSeparation, cornerSeparation);
+	for(u8 corner = 0; corner < 4; corner++) //4 corners
+	{
+		for(uint vertex = 0; vertex < (vertexPos.length() - 1); vertex++) 
+		{
+			Vec2f pos1 = vertexPos[vertex];
+			Vec2f pos2 = vertexPos[vertex+1];
+
+			pos1 += separationVec;
+			pos2 += separationVec;
+
+			pos1.RotateByDegrees((90*corner) + blobAngle);
+			pos2.RotateByDegrees((90*corner) + blobAngle);
+
+			drawParticleLine( pos1 + blobPos, pos2 + blobPos, Vec2f_zero, color, 0, particleStepDistance);
+		}
+	}
+}
 
 
 
