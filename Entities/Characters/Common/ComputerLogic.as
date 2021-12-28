@@ -5,22 +5,20 @@
 #include "ComputerCommon.as"
 #include "CommonFX.as"
 
-const f32 secondsBeforeDeath = 5.0f;
-const f32 rotationRingRadius = 40.0f;
+#include "NavComp.as"
+#include "BallisticsCalculator.as"
 
 void onInit(CBlob@ this)
 {
-	CShape@ shape = this.getShape();
-	if (shape != null)
+	//setup all calcs to false
+	this.set_bool(hasNavCompString, false);
+	this.set_bool(hasBallisticsString, false);
+	this.set_bool(hasTargetingString, false);
+
+	if (this.isMyPlayer())
 	{
-		shape.getConsts().mapCollisions = true;
-		shape.SetGravityScale(0.0f);
+
 	}
-
-	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
-	this.set_u32("time_of_death", getGameTime() + (secondsBeforeDeath * getTicksASecond()));
-
-	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
 	/*
 	ComputerTargetInfo compInfo;
 	compInfo.current_pos = Vec2f_zero; //this tick position
@@ -40,78 +38,55 @@ void onTick(CBlob@ this)
 {
 	u32 gameTime = getGameTime();
 	u32 ticksASecond = getTicksASecond();
-
-	if (isServer())
-	{
-		if (!this.isInInventory() && !this.isAttached())
-		{
-			if (gameTime >= this.get_u32("time_of_death"))
-			{
-				this.server_Die();
-			}
-			return;
-		}
-		else
-		{
-			this.set_u32("time_of_death", getGameTime() + (secondsBeforeDeath * getTicksASecond()));
-		}
-	}
-
+	u16 thisNetID = this.getNetworkID();
 	
-	CBlob@ ownerBlob = this.getInventoryBlob();
-	if (ownerBlob == null)
-	{ return; }
-
-	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
-	{ return; }
-
-	if (ownerBlob.get_s32(absoluteCharge_string) <= 0) //no charge? fucked.
-	{ return; }
-
-	CPlayer@ ownerPlayer = ownerBlob.getPlayer();
-	if (ownerPlayer == null)
-	{ return; }
-	int playerPing = ownerPlayer.getPing();
-	u32 pingTicks = (float(playerPing) / 1000.0f) * ticksASecond;
-
-	int teamNum = ownerBlob.getTeamNum();
-	
-	if (ownerBlob.hasTag(smallTag)) 
-	{ 
-		smallshipNavigation( this, ownerBlob, ticksASecond, true );
-	}
-	else if (ownerBlob.hasTag(mediumTag))
+	if ( (gameTime+thisNetID) % 30 == 0)
 	{
-		mediumshipNavigation( this, ownerBlob, ticksASecond, true );
+		updateInventoryCPU( this );
 	}
 
-	CBlob@[] hulls;
-	getBlobsByTag("hull", @hulls);
-	for(uint i = 0; i < hulls.length(); i++)
+	if (this.get_s32(absoluteCharge_string) <= 0) //no charge? fucked.
+	{ return; }
+
+	const bool hasNavComp = this.get_bool(hasNavCompString);
+	const bool hasBallistics = this.get_bool(hasBallisticsString);
+	const bool hasTargeting = this.get_bool(hasTargetingString);
+
+	if (!hasNavComp && !hasBallistics && !hasTargeting)
+	{ return; }
+
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+	int teamNum = this.getTeamNum();
+	f32 blobAngle = this.getAngleDegrees();
+	blobAngle = Maths::Abs(blobAngle) % 360;
+
+	ComputerBlobInfo ownerInfo;
+	ownerInfo.current_pos = thisPos;
+	ownerInfo.current_vel = thisVel;
+	ownerInfo.team_num = teamNum;
+	ownerInfo.blob_angle = blobAngle;
+
+	if (hasNavComp)
 	{
-		CBlob@ b = hulls[i];
-		if (b == null || b is ownerBlob)
-		{ continue; }
-
-		f32 targetDist = b.getDistanceTo(ownerBlob);
-		if (targetDist > 512) //too far away, don't continue rendering
-		{ continue; }
-
-		SColor color = greenConsoleColor;
-		if (b.getTeamNum() != teamNum)
-		{ 
-			color = yellowConsoleColor; //yellow for enemies
-		}
-
-		if (b.hasTag(smallTag))
-		{
-			smallshipNavigation( this, b, ticksASecond, false, color );
-		}
-		else if (b.hasTag(mediumTag))
-		{
-			mediumshipNavigation( this, b, ticksASecond, false, color );
-		}
+		runNavigation( this, gameTime, ticksASecond, thisNetID, ownerInfo );
 	}
+	if (hasBallistics)
+	{
+		runBallistics( this, gameTime, ticksASecond, thisNetID, ownerInfo );
+	}
+	if (hasTargeting)
+	{
+		//runTargeting( this, gameTime, ticksASecond, thisNetID, ownerInfo );
+		//TODO
+	}
+
+	if (!this.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
+	{ return; }
+
+	Vec2f aimVec = Vec2f(300.0f, 0);
+	aimVec.RotateByDegrees(blobAngle); //aim vector
+	drawParticleLine( thisPos, aimVec + thisPos, Vec2f_zero, greenConsoleColor, 0, 15.0f); //ship aim line
 
 	/*ComputerTargetInfo compInfo;
 	compInfo.current_pos = ownerBlob.getPosition(); //this tick position
@@ -150,252 +125,83 @@ void onTick(CBlob@ this)
 	
 }
 
-void smallshipNavigation( CBlob@ navComp, CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor )
+void runNavigation( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNetID, ComputerBlobInfo@ ownerInfo )
 {
-	SmallshipInfo@ ship;
-	if (!hullBlob.get( "shipInfo", @ship )) 
+	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
 
-	Vec2f hullPos = hullBlob.getPosition();
-	Vec2f hullVel = hullBlob.getVelocity();
-	f32 hullAngle = hullBlob.getAngleDegrees();
-	hullAngle = Maths::Abs(hullAngle) % 360;
+	const int teamNum = ownerInfo.team_num;
 
-	if (isTrueOwner) //laser sight for owner, small indicator line for everyone else
+	CBlob@[] hulls;
+	getBlobsByTag("hull", @hulls);
+	for(uint i = 0; i < hulls.length(); i++)
 	{
-		Vec2f aimVec = Vec2f(300.0f, 0);
-		aimVec.RotateByDegrees(hullAngle); //aim vector
-		f32 shotSpeed = ship.shot_speed;
-		drawParticleLine( hullPos, aimVec + hullPos, Vec2f_zero, greenConsoleColor, 0, shotSpeed/2); //owner aim line
-	}
-	else
-	{
-		Vec2f aimVec = Vec2f(60.0f, 0);
-		aimVec.RotateByDegrees(hullAngle); //aim vector
-		drawParticleLine( hullPos, aimVec + hullPos, Vec2f_zero, color, 0, 3.0f); //others aim line
-	}
-	
+		CBlob@ b = hulls[i];
+		if (b == null)
+		{ continue; }
 
-	Vec2f travelVec = hullVel * getTicksASecond(); //gets a full second of travel
-	f32 shipSpeed = hullVel.getLength();
-	Vec2f navPIP = travelVec + hullPos;
-	Vec2f navPIP2 = (travelVec/2) + hullPos;
+		f32 targetDist = b.getDistanceTo(ownerBlob);
+		if (targetDist > 512) //too far away, don't continue rendering
+		{ continue; }
 
-	drawParticleCircle(navPIP, 5.0f, Vec2f_zero, color, 0, 2.0f); //navigation pip
-	drawParticleLine(hullPos, navPIP, Vec2f_zero, color, 0, shipSpeed); //navigation line
-
-	//impulse calculation
-	Vec2f thrustVec = Vec2f_zero; 
-	u8 thrusterAmount = 0;
-
-	if (ship.forward_thrust)
-	{
-		Vec2f forwardAccel = Vec2f(ship.main_engine_force, 0);
-		thrustVec += forwardAccel;
-		thrusterAmount++;
-	}
-	if (ship.backward_thrust)
-	{
-		Vec2f backwardAccel = Vec2f(-ship.secondary_engine_force, 0);
-		thrustVec += backwardAccel;
-		thrusterAmount++;
-	}
-	if (ship.port_thrust)
-	{
-		Vec2f portAccel = Vec2f(0, -ship.rcs_force);
-		thrustVec += portAccel;
-		thrusterAmount++;
-	}
-	if (ship.starboard_thrust)
-	{
-		Vec2f starboardAccel = Vec2f(0, ship.rcs_force);
-		thrustVec += starboardAccel;
-		thrusterAmount++;
-	}
-
-	if (thrusterAmount == 0) //no keys pressed, no calcs
-	{ return; }
-
-	thrustVec /= thrusterAmount; //divide by thrusters active
-	thrustVec.RotateByDegrees(hullAngle); //rotate to match ship rotation
-	thrustVec *= ticksASecond * 5; //gets a full second of thrust
-
-	Vec2f thrustPIP = thrustVec + hullPos;
-
-	makeBlobTriangle(thrustPIP, -thrustVec.getAngleDegrees(), Vec2f(4.0f, 3.0f), 1.0f, color); //thrust triangle
-	//drawParticleLine(hullPos, thrustPIP, Vec2f_zero, color, 0, 3.0f); //thrust line
-}
-
-void mediumshipNavigation( CBlob@ navComp, CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor )
-{
-	MediumshipInfo@ ship;
-	if (!hullBlob.get( "shipInfo", @ship )) 
-	{ return; }
-
-	Vec2f hullPos = hullBlob.getPosition();
-	Vec2f hullVel = hullBlob.getVelocity();
-	f32 hullAngle = hullBlob.getAngleDegrees() + 270.0f;
-	hullAngle = Maths::Abs(hullAngle) % 360;
-
-	if (isTrueOwner) //laser sight for owner, small indicator line for everyone else
-	{
-		Vec2f aimVec = Vec2f(300.0f, 0);
-		aimVec.RotateByDegrees(hullAngle); //aim vector
-		f32 shotSpeed = ship.shot_speed;
-		drawParticleLine( hullPos, aimVec + hullPos, Vec2f_zero, greenConsoleColor, 0, shotSpeed/2); //owner aim line
-	}
-	else
-	{
-		Vec2f aimVec = Vec2f(60.0f, 0);
-		aimVec.RotateByDegrees(hullAngle); //aim vector
-		drawParticleLine( hullPos, aimVec + hullPos, Vec2f_zero, color, 0, 3.0f); //others aim line
-	}
-	
-
-	Vec2f travelVec = hullVel * getTicksASecond(); //gets a full second of travel
-	f32 shipSpeed = hullVel.getLength();
-	Vec2f navPIP = travelVec + hullPos;
-	Vec2f navPIP2 = (travelVec/2) + hullPos;
-
-	drawParticleCircle(navPIP, 5.0f, Vec2f_zero, color, 0, 2.0f); //navigation pip
-	drawParticleLine(hullPos, navPIP, Vec2f_zero, color, 0, shipSpeed); //navigation line
-
-	//impulse calculation
-	const bool isShifting = hullBlob.get_bool("shifting");
-	Vec2f thrustVec = Vec2f_zero; 
-	u8 thrusterAmount = 0;
-
-	if (ship.forward_thrust)
-	{
-		Vec2f forwardAccel = Vec2f(ship.main_engine_force, 0);
-		thrustVec += forwardAccel;
-		thrusterAmount++;
-	}
-	if (ship.backward_thrust)
-	{
-		Vec2f backwardAccel = Vec2f(-ship.secondary_engine_force, 0);
-		thrustVec += backwardAccel;
-		thrusterAmount++;
-	}
-	if (isShifting)
-	{
-		if (hullBlob.isFacingLeft())
-		{
-			if (ship.port_thrust)
-			{
-				Vec2f portAccel = Vec2f(0, -ship.rcs_force);
-				thrustVec += portAccel;
-				thrusterAmount++;
-			}
-			if (ship.starboard_thrust)
-			{
-				Vec2f starboardAccel = Vec2f(0, ship.rcs_force);
-				thrustVec += starboardAccel;
-				thrusterAmount++;
-			}
-		}
-		else
-		{
-			if (ship.port_thrust)
-			{
-				Vec2f portAccel = Vec2f(0, ship.rcs_force);
-				thrustVec += portAccel;
-				thrusterAmount++;
-			}
-			if (ship.starboard_thrust)
-			{
-				Vec2f starboardAccel = Vec2f(0, -ship.rcs_force);
-				thrustVec += starboardAccel;
-				thrusterAmount++;
-			}
-		}
-		
-	}
-	else
-	{
-		const bool portBow 			= ship.portBow_thrust;
-		const bool portQuarter 		= ship.portQuarter_thrust;
-		const bool starboardBow 	= ship.starboardBow_thrust;
-		const bool starboardQuarter = ship.starboardQuarter_thrust;
-
-		f32 leftArrowAngle = 180;
-		f32 rightArrowAngle = 0;
-		if (hullBlob.isFacingLeft())
-		{
-			leftArrowAngle = 0;
-			rightArrowAngle = 180;
+		SColor color = greenConsoleColor;
+		if (b.getTeamNum() != teamNum)
+		{ 
+			color = yellowConsoleColor; //yellow for enemies
 		}
 
-		if (portBow && starboardQuarter && !portQuarter && !starboardBow)
+		if (b.hasTag(smallTag))
 		{
-			makeBlobTriangle(hullPos + Vec2f(0, -rotationRingRadius*0.8f), rightArrowAngle, Vec2f(4.0f, 3.0f), 1.0f, color);
-			makeBlobTriangle(hullPos + Vec2f(0, rotationRingRadius*0.8f), leftArrowAngle, Vec2f(4.0f, 3.0f), 1.0f, color);
+			smallshipNavigation( b, ticksASecond, b is ownerBlob, color );
 		}
-		else if (!portBow && !starboardQuarter && portQuarter && starboardBow)
+		else if (b.hasTag(mediumTag))
 		{
-			makeBlobTriangle(hullPos + Vec2f(0, -rotationRingRadius*0.8f), leftArrowAngle, Vec2f(4.0f, 3.0f), 1.0f, color);
-			makeBlobTriangle(hullPos + Vec2f(0, rotationRingRadius*0.8f), rightArrowAngle, Vec2f(4.0f, 3.0f), 1.0f, color);
+			mediumshipNavigation( b, ticksASecond, b is ownerBlob, color );
 		}
 	}
+}
 
-	f32 hullSpinVel = hullBlob.getAngularVelocity(); //rotation speed
-	f32 maxSpinVel = ship.ship_turn_speed; //max rotation speed
-	if (hullSpinVel != 0)
+
+void runBallistics( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNetID, ComputerBlobInfo@ ownerInfo )
+{
+	if (isServer() && (gameTime+thisNetID) % 45 == 0) //remove charge one every 1.5 seconds
 	{
-		f32 spinVelPercentage = Maths::Clamp(hullSpinVel / maxSpinVel, -1.0f, 1.0f);
-		drawParticlePartialCircle(hullPos, rotationRingRadius, spinVelPercentage, 270.0f, color, 0, 2.0f);
+		removeCharge(ownerBlob, 1, true);
 	}
 
-	if (thrusterAmount == 0) //no keys pressed, no calcs
+	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
 
-	if (isShifting)
+	string ownerBlobName = ownerBlob.getName();
+	switch (ownerBlobName.getHash())
 	{
-		thrustVec /= thrusterAmount; //divide by thrusters active
+		case 0:
+		break;
+		case 1:
+		break;
+		case 2:
+		break;
+
+		default:
+		{
+			fighterBallistics( ownerBlob, ownerInfo, ticksASecond );
+		}
 	}
-	thrustVec.RotateByDegrees(hullAngle); //rotate to match ship rotation
-	thrustVec *= ticksASecond * 100; //gets a full second of thrust
-
-	Vec2f thrustPIP = thrustVec + hullPos;
-
-	makeBlobTriangle(thrustPIP, -thrustVec.getAngleDegrees(), Vec2f(5.0f, 4.0f), 1.0f, color); //thrust triangle
-	//drawParticleLine(hullPos, thrustPIP, Vec2f_zero, color, 0, 3.0f); //thrust line
 }
 
-void onCollision(CBlob@ this, CBlob@ blob, bool solid)
-{
 
+void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNetID, ComputerBlobInfo@ ownerInfo )
+{
+	//TODO
 }
 
-void onDie(CBlob@ this)
+void updateInventoryCPU( CBlob@ this )
 {
-	
-}
-
-bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
-{
-	return byBlob.hasTag("player");
-}
-
-void onThisAddToInventory(CBlob@ this, CBlob@ inventoryBlob)
-{
-	this.doTickScripts = true;
-	
-	CBlob@ ownerBlob = this.getInventoryBlob();
-	if (ownerBlob == null || ownerBlob.hasTag("dead"))
-	{ return; }
-	if (!ownerBlob.isMyPlayer())
+	CInventory@ inv = this.getInventory();
+	if (inv == null)
 	{ return; }
 
-	ComputerTargetInfo compInfo;
-	compInfo.current_pos = Vec2f_zero; //this tick position
-	compInfo.last_pos = Vec2f_zero; //last tick position
-	compInfo.current_vel = Vec2f_zero; //this tick velocity
-	compInfo.last_vel = Vec2f_zero; //last tick velocity
-
-	for(int i = 0; i < 256; i++)
-	{
-		string varName = "ownerInfo" + i;
-		this.set(varName, compInfo);
-	}
+	this.set_bool(hasNavCompString, inv.isInInventory("nav_comp", 1));
+	this.set_bool(hasBallisticsString, inv.isInInventory("ballistics_calc", 1));
+	this.set_bool(hasTargetingString, inv.isInInventory("targeting_unit", 1));
 }

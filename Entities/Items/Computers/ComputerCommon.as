@@ -3,6 +3,10 @@
 #include "SpaceshipGlobal.as"
 #include "CommonFX.as"
 
+const string hasNavCompString = "has_nav_comp";
+const string hasBallisticsString = "has_ballistics";
+const string hasTargetingString = "has_targeting";
+
 class BallisticsOwnerInfo
 {
 	ComputerTargetInfo@[] tickInfo;
@@ -23,6 +27,22 @@ class ComputerTargetInfo
 		last_pos = Vec2f_zero;
 		current_vel = Vec2f_zero;
 		last_vel = Vec2f_zero;
+	}
+}
+
+class ComputerBlobInfo
+{
+	Vec2f current_pos;
+	Vec2f current_vel;
+	int team_num;
+	f32 blob_angle;
+	
+	ComputerBlobInfo()
+	{
+		current_pos = Vec2f_zero;
+		current_vel = Vec2f_zero;
+		team_num = 0;
+		blob_angle = 0;
 	}
 }
 
