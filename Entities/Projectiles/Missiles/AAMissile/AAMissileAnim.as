@@ -1,6 +1,6 @@
 // Fighter animations
 
-#include "MissileCommon.as"
+#include "OrdinanceCommon.as"
 #include "RunnerAnimCommon.as"
 #include "RunnerCommon.as"
 #include "KnockedCommon.as"

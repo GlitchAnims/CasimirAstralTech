@@ -5,7 +5,7 @@
 #include "BarrierCommon.as"
 #include "CommonFX.as"
 #include "ComputerCommon.as"
-#include "MissileCommon.as"
+#include "OrdinanceCommon.as"
 
 Random _aa_missile_r(12231);
 
