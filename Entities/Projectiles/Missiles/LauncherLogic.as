@@ -15,9 +15,44 @@ void onInit( CBlob@ this )
 {
 
 	LauncherInfo launcher;
-	const u8[] ord = {0, 3};
-	launcher.launchableOrdinance.opAssign( ord );
+	
+	int blobHash = this.getName().getHash();
+	switch(blobHash)
+	{
+		case _bomber:
+		{
+			u8[] ord = {0, 1, 2};
+			launcher.launchableOrdinance.opAssign( ord );
+		}
+		break;
+
+		case _scout:
+		{
+			u8[] ord = {0, 1};
+			launcher.launchableOrdinance.opAssign( ord );
+		}
+		break;
+
+		case _foul:
+		{
+			u8[] ord = {0, 1, 2, 3};
+			launcher.launchableOrdinance.opAssign( ord );
+		}
+		break;
+
+		case _wanderer:
+		{
+			u8[] ord = {0, 3};
+			launcher.launchableOrdinance.opAssign( ord );
+		}
+		break;
+
+		default: break;
+	}
+	
 	this.set("launcherInfo", @launcher);
+
+	
 	
 	this.Tag("launcher");
 }
