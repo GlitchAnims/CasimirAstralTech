@@ -39,11 +39,15 @@ void onTick(CBlob@ this)
 	u32 gameTime = getGameTime();
 	u32 ticksASecond = getTicksASecond();
 	u16 thisNetID = this.getNetworkID();
+
+	const bool my_player = this.isMyPlayer();
 	
 	if ( (gameTime+thisNetID) % 30 == 0)
 	{
 		updateInventoryCPU( this );
 	}
+
+	//TODO alarm system for being targeted and having missiles locked on self
 
 	if (this.get_s32(absoluteCharge_string) <= 0) //no charge? fucked.
 	{ return; }
@@ -77,16 +81,19 @@ void onTick(CBlob@ this)
 	}
 	if (hasTargeting)
 	{
-		//runTargeting( this, gameTime, ticksASecond, thisNetID, ownerInfo );
-		//TODO
+		runTargeting( this, gameTime, ticksASecond, thisNetID, ownerInfo );
 	}
 
-	if (!this.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
+	if (!my_player) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
 
-	Vec2f aimVec = Vec2f(300.0f, 0);
-	aimVec.RotateByDegrees(blobAngle); //aim vector
-	drawParticleLine( thisPos, aimVec + thisPos, Vec2f_zero, greenConsoleColor, 0, 15.0f); //ship aim line
+//	if (hasNavComp && !hasBallistics) //ballistics overrides with a different aim line system
+//	{
+		Vec2f aimVec = Vec2f(300.0f, 0);
+		aimVec.RotateByDegrees(blobAngle); //aim vector
+		drawParticleLine( thisPos, aimVec + thisPos, Vec2f_zero, greenConsoleColor, 0, 15.0f); //ship aim line
+//	}
+	
 
 	/*ComputerTargetInfo compInfo;
 	compInfo.current_pos = ownerBlob.getPosition(); //this tick position
@@ -192,7 +199,16 @@ void runBallistics( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNe
 
 void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNetID, ComputerBlobInfo@ ownerInfo )
 {
-	//TODO
+	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
+	{ return; }
+
+	const bool isShifting = ownerBlob.get_bool("shifting");
+	
+	Vec2f ownerPos = ownerInfo.current_pos;
+	Vec2f ownerVel = ownerInfo.current_vel;
+	int teamNum = ownerInfo.team_num;
+	f32 ownerAngle = ownerInfo.blob_angle;
+
 }
 
 void updateInventoryCPU( CBlob@ this )

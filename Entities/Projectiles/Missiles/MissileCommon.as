@@ -55,10 +55,125 @@ class MissileInfo
 	}
 };
 
+shared class LauncherInfo
+{
+	s8 charge_time;
+	u8 charge_state;
+	bool has_ordinance;
+	u8 stab_delay;
+	u8 fletch_cooldown;
+	u8 ordinance_type;
+
+	u8 legolas_arrows;
+	u8 legolas_time;
+
+	bool grappling;
+	u16 grapple_id;
+	f32 grapple_ratio;
+	f32 cache_angle;
+	Vec2f grapple_pos;
+	Vec2f grapple_vel;
+
+	u8[] launchableOrdinance;
+
+	LauncherInfo()
+	{
+		charge_time = 0;
+		charge_state = 0;
+		has_ordinance = false;
+		stab_delay = 0;
+		fletch_cooldown = 0;
+		ordinance_type = OrdinanceType::normal;
+		grappling = false;
+
+		const u8[] ord = {0, 1, 2, 3};
+		launchableOrdinance.opAssign(ord);
+	}
+};
+
 void turnOffAllThrust( MissileInfo@ missile )
 {
 	missile.forward_thrust = false;
 	missile.backward_thrust = false;
 	missile.port_thrust = false;
 	missile.starboard_thrust = false;
+}
+
+namespace OrdinanceType
+{
+	enum type
+	{
+		normal = 0,
+		water,
+		fire,
+		bomb,
+		count
+	};
+}
+
+const string[] ordinanceTypeNames = { "missile_aa",
+                                  "mat_waterarrows",
+                                  "mat_firearrows",
+                                  "mat_bombarrows"
+                                };
+
+const string[] ordinanceNames = { "AA Missile",
+                              "Water arrows",
+                              "Fire arrows",
+                              "Bomb arrow"
+                            };
+
+const string[] ordinanceIcons = { "$MissileAA$",
+                              "$MissileCruise$",
+                              "$MissileEMP$",
+                              "$MissileFlare$"
+                            };
+
+
+bool hasArrows(CBlob@ this)
+{
+	LauncherInfo@ launcher;
+	if (!this.get("launcherInfo", @launcher))
+	{ return false; }
+
+	if (launcher.ordinance_type >= 0 && launcher.ordinance_type < ordinanceTypeNames.length)
+	{
+		return this.getBlobCount(ordinanceTypeNames[launcher.ordinance_type]) > 0;
+	}
+	return false;
+}
+
+bool hasArrows(CBlob@ this, u8 ordinanceType)
+{
+	return ordinanceType < OrdinanceType::count && this.getBlobCount(ordinanceTypeNames[ordinanceType]) > 0;
+}
+
+bool hasAnyArrows(CBlob@ this)
+{
+	for (uint i = 0; i < OrdinanceType::count; i++)
+	{
+		if (hasArrows(this, i))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void SetOrdinanceType(CBlob@ this, const u8 type)
+{
+	LauncherInfo@ launcher;
+	if (!this.get("launcherInfo", @launcher))
+	{ return; }
+
+	launcher.ordinance_type = type;
+}
+
+u8 getOrdinanceType(CBlob@ this)
+{
+	LauncherInfo@ launcher;
+	if (!this.get("launcherInfo", @launcher))
+	{ return 0; }
+
+	return launcher.ordinance_type;
 }
