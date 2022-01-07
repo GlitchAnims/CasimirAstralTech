@@ -7,6 +7,9 @@ const string hasNavCompString = "has_nav_comp";
 const string hasBallisticsString = "has_ballistics";
 const string hasTargetingString = "has_targeting";
 
+const string targetingTimerString = "targeting_timer";
+const string currentTargetIDString = "current_target_ID";
+
 class BallisticsOwnerInfo
 {
 	ComputerTargetInfo@[] tickInfo;

@@ -261,7 +261,7 @@ void makeFlakDamage(CBlob@ this, Vec2f thisPos = Vec2f_zero)
 	int teamNum = this.getTeamNum();
 
 	CBlob@[] blobsInRadius;
-	map.getBlobsInRadius(thisPos, radius, @blobsInRadius); //tent aura push
+	map.getBlobsInRadius(thisPos, radius, @blobsInRadius);
 	for (uint i = 0; i < blobsInRadius.length; i++)
 	{
 		CBlob@ b = blobsInRadius[i];

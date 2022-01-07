@@ -3,10 +3,13 @@
 #include "SmallshipCommon.as"
 #include "MediumshipCommon.as"
 #include "ComputerCommon.as"
+#include "OrdinanceCommon.as"
 #include "CommonFX.as"
 
 #include "NavComp.as"
 #include "BallisticsCalculator.as"
+
+Random _computer_logic_r(53991);
 
 void onInit(CBlob@ this)
 {
@@ -17,7 +20,8 @@ void onInit(CBlob@ this)
 
 	if (this.isMyPlayer())
 	{
-
+		this.set_u32(targetingTimerString, 0);
+		this.set_u16(currentTargetIDString, 0);
 	}
 	/*
 	ComputerTargetInfo compInfo;
@@ -199,16 +203,212 @@ void runBallistics( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNe
 
 void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNetID, ComputerBlobInfo@ ownerInfo )
 {
+	LauncherInfo@ launcher;
+	if (!ownerBlob.get("launcherInfo", @launcher))
+	{ return; }
+	
+	if (isServer() && (gameTime+thisNetID) % 30 == 0) //remove charge one every 1.0 seconds
+	{
+		removeCharge(ownerBlob, 1, true);
+	}
+
 	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
 
-	const bool isShifting = ownerBlob.get_bool("shifting");
-	
+	CMap@ map = getMap(); //standard map check
+	if (map is null)
+	{ return; }
+
+	const bool isSearching = ownerBlob.isKeyPressed(key_taunts);
+	u8 type = launcher.ordinance_type; // currently selected ordinance
+
+	if (!isSearching)
+	{
+		if (launcher.found_targets_id.length > 0)
+		{
+			launcher.found_targets_id.clear();
+		}
+		return;
+	}
+
 	Vec2f ownerPos = ownerInfo.current_pos;
 	Vec2f ownerVel = ownerInfo.current_vel;
 	int teamNum = ownerInfo.team_num;
 	f32 ownerAngle = ownerInfo.blob_angle;
 
+	HitInfo@[] hitInfos;
+	
+	switch (type)
+	{
+		case OrdinanceType::aa: //medium cone of target acquisition
+		{
+			const f32 arcDegrees = 90.0f;
+			const f32 range = 300.0f;
+
+			CBlob@[] blobsInRadius;
+			map.getBlobsInRadius(ownerPos, range, @blobsInRadius); //possible enemies in radius
+			for (uint i = 0; i < blobsInRadius.length; i++)
+			{
+				CBlob@ b = blobsInRadius[i];
+				if (b is null)
+				{ continue; }
+
+				if (b.getTeamNum() == teamNum) //enemy only
+				{ continue; }
+
+				if (!b.hasTag(smallTag) && !b.hasTag(mediumTag)) //mediumship and smallship only
+				{ continue; }
+
+				Vec2f targetPos = b.getPosition();
+				Vec2f targetVec = targetPos - ownerPos;
+				f32 targetAngle = -targetVec.getAngleDegrees();
+
+				f32 angleDiff = Maths::Abs(targetAngle - ownerAngle);
+				angleDiff = (angleDiff + 180) % 360 - 180;
+
+				if (angleDiff < -arcDegrees/2 || angleDiff > arcDegrees/2)
+				{ continue; }
+
+				u16 bNetID = b.getNetworkID();
+				int index = launcher.found_targets_id.find(bNetID);
+				if (index >= 0 && index < launcher.found_targets_id.length) //skip if ID already in array
+				{ continue; }
+
+				if (_computer_logic_r.NextFloat() > 0.025f) //chance to pickup target
+				{
+					makeTargetSquare(targetPos, 45.0f, Vec2f(8.0f, 8.0f), 4.0f, 4.0f); //target detected rhombus
+					continue;
+				}
+
+				launcher.found_targets_id.push_back(bNetID); //place ID in array
+			}
+
+			//draw detection cone
+			Vec2f line1 = Vec2f(range, 0);
+			Vec2f line2 = Vec2f(range, 0);
+			line1.RotateByDegrees(ownerAngle + (arcDegrees/2));
+			line2.RotateByDegrees(ownerAngle - (arcDegrees/2));
+			drawParticleLine( ownerPos, line1 + ownerPos, Vec2f_zero, greenConsoleColor, 0, 4.0f);
+			drawParticleLine( ownerPos, line2 + ownerPos, Vec2f_zero, greenConsoleColor, 0, 4.0f);
+		}
+		break;
+
+		case OrdinanceType::cruise:
+		{
+			//TODO global target spotting
+		}
+		break;
+
+		case OrdinanceType::emp: //cursor radius acquisition
+		{
+			Vec2f ownerAimpos = ownerBlob.getAimPos();
+			const f32 range = 64.0f;
+
+			u16[] validBlobIDs; //detectable enemies go here
+			CBlob@[] blobsInRadius;
+			map.getBlobsInRadius(ownerAimpos, range, @blobsInRadius); //possible enemies in radius
+			for (uint i = 0; i < blobsInRadius.length; i++)
+			{
+				CBlob@ b = blobsInRadius[i];
+				if (b is null)
+				{ continue; }
+
+				if (b.getTeamNum() == teamNum) //enemy only
+				{ continue; }
+
+				if (!b.hasTag(smallTag) && !b.hasTag(mediumTag)) //mediumship and smallship only
+				{ continue; }
+
+				u16 bNetID = b.getNetworkID();
+				int index = launcher.found_targets_id.find(bNetID);
+				if (index >= 0 && index < launcher.found_targets_id.length) //skip if ID already in array
+				{ continue; }
+
+				validBlobIDs.push_back(bNetID); //to the pile
+			}
+
+			//get closest to mouse
+			f32 bestDist = 99999.0f;
+			u16 bestBlobNetID = 0;
+			for (uint i = 0; i < validBlobIDs.length; i++)
+			{
+				u16 validNetID = validBlobIDs[i];
+				CBlob@ b = getBlobByNetworkID(validNetID);
+				if (b is null)
+				{ continue; }
+
+				Vec2f targetPos = b.getPosition();
+				Vec2f targetVec = targetPos - ownerAimpos;
+				f32 targetDist = targetVec.getLength();
+
+				if (targetDist < bestDist)
+				{
+					bestDist = targetDist;
+					bestBlobNetID = validNetID;
+				}
+			}
+
+			if (bestBlobNetID != 0)
+			{
+				u32 timer = ownerBlob.get_u32(targetingTimerString);
+
+				CBlob@ bestBlob = getBlobByNetworkID(bestBlobNetID);
+				if (bestBlob != null)
+				{
+					Vec2f targetPos = bestBlob.getPosition();
+
+					u16 currentTargetNetID = ownerBlob.get_u16(currentTargetIDString);
+					if (bestBlobNetID != currentTargetNetID)
+					{
+						ownerBlob.set_u16(currentTargetIDString, bestBlobNetID);
+						timer = 0;
+					}
+					
+					const u32 acquisitionTime = 30;
+					if (timer >= acquisitionTime)
+					{
+						launcher.found_targets_id.push_back(bestBlobNetID); //place ID in array
+					}
+					else
+					{
+						f32 percentage = Maths::Clamp(float(timer)/float(acquisitionTime), 0.0f, 1.0f);
+
+						f32 squareAngle = 45.0f * (1.0f-percentage);
+						Vec2f squareScale = Vec2f(8.0f, 8.0f)*percentage;
+						f32 squareCornerSeparation = 4.0f * percentage;
+						makeTargetSquare(targetPos, squareAngle, squareScale, 4.0f, 1.0f); //target detected rhombus
+						print ("loadingBlob: "+ bestBlobNetID);
+						print ("timer: "+ timer);
+						ownerBlob.set_u32(targetingTimerString, timer+1);
+					}
+				}
+			}
+			
+			//draw detection circle
+			drawParticleCircle(ownerAimpos, range, Vec2f_zero, greenConsoleColor, 0, 4.0f); //navigation pip
+		}
+		break;
+
+		case OrdinanceType::flare:
+		break;
+
+		default: return;
+	}
+	
+	//draw square for all saved targets
+	for (uint i = 0; i < launcher.found_targets_id.length; i++)
+	{
+		u16 netID = launcher.found_targets_id[i];
+		CBlob@ targetBlob = getBlobByNetworkID(netID);
+		if (targetBlob == null)
+		{ continue; }
+
+		Vec2f targetPos = targetBlob.getPosition();
+
+		makeTargetSquare(targetPos, 0.0f, Vec2f(8.0f, 8.0f), 4.0f, 1.0f); //target acquired square
+	}
+
+	ownerBlob.set("launcherInfo", @launcher);
 }
 
 void updateInventoryCPU( CBlob@ this )

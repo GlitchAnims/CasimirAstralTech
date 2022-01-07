@@ -75,6 +75,7 @@ shared class LauncherInfo
 	Vec2f grapple_vel;
 
 	u8[] launchableOrdinance;
+	u16[] found_targets_id;
 
 	LauncherInfo()
 	{
@@ -83,7 +84,7 @@ shared class LauncherInfo
 		has_ordinance = false;
 		stab_delay = 0;
 		fletch_cooldown = 0;
-		ordinance_type = OrdinanceType::normal;
+		ordinance_type = OrdinanceType::aa;
 		grappling = false;
 
 		const u8[] ord = {0, 1, 2, 3};
@@ -103,18 +104,23 @@ namespace OrdinanceType
 {
 	enum type
 	{
-		normal = 0,
-		water,
-		fire,
-		bomb,
+		aa = 0,
+		cruise,
+		emp,
+		flare,
 		count
 	};
 }
 
-const string[] ordinanceTypeNames = { "missile_aa",
+const string[] ordinanceTypeNames = { "mat_arrows",
                                   "mat_waterarrows",
                                   "mat_firearrows",
                                   "mat_bombarrows"
+                                };
+const string[] ordinanceBlobNames = { "missile_aa",
+                                  "railgun_shot",
+                                  "flak_shot",
+                                  "gatling_basicshot"
                                 };
 
 const string[] ordinanceNames = { "AA Missile",
@@ -130,7 +136,7 @@ const string[] ordinanceIcons = { "$MissileAA$",
                             };
 
 
-bool hasArrows(CBlob@ this)
+bool hasOrdinance(CBlob@ this)
 {
 	LauncherInfo@ launcher;
 	if (!this.get("launcherInfo", @launcher))
@@ -143,16 +149,16 @@ bool hasArrows(CBlob@ this)
 	return false;
 }
 
-bool hasArrows(CBlob@ this, u8 ordinanceType)
+bool hasOrdinance(CBlob@ this, u8 ordinanceType)
 {
 	return ordinanceType < OrdinanceType::count && this.getBlobCount(ordinanceTypeNames[ordinanceType]) > 0;
 }
 
-bool hasAnyArrows(CBlob@ this)
+bool hasAnyOrdinance(CBlob@ this)
 {
 	for (uint i = 0; i < OrdinanceType::count; i++)
 	{
-		if (hasArrows(this, i))
+		if (hasOrdinance(this, i))
 		{
 			return true;
 		}
