@@ -92,6 +92,22 @@ shared class LauncherInfo
 	}
 };
 
+shared class OrdinanceLaunchInfo
+{
+	u8 ordinance;
+	u16 target_ID;
+	Vec2f launch_pos;
+	Vec2f launch_vec;
+
+	OrdinanceLaunchInfo()
+	{
+		ordinance = 0;
+		target_ID = 0;
+		launch_pos = Vec2f_zero;
+		launch_vec = Vec2f_zero;
+	}
+};
+
 void turnOffAllThrust( MissileInfo@ missile )
 {
 	missile.forward_thrust = false;
@@ -182,4 +198,22 @@ u8 getOrdinanceType(CBlob@ this)
 	{ return 0; }
 
 	return launcher.ordinance_type;
+}
+
+u32 getOrdinanceCooldown(u8 type)
+{
+	switch (type)
+	{
+		case OrdinanceType::aa: return 10;
+
+		case OrdinanceType::cruise: return 300;
+
+		case OrdinanceType::emp: return 40;
+
+		case OrdinanceType::flare: return 5;
+
+		//default: return 30;
+	}
+
+	return 30;
 }

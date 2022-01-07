@@ -162,6 +162,7 @@ void onTick( CBlob@ this )
 		}
 	}
 
+	/*
 	if (pressed_m2 && m2Time >= ship.firing_delay)
 	{
 		if (m2ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
@@ -191,7 +192,7 @@ void onTick( CBlob@ this )
 
 			m2ShotTicks = 0;
 		}
-	}
+	}*/
 
 	if (pressed_m1)
 	{ m1Time++; }

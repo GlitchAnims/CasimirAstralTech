@@ -236,6 +236,9 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 		return;
 	}
 
+	if (ownerBlob.isKeyPressed(key_action2)) //can't fire and search at the same time
+	{ return; }
+
 	Vec2f ownerPos = ownerInfo.current_pos;
 	Vec2f ownerVel = ownerInfo.current_vel;
 	int teamNum = ownerInfo.team_num;
@@ -248,7 +251,7 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 		case OrdinanceType::aa: //medium cone of target acquisition
 		{
 			const f32 arcDegrees = 90.0f;
-			const f32 range = 300.0f;
+			const f32 range = 400.0f;
 
 			CBlob@[] blobsInRadius;
 			map.getBlobsInRadius(ownerPos, range, @blobsInRadius); //possible enemies in radius

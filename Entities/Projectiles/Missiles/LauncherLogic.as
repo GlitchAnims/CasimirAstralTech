@@ -13,6 +13,8 @@
 const string fire_ordinance_command_ID = "ordinance_shoot";
 const string pick_ordinance_command_ID = "pick_ordinance";
 
+const string launchCooldownString = "launch_cooldown";
+
 Random _launcher_logic_r(19935);
 void onInit( CBlob@ this )
 {
@@ -57,12 +59,12 @@ void onInit( CBlob@ this )
 	this.addCommandID(pick_ordinance_command_ID);
 	
 	this.Tag("launcher");
+	this.set_u32(launchCooldownString, 0);
 }
 
 
 void onTick( CBlob@ this )
 {
-	/*
 	LauncherInfo@ launcher;
 	if (!this.get("launcherInfo", @launcher))
 	{ return; }
@@ -80,319 +82,229 @@ void onTick( CBlob@ this )
 	}
 	//
 	CSprite@ sprite = this.getSprite();
-	bool hasarrow = archer.has_arrow;
-	bool hasnormal = hasOrdinance(this, ArrowType::normal);
-	s8 charge_time = archer.charge_time;
-	u8 charge_state = archer.charge_state;
+	bool hasCurrentOrdinance = launcher.has_ordinance;
+	bool has_aa = hasOrdinance(this, OrdinanceType::aa);
+	u32 cooldown = this.get_u32(launchCooldownString);
 	const bool pressed_action2 = this.isKeyPressed(key_action2);
-	Vec2f pos = this.getPosition();
+
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+	int teamNum = this.getTeamNum();
+	f32 blobAngle = this.getAngleDegrees();
+
+	if (cooldown > 0) //tick down cooldown
+	{
+		this.set_u32(launchCooldownString, cooldown-1);
+	}
 
 	if (responsible)
 	{
 		if ((getGameTime() + this.getNetworkID()) % 10 == 0)
 		{
-			hasarrow = hasOrdinance(this);
+			hasCurrentOrdinance = hasOrdinance(this);
 
-			if (!hasarrow && hasnormal)
+			if (!hasCurrentOrdinance && has_aa)
 			{
 				// set back to default
-				archer.arrow_type = ArrowType::normal;
-				hasarrow = hasnormal;
+				launcher.ordinance_type = OrdinanceType::aa;
+				hasCurrentOrdinance = has_aa;
 			}
 		}
 
-		if (hasarrow != this.get_bool("has_arrow"))
+		if (hasCurrentOrdinance != this.get_bool("has_ord"))
 		{
-			this.set_bool("has_arrow", hasarrow);
-			this.Sync("has_arrow", isServer());
-		}
-
-	}
-
-	if (charge_state == ArcherParams::legolas_charging) // fast arrows
-	{
-		if (!hasarrow)
-		{
-			charge_state = ArcherParams::not_aiming;
-			charge_time = 0;
-		}
-		else
-		{
-			charge_state = ArcherParams::legolas_ready;
+			this.set_bool("has_ord", hasCurrentOrdinance);
+			this.Sync("has_ord", isServer());
 		}
 	}
 	
 	//charged - no else (we want to check the very same tick)
-	if (this.isKeyPressed(key_action1))
+	if (this.isKeyPressed(key_action2))
 	{
-		const bool just_action1 = this.isKeyJustPressed(key_action1);
+		const bool just_action2 = this.isKeyJustPressed(key_action2);
 
-		//	printf("charge_state " + charge_state );
-
-		if ((just_action1 || this.wasKeyPressed(key_action2) && !pressed_action2) &&
-		        (charge_state == ArcherParams::not_aiming || charge_state == ArcherParams::fired || charge_state == ArcherParams::stabbing))
+		if (just_action2)
 		{
-			charge_state = ArcherParams::readying;
-			hasarrow = hasOrdinance(this);
+			hasCurrentOrdinance = hasOrdinance(this);
 
-			if (!hasarrow && hasnormal)
+			if (!hasCurrentOrdinance && has_aa) //switch to default ammo if current ammo is empty
 			{
-				archer.arrow_type = ArrowType::normal;
-				hasarrow = hasnormal;
-
+				launcher.ordinance_type = OrdinanceType::aa;
+				hasCurrentOrdinance = has_aa;
 			}
 
 			if (responsible)
 			{
-				this.set_bool("has_arrow", hasarrow);
-				this.Sync("has_arrow", isServer());
+				this.set_bool("has_ord", hasCurrentOrdinance);
+				this.Sync("has_ord", isServer());
 			}
 
-			charge_time = 0;
-
-			if (!hasarrow)
+			if (!hasCurrentOrdinance || cooldown > 0) // playing annoying no ammo sound
 			{
-				charge_state = ArcherParams::no_arrows;
-
-				if (ismyplayer && !this.wasKeyPressed(key_action1))   // playing annoying no ammo sound
-				{
-					this.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg", 0.5);
-				}
-
+				failedLaunchSound(this, ismyplayer);
 			}
-			else
+			else //has ammo
 			{
 				if (ismyplayer)
 				{
-					if (just_action1)
-					{
-						const u8 type = archer.arrow_type;
+					const u8 type = launcher.ordinance_type;
+					u32 addedCooldown = getOrdinanceCooldown(type);
 
-						if (type == ArrowType::water)
-						{
-							sprite.PlayRandomSound("/WaterBubble");
-						}
-						else if (type == ArrowType::fire)
-						{
-							sprite.PlaySound("SparkleShort.ogg");
-						}
+					u8 ammoCount = this.getBlobCount(ordinanceTypeNames[type]);
+					if (ammoCount <= 0)
+					{
+						failedLaunchSound(this, ismyplayer);
+						return;
 					}
-				}
 
-				sprite.RewindEmitSound();
-				sprite.SetEmitSoundPaused(false);
+					int targetAmount = launcher.found_targets_id.length;
+					bool noTarget = targetAmount <= 0;
 
-				if (!ismyplayer)   // lower the volume of other players charging  - ooo good idea
-				{
-					sprite.SetEmitSoundVolume(0.5f);
-				}
-			}
-		}
-		else if (charge_state == ArcherParams::readying)
-		{
-			charge_time++;
+					OrdinanceLaunchInfo[] launches;
 
-			if (charge_time > ArcherParams::ready_time)
-			{
-				charge_time = 1;
-				charge_state = ArcherParams::charging;
-			}
-		}
-		else if (charge_state == ArcherParams::charging)
-		{
-			if(!hasarrow)
-			{
-				charge_state = ArcherParams::no_arrows;
-				charge_time = 0;
-				
-				if (ismyplayer)   // playing annoying no ammo sound
-				{
-					this.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg", 0.5);
-				}
-			}
-			else
-			{
-				charge_time++;
-			}
-
-			if (charge_time >= ArcherParams::legolas_period)
-			{
-				// Legolas state
-
-				Sound::Play("AnimeSword.ogg", pos, ismyplayer ? 1.3f : 0.7f);
-				Sound::Play("FastBowPull.ogg", pos);
-				charge_state = ArcherParams::legolas_charging;
-				charge_time = ArcherParams::shoot_period - ArcherParams::legolas_charge_time;
-
-				archer.legolas_arrows = ArcherParams::legolas_arrows_count;
-				archer.legolas_time = ArcherParams::legolas_time;
-			}
-
-			if (charge_time >= ArcherParams::shoot_period)
-			{
-				sprite.SetEmitSoundPaused(true);
-			}
-		}
-		else if (charge_state == ArcherParams::no_arrows)
-		{
-			if (charge_time < ArcherParams::ready_time)
-			{
-				charge_time++;
-			}
-		}
-	}
-	else
-	{
-		if (charge_state > ArcherParams::readying)
-		{
-			if (charge_state < ArcherParams::fired)
-			{
-				ClientFire(this, charge_time, hasarrow, archer.arrow_type, false);
-
-				charge_time = ArcherParams::fired_time;
-				charge_state = ArcherParams::fired;
-			}
-			else if(charge_state == ArcherParams::stabbing)
-			{
-				archer.stab_delay++;
-				if (archer.stab_delay == STAB_DELAY)
-				{
-					// hit tree and get an arrow
-					CBlob@ stabTarget = getBlobByNetworkID(this.get_u16("stabHitID"));
-					if (stabTarget !is null)
+					OrdinanceLaunchInfo launchInfo;
+					launchInfo.ordinance = type;
+					
+					switch (type)
 					{
-						if (stabTarget.getName() == "mat_wood")
+						case OrdinanceType::aa:
 						{
-							u16 quantity = stabTarget.getQuantity();
-							if (quantity > 4)
+							bool leftCannon = this.get_bool( "leftCannonTurn" );
+							if (noTarget)
 							{
-								stabTarget.server_SetQuantity(quantity-4);
+								this.set_bool( "leftCannonTurn", !leftCannon);
+								f32 leftMult = leftCannon ? 1.0f : -1.0f;
+
+								Vec2f launchpos = Vec2f(0, 8.0f*leftMult);
+								f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+								Vec2f launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
+								launchInfo.launch_pos 	= launchpos+thisPos;
+								launchInfo.launch_vec 	= launchVec+thisVel;
+
+								launches.push_back(launchInfo);
 							}
 							else
 							{
-								stabTarget.server_Die();
+								u32 tempCooldown = addedCooldown;
+								for (uint i = 0; i < targetAmount; i++)
+								{
+									if (ammoCount <= 0) //stop if no ammo left
+									{ break; }
+									leftCannon = !leftCannon;
+									f32 leftMult = leftCannon ? 1.0f : -1.0f;
 
+									u16 targetID = launcher.found_targets_id[i];
+									Vec2f launchpos = Vec2f(0, 8.0f*leftMult);
+									f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+									Vec2f launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
+									launchInfo.target_ID 	= targetID;
+									launchInfo.launch_pos 	= launchpos+thisPos;
+									launchInfo.launch_vec 	= launchVec+thisVel;
+									
+									ammoCount--;
+									addedCooldown += tempCooldown;
+									launches.push_back(launchInfo);
+
+									//duplicate code, for now
+									if (ammoCount <= 0) //stop if no ammo left
+									{ break; }
+									leftCannon = !leftCannon;
+									leftMult = leftCannon ? 1.0f : -1.0f;
+
+									//targetID = launcher.found_targets_id[i];
+									launchpos = Vec2f(0, 8.0f*leftMult);
+									//launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+									launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
+									launchInfo.target_ID 	= targetID;
+									launchInfo.launch_pos 	= launchpos+thisPos;
+									launchInfo.launch_vec 	= launchVec+thisVel;
+									
+									ammoCount--;
+									addedCooldown += tempCooldown;
+									launches.push_back(launchInfo);
+								}
+								
+								this.set_bool( "leftCannonTurn", !leftCannon);
 							}
-							fletchArrow(this);
 						}
-						else
+						break;
+
+						case OrdinanceType::cruise:
 						{
-							this.server_Hit(stabTarget, stabTarget.getPosition(), Vec2f_zero, 0.25f,  Hitters::stab);
+							if (noTarget)
+							{
+								failedLaunchSound(this, ismyplayer);
+								return;
+							}
+
+							u16 targetID = launcher.found_targets_id[0];
+							f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+							Vec2f launchVec = Vec2f(1.0f, 0).RotateByDegrees(launchAngle);
+							launchInfo.target_ID 	= targetID;
+							launchInfo.launch_pos 	= thisPos;
+							launchInfo.launch_vec 	= launchVec+thisVel;
+
+							launches.push_back(launchInfo);
+						}
+						break;
+
+						case OrdinanceType::emp: 
+						{
 
 						}
+						break;
 
+						case OrdinanceType::flare:
+						{
+							
+						}
+						break;
+
+						default: return;
+					}
+
+					if (launches.length > 0)
+					{
+						ShootOrdinance( this, launches );
+						this.set_u32(launchCooldownString, addedCooldown); //add cumulative cooldown
+						launcher.found_targets_id.clear(); //clear list, already fired
 					}
 				}
-				else if(archer.stab_delay >= STAB_TIME)
-				{
-					charge_state = ArcherParams::not_aiming;
-				}
-			}
-			else //fired..
-			{
-				charge_time--;
-
-				if (charge_time <= 0)
-				{
-					charge_state = ArcherParams::not_aiming;
-					charge_time = 0;
-				}
-			}
-		}
-		else
-		{
-			charge_state = ArcherParams::not_aiming;    //set to not aiming either way
-			charge_time = 0;
-		}
-
-		sprite.SetEmitSoundPaused(true);
-	}
-
-	// safe disable bomb light
-
-	if (this.wasKeyPressed(key_action1) && !this.isKeyPressed(key_action1))
-	{
-		const u8 type = archer.arrow_type;
-		if (type == ArrowType::bomb)
-		{
-			BombFuseOff(this);
-		}
-	}
-
-	// my player!
-
-	if (responsible)
-	{
-		// set cursor
-
-		if (ismyplayer && !getHUD().hasButtons())
-		{
-			int frame = 0;
-			//	print("archer.charge_time " + archer.charge_time + " / " + ArcherParams::shoot_period );
-			if (archer.charge_state == ArcherParams::readying)
-			{
-				//readying shot
-				frame = 2 + int((float(archer.charge_time) / float(ArcherParams::shoot_period + ArcherParams::ready_time)) * 8) * 2.0f;
-			}
-			else if (archer.charge_state == ArcherParams::charging)
-			{
-				if (archer.charge_time < ArcherParams::shoot_period)
-				{
-					//charging shot
-					frame = 2 + int((float(ArcherParams::ready_time + archer.charge_time) / float(ArcherParams::shoot_period + ArcherParams::ready_time)) * 8) * 2;
-				}
-				else
-				{
-					//charging legolas
-					frame = 1 + int((float(archer.charge_time - ArcherParams::shoot_period) / (ArcherParams::legolas_period - ArcherParams::shoot_period)) * 9) * 2;
-				}
-			}
-			else if (archer.charge_state == ArcherParams::legolas_ready)
-			{
-				//legolas ready
-				frame = 19;
-			}
-			else if (archer.charge_state == ArcherParams::legolas_charging)
-			{
-				//in between shooting multiple legolas shots
-				frame = 1;
-			}
-			getHUD().SetCursorFrame(frame);
-		}
-
-		// activate/throw
-
-		if (this.isKeyJustPressed(key_action3))
-		{
-			client_SendThrowOrActivateCommand(this);
-		}
-
-		// pick up arrow
-
-		if (archer.fletch_cooldown > 0)
-		{
-			archer.fletch_cooldown--;
-		}
-
-		// pickup from ground
-
-		if (archer.fletch_cooldown == 0 && this.isKeyPressed(key_action2))
-		{
-			if (getPickupArrow(this) !is null)   // pickup arrow from ground
-			{
-				this.SendCommand(this.getCommandID("pickup arrow"));
-				archer.fletch_cooldown = PICKUP_COOLDOWN;
 			}
 		}
 	}
 
-	archer.charge_time = charge_time;
-	archer.charge_state = charge_state;
-	archer.has_arrow = hasarrow;
-	*/
+	launcher.has_ordinance = hasCurrentOrdinance;
 }
 
+bool canSend(CBlob@ this)
+{
+	return (this.isMyPlayer() || this.getPlayer() is null || this.getPlayer().isBot());
+}
 
+void ShootOrdinance(CBlob @this, OrdinanceLaunchInfo[] launches )
+{
+	if (canSend(this)) // player or bot
+	{
+		CBitStream params;
+		for (uint i = 0; i < launches.length; i++) //write a set for each target
+		{
+			OrdinanceLaunchInfo launchInfo = launches[i];
+
+			u8 ordinanceType = launchInfo.ordinance;
+			u16 targetID = launchInfo.target_ID;
+			Vec2f launchPos = launchInfo.launch_pos;
+			Vec2f launchVec = launchInfo.launch_vec;
+
+			params.write_u8(ordinanceType);
+			params.write_u16(targetID);
+			params.write_Vec2f(launchPos);
+			params.write_Vec2f(launchVec);
+		}
+		this.getSprite().PlaySound("Entities/Characters/Archer/BowFire.ogg");
+		this.SendCommand(this.getCommandID(fire_ordinance_command_ID), params);
+	}
+}
 
 //missile menu
 void onCreateInventoryMenu(CBlob@ this, CBlob@ forBlob, CGridMenu @gridmenu)
@@ -445,20 +357,21 @@ void onCreateInventoryMenu(CBlob@ this, CBlob@ forBlob, CGridMenu @gridmenu)
 	}
 }
 
-CBlob@ CreateOrdinance(CBlob@ this, Vec2f blobPos, Vec2f blobVel, u8 ordinanceType)
+CBlob@ CreateOrdinance( CBlob@ this, u8 ordinanceType, u16 targetID, Vec2f blobPos, Vec2f blobVel )
 {
-	Vec2f thisVel = this.getVelocity();
+	//Vec2f thisPos = this.getPosition();
+	//Vec2f thisVel = this.getVelocity();
 
-	CBlob@ arrow = server_CreateBlob(ordinanceBlobNames[ ordinanceType ], this.getTeamNum(), blobPos);
-	if (arrow !is null)
+	CBlob@ newOrd = server_CreateBlob(ordinanceBlobNames[ ordinanceType ], this.getTeamNum(), blobPos);
+	if (newOrd !is null)
 	{
-		arrow.SetDamageOwnerPlayer(this.getPlayer());
-		arrow.IgnoreCollisionWhileOverlapped(this);
-		arrow.setVelocity(blobVel + thisVel);
-
-
+		newOrd.SetDamageOwnerPlayer(this.getPlayer());
+		newOrd.IgnoreCollisionWhileOverlapped( this );
+		newOrd.setVelocity( blobVel );
+		newOrd.set_f32(shotLifetimeString, 30.0f); //a full second for now
+		newOrd.set_u16(targetNetIDString, targetID);
 	}
-	return arrow;
+	return newOrd;
 }
 
 void CycleToOrdinanceType(CBlob@ this, LauncherInfo@ launcher, u8 ordinanceType)
@@ -475,39 +388,35 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
 	if (cmd == this.getCommandID(fire_ordinance_command_ID))
 	{
-		Vec2f blobPos;
-		if (!params.saferead_Vec2f(blobPos)) return;
-		Vec2f blobVel;
-		if (!params.saferead_Vec2f(blobVel)) return;
 		u8 ordinanceType;
-		if (!params.saferead_u8(ordinanceType)) return;
+		u16 targetID;
+		Vec2f blobPos;
+		Vec2f blobVel;
 
-		u16 targetBlobID = 0;
-		u16 tempID = 0;
-		if (params.saferead_u16(tempID))
+		u8 consumedAmmo = 0;
+
+		while (params.saferead_u8(ordinanceType) && params.saferead_u16(targetID) && params.saferead_Vec2f(blobPos) && params.saferead_Vec2f(blobVel)) //immediately stops if something fails
 		{
-			targetBlobID = tempID; //if a target ID was sent, use it
+			if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
+			{ continue; }
+
+			if (ordinanceType >= ordinanceTypeNames.length) 
+			{ continue; }
+
+			if (!hasOrdinance(this, ordinanceType))
+			{ return; } // return to normal ordinance - server didnt have this synced
+
+			if (isServer())
+			{
+				CreateOrdinance(this, ordinanceType, targetID, blobPos, blobVel);
+			}
+			consumedAmmo++;
 		}
 
-		if (ordinanceType >= ordinanceTypeNames.length) return;
-
-		LauncherInfo@ launcher;
-		if (!this.get("launcherInfo", @launcher))
-		{ return; }
-
-		u8 type = launcher.ordinance_type;
-
-		// return to normal ordinance - server didnt have this synced
-		if (!hasOrdinance(this, ordinanceType))
-		{ return; }
-
-		if (isServer())
+		if (consumedAmmo > 0)
 		{
-			CreateOrdinance(this, blobPos, blobVel, ordinanceType);
+			this.TakeBlob(ordinanceTypeNames[ ordinanceType ], consumedAmmo);
 		}
-
-		this.getSprite().PlaySound("Entities/Characters/Archer/BowFire.ogg");
-		this.TakeBlob(ordinanceTypeNames[ ordinanceType ], 1);
 	}
 	else if (cmd == this.getCommandID("cycle"))  //from standardcontrols
 	{
@@ -546,5 +455,13 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		{
 			CycleToOrdinanceType(this, launcher, type);
 		}
+	}
+}
+
+void failedLaunchSound( CBlob@ blob, bool ismyplayer = false )
+{
+	if (ismyplayer)
+	{
+		blob.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg", 0.5);
 	}
 }
