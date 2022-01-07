@@ -222,11 +222,16 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 	const bool isSearching = ownerBlob.isKeyPressed(key_taunts);
 	u8 type = launcher.ordinance_type; // currently selected ordinance
 
+	u16 currentTargetNetID = ownerBlob.get_u16(currentTargetIDString);
 	if (!isSearching)
 	{
 		if (launcher.found_targets_id.length > 0)
 		{
 			launcher.found_targets_id.clear();
+		}
+		if (currentTargetNetID != 0)
+		{
+			ownerBlob.set_u16(currentTargetIDString, 0);
 		}
 		return;
 	}
@@ -357,7 +362,6 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 				{
 					Vec2f targetPos = bestBlob.getPosition();
 
-					u16 currentTargetNetID = ownerBlob.get_u16(currentTargetIDString);
 					if (bestBlobNetID != currentTargetNetID)
 					{
 						ownerBlob.set_u16(currentTargetIDString, bestBlobNetID);
@@ -376,11 +380,18 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 						f32 squareAngle = 45.0f * (1.0f-percentage);
 						Vec2f squareScale = Vec2f(8.0f, 8.0f)*percentage;
 						f32 squareCornerSeparation = 4.0f * percentage;
-						makeTargetSquare(targetPos, squareAngle, squareScale, 4.0f, 1.0f); //target detected rhombus
+						makeTargetSquare(targetPos, squareAngle, squareScale, squareCornerSeparation, 1.0f); //target detected rhombus
 						print ("loadingBlob: "+ bestBlobNetID);
 						print ("timer: "+ timer);
 						ownerBlob.set_u32(targetingTimerString, timer+1);
 					}
+				}
+			}
+			else //resets if no valid targets in range
+			{
+				if (currentTargetNetID != 0)
+				{
+					ownerBlob.set_u16(currentTargetIDString, 0);
 				}
 			}
 			

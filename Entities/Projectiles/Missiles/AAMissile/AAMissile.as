@@ -27,6 +27,7 @@ void onInit(CBlob@ this)
 	this.server_SetTimeToDie(2);
 	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
 	this.set_u32(hasTargetTicksString, 0);
+	this.set_u16(targetNetIDString, 0);
 
 	CShape@ shape = this.getShape();
 	if (shape != null)
@@ -39,8 +40,6 @@ void onInit(CBlob@ this)
 
 	this.Tag("projectile");
 	this.Tag("hull");
-
-	this.set_u16(targetNetIDString, 0);
 
 	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 
@@ -150,7 +149,16 @@ void onTick(CBlob@ this)
 		return;
 	}
 
-	if (is_server)
+	//homing logic
+	f32 thisReducedSpeed = missile.max_speed*0.5f; //arbitrary travel speed. TODO actual homing logic
+
+	Vec2f targetPos = targetBlob.getPosition();
+	Vec2f bVel = targetBlob.getVelocity() - (thisVel); //compensates for missile speed
+
+	Vec2f targetVec = targetPos - thisPos;
+	f32 targetDist = targetVec.getLength(); //distance to target
+
+	if (targetDist > searchRadius) //lose target logic
 	{
 		u32 hasTargetTicks = this.get_u32(hasTargetTicksString);
 		if (hasTargetTicks < missile.lose_target_ticks)
@@ -160,27 +168,29 @@ void onTick(CBlob@ this)
 		else //set target to null and stop the code
 		{
 			this.set_u16(targetNetIDString, 0);
-			this.Sync(targetNetIDString, true);
-
+			if (is_server)
+			{ this.Sync(targetNetIDString, true); }
+			
 			this.set_u32(hasTargetTicksString, 0);
 			return;
 		}
 	}
-
-	f32 thisReducedSpeed = missile.max_speed; //arbitrary travel speed. TODO actual homing logic
-
-	Vec2f targetPos = targetBlob.getPosition();
-	Vec2f bVel = targetBlob.getVelocity() - (thisVel*0.2f); //slightly compensates for missile speed
-
-	Vec2f targetVec = targetPos - thisPos;
-	f32 targetDist = targetVec.getLength(); //distance to target
-
-	if (targetDist < radius*0.8f) //if closer than 80% of explosion radius, detonate.
+	else //resets lose target timer if in range
 	{
-		this.server_Die();
-		return;
+		this.set_u32(hasTargetTicksString, 0); 
+		if (is_server)
+		{ this.Sync(hasTargetTicksString, true); }
 	}
 
+	if (is_server) //server only detonation
+	{
+		if (targetDist < radius*0.8f) //if closer than 80% of explosion radius, detonate.
+		{
+			this.server_Die();
+			return;
+		}
+	}
+	
 	f32 travelTicks = targetDist / thisReducedSpeed; //theoretical ticks required to get to the target (again, TODO)
 	Vec2f futureTargetPos = targetPos + (bVel*travelTicks); //matches future target pos with travel time
 	
