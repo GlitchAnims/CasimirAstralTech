@@ -4,7 +4,7 @@
 #include "ChargeCommon.as"
 #include "SmallshipCommon.as"
 #include "SpaceshipVars.as"
-#include "ThrowCommon.as"
+#include "HoverMessage.as"
 #include "KnockedCommon.as"
 #include "OrdinanceCommon.as"
 #include "CommonFX.as"
@@ -120,13 +120,15 @@ void onTick( CBlob@ this )
 	if (this.isKeyPressed(key_action2))
 	{
 		const bool just_action2 = this.isKeyJustPressed(key_action2);
-		const bool canFire = hasCurrentOrdinance && cooldown == 0;
+		const bool reloaded = cooldown == 0;
+		const bool canFire = hasCurrentOrdinance && reloaded;
 
-		if (!canFire && ismyplayer && cooldownCap != 0) //reload circle at mouse pos
+		//reload circle at mouse pos
+		if (!canFire && ismyplayer && cooldownCap != 0)
 		{
 			f32 reloadPercentage = float(cooldown) / float(cooldownCap);
 			Vec2f aimPos = this.getAimPos();
-			drawParticlePartialCircle( aimPos, 32.0f, reloadPercentage, 0, greenConsoleColor, 0, 2.0f);
+			drawParticlePartialCircle( aimPos, 16.0f, reloadPercentage, 0, greenConsoleColor, 0, 2.0f);
 		}
 
 		if (just_action2)
@@ -147,7 +149,14 @@ void onTick( CBlob@ this )
 
 			if (!canFire) // playing annoying no ammo sound
 			{
-				failedLaunchSound(this, ismyplayer);
+				if (!hasCurrentOrdinance)
+				{
+					failedLaunchEffect(this, "No ammo");
+				}
+				else if (!reloaded)
+				{
+					failedLaunchEffect(this, "Reloading...");
+				}
 			}
 			else //has ammo
 			{
@@ -159,7 +168,7 @@ void onTick( CBlob@ this )
 					u8 ammoCount = this.getBlobCount(ordinanceTypeNames[type]);
 					if (ammoCount <= 0)
 					{
-						failedLaunchSound(this, ismyplayer);
+						failedLaunchEffect(this, "No ammo");
 						return;
 					}
 
@@ -239,7 +248,7 @@ void onTick( CBlob@ this )
 						{
 							if (noTarget)
 							{
-								failedLaunchSound(this, ismyplayer);
+								failedLaunchEffect(this, "Cruise missile requires target");
 								return;
 							}
 
@@ -465,10 +474,18 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 	}
 }
 
-void failedLaunchSound( CBlob@ blob, bool ismyplayer = false )
+void failedLaunchEffect( CBlob@ blob, string msg )
 {
-	if (ismyplayer)
-	{
-		blob.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg", 0.5);
-	}
+	if (!blob.isMyPlayer())
+	{ return; }
+
+	blob.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg", 0.5);
+
+	if (msg.length() <= 0)
+	{ return; }
+
+	ShipWarningMessage@ message = cast<ShipWarningMessage>(add_message(
+				ShipWarningMessage(msg),
+				true
+			));
 }

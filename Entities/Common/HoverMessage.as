@@ -43,6 +43,7 @@ enum MessageTypes
 	MESSAGE_KILLSPREE,
 	MESSAGE_ASSIST,
 	MESSAGE_MATERIAL,
+	MESSAGE_SHIP,
 	MESSAGE_TOTAL
 };
 
@@ -357,6 +358,40 @@ class MaterialMessage : HoverMessage
 		if (material_name == message.material_name)
 		{
 			quantity_change += message.quantity_change;
+			return this;
+		}
+
+		return null;
+	}
+}
+
+class ShipWarningMessage : HoverMessage
+{
+	string message_string;
+
+	ShipWarningMessage(string msg_input)
+	{
+		message_string = getTranslatedString(msg_input);
+
+		category = MESSAGE_SHIP;
+	}
+
+	void reset_time() override
+	{
+		time_left = 2.0f;
+	}
+
+	void generate_tokens() override
+	{
+		tokens.push_back(MessageToken(message_string, color_white, Vec2f(12.0f, 0.0f)));
+	}
+
+	HoverMessage@ try_merge(HoverMessage@ other) override
+	{
+		ShipWarningMessage@ message = cast<ShipWarningMessage>(other);
+
+		if (message_string == message.message_string)
+		{
 			return this;
 		}
 
