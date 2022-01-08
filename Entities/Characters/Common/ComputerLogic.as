@@ -356,7 +356,7 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 				}
 			}
 
-			if (bestBlobNetID != 0)
+			if (bestBlobNetID != 0) //start locking onto valid target
 			{
 				u32 timer = ownerBlob.get_u32(targetingTimerString);
 
@@ -399,7 +399,7 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 			}
 			
 			//draw detection circle
-			drawParticleCircle(ownerAimpos, range, Vec2f_zero, greenConsoleColor, 0, 4.0f); //navigation pip
+			drawParticleCircle(ownerAimpos, range, Vec2f_zero, greenConsoleColor, 0, 4.0f);
 		}
 		break;
 
@@ -421,8 +421,6 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 
 		makeTargetSquare(targetPos, 0.0f, Vec2f(8.0f, 8.0f), 4.0f, 1.0f); //target acquired square
 	}
-
-	//ownerBlob.set("launcherInfo", @launcher);
 }
 
 void updateInventoryCPU( CBlob@ this )

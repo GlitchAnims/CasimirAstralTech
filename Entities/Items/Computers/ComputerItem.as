@@ -1,5 +1,5 @@
 
-const f32 secondsBeforeDeath = 5.0f;
+const f32 secondsBeforeDeath = 10.0f;
 
 void onInit(CBlob@ this)
 {
