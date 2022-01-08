@@ -13,8 +13,6 @@
 const string fire_ordinance_command_ID = "ordinance_shoot";
 const string pick_ordinance_command_ID = "pick_ordinance";
 
-const string launchCooldownString = "launch_cooldown";
-
 Random _launcher_logic_r(19935);
 void onInit( CBlob@ this )
 {
@@ -59,7 +57,6 @@ void onInit( CBlob@ this )
 	this.addCommandID(pick_ordinance_command_ID);
 	
 	this.Tag("launcher");
-	this.set_u32(launchCooldownString, 0);
 }
 
 
@@ -84,7 +81,8 @@ void onTick( CBlob@ this )
 	CSprite@ sprite = this.getSprite();
 	bool hasCurrentOrdinance = launcher.has_ordinance;
 	bool has_aa = hasOrdinance(this, OrdinanceType::aa);
-	u32 cooldown = this.get_u32(launchCooldownString);
+	u32 cooldown = launcher.cooldown;
+	u32 cooldownCap = launcher.max_cooldown;
 	const bool pressed_action2 = this.isKeyPressed(key_action2);
 
 	Vec2f thisPos = this.getPosition();
@@ -94,7 +92,7 @@ void onTick( CBlob@ this )
 
 	if (cooldown > 0) //tick down cooldown
 	{
-		this.set_u32(launchCooldownString, cooldown-1);
+		launcher.cooldown = cooldown-1;
 	}
 
 	if (responsible)
@@ -122,6 +120,14 @@ void onTick( CBlob@ this )
 	if (this.isKeyPressed(key_action2))
 	{
 		const bool just_action2 = this.isKeyJustPressed(key_action2);
+		const bool canFire = hasCurrentOrdinance && cooldown == 0;
+
+		if (!canFire && ismyplayer && cooldownCap != 0) //reload circle at mouse pos
+		{
+			f32 reloadPercentage = float(cooldown) / float(cooldownCap);
+			Vec2f aimPos = this.getAimPos();
+			drawParticlePartialCircle( aimPos, 32.0f, reloadPercentage, 0, greenConsoleColor, 0, 2.0f);
+		}
 
 		if (just_action2)
 		{
@@ -139,7 +145,7 @@ void onTick( CBlob@ this )
 				this.Sync("has_ord", isServer());
 			}
 
-			if (!hasCurrentOrdinance || cooldown > 0) // playing annoying no ammo sound
+			if (!canFire) // playing annoying no ammo sound
 			{
 				failedLaunchSound(this, ismyplayer);
 			}
@@ -266,7 +272,8 @@ void onTick( CBlob@ this )
 					if (launches.length > 0)
 					{
 						ShootOrdinance( this, launches );
-						this.set_u32(launchCooldownString, addedCooldown); //add cumulative cooldown
+						launcher.max_cooldown = addedCooldown; //for reload circle logic
+						launcher.cooldown = addedCooldown; //add cumulative cooldown
 						launcher.found_targets_id.clear(); //clear list, already fired
 					}
 				}

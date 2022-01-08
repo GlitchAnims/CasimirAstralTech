@@ -57,8 +57,8 @@ class MissileInfo
 
 shared class LauncherInfo
 {
-	s8 charge_time;
-	u8 charge_state;
+	u32 cooldown;
+	u32 max_cooldown;
 	bool has_ordinance;
 	u8 stab_delay;
 	u8 fletch_cooldown;
@@ -79,8 +79,8 @@ shared class LauncherInfo
 
 	LauncherInfo()
 	{
-		charge_time = 0;
-		charge_state = 0;
+		cooldown = 0;
+		max_cooldown = 0;
 		has_ordinance = false;
 		stab_delay = 0;
 		fletch_cooldown = 0;

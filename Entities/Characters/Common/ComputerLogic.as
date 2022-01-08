@@ -422,7 +422,7 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 		makeTargetSquare(targetPos, 0.0f, Vec2f(8.0f, 8.0f), 4.0f, 1.0f); //target acquired square
 	}
 
-	ownerBlob.set("launcherInfo", @launcher);
+	//ownerBlob.set("launcherInfo", @launcher);
 }
 
 void updateInventoryCPU( CBlob@ this )
