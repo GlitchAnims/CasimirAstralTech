@@ -1,9 +1,5 @@
 enum EntityHash
 {
-	//other entities
-	_ice_prison = -286128466,
-	//_battering_ram = ,
-
 	//characters
 	_fighter = 2036404098,
 	_interceptor = -1769183340,
@@ -25,34 +21,9 @@ enum EntityHash
 	_missile_emp = 1566838222,
 	_missile_flare = -1839130808,
 
-	/*
-	_wizard = ,
-	_wizard = ,
-	_wizard = ,
-	_wizard = ,
-	*/
-	
-};
+	_mat_missile_aa = -1277748759,
+	_mat_missile_cruise = 2039528488,
+	_mat_missile_emp = -229992269,
+	_mat_missile_flare = -1189143355,
 
-/*
-//all IDs
-	const int _wizard = ;
-	const int _necromancer = ;
-	const int _druid = ;
-	const int _swordcaster = ;
-	const int _entropist = ;
-	const int _knight = ;
-	const int _archer = ;
-	const int _builder = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-	const int _wizard = ;
-*/
+};

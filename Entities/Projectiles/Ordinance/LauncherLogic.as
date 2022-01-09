@@ -59,7 +59,6 @@ void onInit( CBlob@ this )
 	this.Tag("launcher");
 }
 
-
 void onTick( CBlob@ this )
 {
 	LauncherInfo@ launcher;

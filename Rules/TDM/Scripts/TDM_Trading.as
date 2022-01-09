@@ -83,6 +83,9 @@ void MakeTradeMenu(CBlob@ trader)
 	addItemForCoin(trader, "Navigational Computer", cost_navcomp, true, "$nav_comp$", "nav_comp", Descriptions::nav_comp);
 
 	addItemForCoin(trader, "AA Missiles", cost_aa, true, "$mat_arrows$", "mat_missile_aa", Descriptions::mat_missile_aa);
+	addItemForCoin(trader, "Cruise Missiles", cost_cruise, true, "$mat_waterarrows$", "mat_missile_cruise", Descriptions::mat_missile_cruise);
+	addItemForCoin(trader, "EMP Missiles", cost_emp, true, "$mat_firearrows$", "mat_missile_emp", Descriptions::mat_missile_emp);
+	addItemForCoin(trader, "Flares", cost_flare, true, "$mat_bombarrows$", "mat_missile_flare", Descriptions::mat_missile_flare);
 }
 
 // load coins amount
