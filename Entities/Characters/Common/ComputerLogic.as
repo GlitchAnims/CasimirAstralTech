@@ -302,10 +302,10 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 		break;
 
 		case OrdinanceType::cruise:
-		{
+//		{
 			//TODO global target spotting
-		}
-		break;
+//		}
+//		break;
 
 		case OrdinanceType::emp: //cursor radius acquisition
 		{
