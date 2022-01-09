@@ -59,6 +59,12 @@ void MakeTradeMenu(CBlob@ trader)
 	s32 cost_ballistics = cfg.read_s32("cost_ballistics", 40);
 	s32 cost_navcomp = cfg.read_s32("cost_navcomp", 30);
 
+	//ordinance
+	s32 cost_aa = cfg.read_s32("cost_aa", 20);
+	s32 cost_cruise = cfg.read_s32("cost_cruise", 30);
+	s32 cost_emp = cfg.read_s32("cost_emp", 20);
+	s32 cost_flare = cfg.read_s32("cost_flare", 10);
+
 	s32 menu_width = cfg.read_s32("trade_menu_width", 3);
 	s32 menu_height = cfg.read_s32("trade_menu_height", 5);
 
@@ -75,6 +81,8 @@ void MakeTradeMenu(CBlob@ trader)
 	//CPUs
 	addItemForCoin(trader, "Ballistics Calculator", cost_ballistics, true, "$ballistics_calc$", "ballistics_calc", Descriptions::ballistics_calc);
 	addItemForCoin(trader, "Navigational Computer", cost_navcomp, true, "$nav_comp$", "nav_comp", Descriptions::nav_comp);
+
+	addItemForCoin(trader, "AA Missiles", cost_aa, true, "$mat_arrows$", "mat_missile_aa", Descriptions::mat_missile_aa);
 }
 
 // load coins amount

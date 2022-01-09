@@ -94,5 +94,11 @@ namespace Descriptions
 
 	//CPUs
 	ballistics_calc 			= getTranslatedString("Highly advanced and accurate ballistics prediction system. Smallships only. Consumes charge."),
-	nav_comp 					= getTranslatedString("Provides navigational data for the ship it is installed in and all ships in range, both friend and foe. \nWhile it is less helpful than the Ballistics Calculator, it works on any ship and it does not require charge.");
+	nav_comp 					= getTranslatedString("Provides navigational data for the ship it is installed in and all ships in range, both friend and foe. \nWhile it is less helpful than the Ballistics Calculator, it works on any ship and it does not require charge."),
+
+	//Ordinance
+	mat_missile_aa 				= getTranslatedString("Anti-Air Missile ordinance. Useful against swarms of enemies."),
+	mat_missile_cruise 			= getTranslatedString("High yield, long-range warhead. Damages and disables multiple enemies within explosion radius. Direct hits are often lethal."),
+	mat_missile_emp 			= getTranslatedString("Produces a strong electromagnetic pulse on detonation."),
+	mat_missile_flare 			= getTranslatedString("Multi-purpose disposable flare munitions. Strong targeting deterrant.");
 }

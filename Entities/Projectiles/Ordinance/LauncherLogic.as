@@ -30,7 +30,7 @@ void onInit( CBlob@ this )
 
 		case _scout:
 		{
-			u8[] ord = {0, 1};
+			u8[] ord = {1, 3};
 			launcher.launchableOrdinance.opAssign( ord );
 		}
 		break;
@@ -174,6 +174,7 @@ void onTick( CBlob@ this )
 
 					int targetAmount = launcher.found_targets_id.length;
 					bool noTarget = targetAmount <= 0;
+					const bool small = this.hasTag(smallTag);
 
 					OrdinanceLaunchInfo[] launches;
 
@@ -191,7 +192,7 @@ void onTick( CBlob@ this )
 								f32 leftMult = leftCannon ? 1.0f : -1.0f;
 
 								Vec2f launchpos = Vec2f(0, 8.0f*leftMult);
-								f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+								f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
 								Vec2f launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
 								launchInfo.launch_pos 	= launchpos+thisPos;
 								launchInfo.launch_vec 	= launchVec+thisVel;
@@ -210,7 +211,7 @@ void onTick( CBlob@ this )
 
 									u16 targetID = launcher.found_targets_id[i];
 									Vec2f launchpos = Vec2f(0, 8.0f*leftMult);
-									f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+									f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
 									Vec2f launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
 									launchInfo.target_ID 	= targetID;
 									launchInfo.launch_pos 	= launchpos+thisPos;
@@ -228,7 +229,7 @@ void onTick( CBlob@ this )
 
 									//targetID = launcher.found_targets_id[i];
 									launchpos = Vec2f(0, 8.0f*leftMult);
-									//launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+									//launchAngle = small ? blobAngle : blobAngle+90.0f;
 									launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
 									launchInfo.target_ID 	= targetID;
 									launchInfo.launch_pos 	= launchpos+thisPos;
@@ -253,7 +254,7 @@ void onTick( CBlob@ this )
 							}
 
 							u16 targetID = launcher.found_targets_id[0];
-							f32 launchAngle = this.hasTag(smallTag) ? blobAngle : blobAngle+90.0f;
+							f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
 							Vec2f launchVec = Vec2f(1.0f, 0).RotateByDegrees(launchAngle);
 							launchInfo.target_ID 	= targetID;
 							launchInfo.launch_pos 	= thisPos;
@@ -271,7 +272,14 @@ void onTick( CBlob@ this )
 
 						case OrdinanceType::flare:
 						{
-							
+							f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
+							Vec2f launchpos = Vec2f(-4.0f, 0).RotateByDegrees(launchAngle);
+							launchAngle += 30.0f * (1.0f - ( 2.0f * _launcher_logic_r.NextFloat() ));
+							Vec2f launchVec = Vec2f(-1.0f, 0).RotateByDegrees(launchAngle);
+							launchInfo.launch_pos 	= launchpos+thisPos;
+							launchInfo.launch_vec 	= launchVec+thisVel;
+
+							launches.push_back(launchInfo);
 						}
 						break;
 
@@ -409,8 +417,6 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		Vec2f blobPos;
 		Vec2f blobVel;
 
-		u8 consumedAmmo = 0;
-
 		while (params.saferead_u8(ordinanceType) && params.saferead_u16(targetID) && params.saferead_Vec2f(blobPos) && params.saferead_Vec2f(blobVel)) //immediately stops if something fails
 		{
 			if (blobPos == Vec2f_zero || blobVel == Vec2f_zero)
@@ -426,12 +432,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			{
 				CreateOrdinance(this, ordinanceType, targetID, blobPos, blobVel);
 			}
-			consumedAmmo++;
-		}
-
-		if (consumedAmmo > 0)
-		{
-			this.TakeBlob(ordinanceTypeNames[ ordinanceType ], consumedAmmo);
+			this.TakeBlob(ordinanceTypeNames[ ordinanceType ], 1);
 		}
 	}
 	else if (cmd == this.getCommandID("cycle"))  //from standardcontrols

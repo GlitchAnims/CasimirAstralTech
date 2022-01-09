@@ -128,21 +128,21 @@ namespace OrdinanceType
 	};
 }
 
-const string[] ordinanceTypeNames = { "mat_arrows",
-                                  "mat_waterarrows",
-                                  "mat_firearrows",
-                                  "mat_bombarrows"
+const string[] ordinanceTypeNames = { "mat_missile_aa",
+                                  "mat_missile_cruise",
+                                  "mat_missile_emp",
+                                  "mat_missile_flare"
                                 };
 const string[] ordinanceBlobNames = { "missile_aa",
-                                  "railgun_shot",
-                                  "flak_shot",
-                                  "gatling_basicshot"
+                                  "missile_cruise",
+                                  "missile_emp",
+                                  "missile_flare"
                                 };
 
 const string[] ordinanceNames = { "AA Missile",
-                              "Water arrows",
-                              "Fire arrows",
-                              "Bomb arrow"
+                              "Cruise Missile",
+                              "EMP Missile",
+                              "Flare"
                             };
 
 const string[] ordinanceIcons = { "$MissileAA$",
@@ -204,7 +204,7 @@ u32 getOrdinanceCooldown(u8 type)
 {
 	switch (type)
 	{
-		case OrdinanceType::aa: return 10;
+		case OrdinanceType::aa: return 15;
 
 		case OrdinanceType::cruise: return 300;
 
