@@ -17,6 +17,7 @@ void onInit(CBlob@ this)
 
 	AddIconToken("$ballistics_calc$", "BallisticsCalculator.png", Vec2f(16, 8), 0);
 	AddIconToken("$nav_comp$", "NavComp.png", Vec2f(16, 8), 0);
+	AddIconToken("$targeting_unit$", "TargetingUnit.png", Vec2f(16, 16), 0);
 
 	/* TODO ordinance icons
 	AddIconToken("$nav_comp$", "NavComp.png", Vec2f(16, 8), 0);

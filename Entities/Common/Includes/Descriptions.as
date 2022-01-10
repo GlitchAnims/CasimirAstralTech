@@ -95,6 +95,7 @@ namespace Descriptions
 	//CPUs
 	ballistics_calc 			= getTranslatedString("Highly advanced and accurate ballistics prediction system. Smallships only. Consumes charge."),
 	nav_comp 					= getTranslatedString("Provides navigational data for the ship it is installed in and all ships in range, both friend and foe. \nWhile it is less helpful than the Ballistics Calculator, it works on any ship and it does not require charge."),
+	targeting_unit 				= getTranslatedString("Allows for multi-targeting and efficient use of ordinance munitions. Requires energy to operate, and is vulnerable to electromagnetic jamming attacks. \nNote: This CPU unit will only work on ships with an integrated ordinance launcher."),
 
 	//Ordinance
 	mat_missile_aa 				= getTranslatedString("Anti-Air Missile ordinance. Useful against swarms of enemies."),
