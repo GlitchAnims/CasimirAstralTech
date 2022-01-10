@@ -6,7 +6,7 @@
 
 const f32 rotationRingRadius = 40.0f;
 
-void smallshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor )
+void smallshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor, f32 interference = 0.0f )
 {
 	SmallshipInfo@ ship;
 	if (!hullBlob.get( "shipInfo", @ship )) 
@@ -16,6 +16,24 @@ void smallshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwn
 	Vec2f hullVel = hullBlob.getVelocity();
 	f32 hullAngle = hullBlob.getAngleDegrees();
 	hullAngle = Maths::Abs(hullAngle) % 360;
+
+	if (interference > 0)
+	{
+		//position interference
+		f32 xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		f32 yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f posInterference = Vec2f(xInterference * maxPosInterference, yInterference * maxPosInterference) * interference;
+		//velocity vector interference
+		xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f velInterference = Vec2f(xInterference * maxVelInterference, yInterference * maxVelInterference) * interference;
+		//angle interference
+		f32 angleInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		
+		hullPos += posInterference;
+		hullVel += velInterference;
+		hullAngle += angleInterference * maxAngleInterference * interference;
+	}
 
 	if (!isTrueOwner) //only draw aim line for ships that are not the owner of the CPU
 	{
@@ -72,7 +90,7 @@ void smallshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwn
 	//drawParticleLine(hullPos, thrustPIP, Vec2f_zero, color, 0, 3.0f); //thrust line
 }
 
-void mediumshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor )
+void mediumshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOwner = false, SColor color = greenConsoleColor, f32 interference = 0.0f )
 {
 	MediumshipInfo@ ship;
 	if (!hullBlob.get( "shipInfo", @ship )) 
@@ -83,11 +101,28 @@ void mediumshipNavigation( CBlob@ hullBlob, u32 ticksASecond = 30, bool isTrueOw
 	f32 hullAngle = hullBlob.getAngleDegrees() + 270.0f;
 	hullAngle = Maths::Abs(hullAngle) % 360;
 
+	if (interference > 0)
+	{
+		//position interference
+		f32 xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		f32 yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f posInterference = Vec2f(xInterference * maxPosInterference, yInterference * maxPosInterference) * interference;
+		//velocity vector interference
+		xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f velInterference = Vec2f(xInterference * maxVelInterference, yInterference * maxVelInterference) * interference;
+		//angle interference
+		f32 angleInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		
+		hullPos += posInterference;
+		hullVel += velInterference;
+		hullAngle += angleInterference * maxAngleInterference * interference;
+	}
+
 	if (!isTrueOwner) //only draw aim line for ships that are not the owner of the CPU
 	{
 		drawSmallAimLine( hullPos, hullAngle, color );
 	}
-	
 
 	Vec2f travelVec = hullVel * getTicksASecond(); //gets a full second of travel
 	f32 shipSpeed = hullVel.getLength();

@@ -51,6 +51,7 @@ void onInit( CBlob@ this )
 
 		default: break;
 	}
+	launcher.ordinance_type = launcher.launchableOrdinance[0];
 	this.set("launcherInfo", @launcher);
 
 	this.addCommandID(fire_ordinance_command_ID);

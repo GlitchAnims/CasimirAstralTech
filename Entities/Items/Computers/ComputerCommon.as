@@ -9,6 +9,14 @@ const string hasTargetingString = "has_targeting";
 
 const string targetingTimerString = "targeting_timer";
 const string currentTargetIDString = "current_target_ID";
+const string interferenceMultString = "interference_mult";
+
+const f32 maxPosInterference = 32.0f;
+const f32 maxVelInterference = 3.0f;
+const f32 maxAngleInterference = 30.0f;
+const f32 maxAimPosInterference = 64.0f;
+
+Random _computer_logic_r(53991);
 
 class BallisticsOwnerInfo
 {
@@ -39,6 +47,8 @@ class ComputerBlobInfo
 	Vec2f current_vel;
 	int team_num;
 	f32 blob_angle;
+	f32 interference_mult;
+	Vec2f current_aimpos;
 	
 	ComputerBlobInfo()
 	{
@@ -46,6 +56,8 @@ class ComputerBlobInfo
 		current_vel = Vec2f_zero;
 		team_num = 0;
 		blob_angle = 0;
+		interference_mult = 0.0f;
+		current_aimpos = Vec2f_zero;
 	}
 }
 

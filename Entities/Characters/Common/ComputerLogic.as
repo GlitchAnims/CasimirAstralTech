@@ -9,8 +9,6 @@
 #include "NavComp.as"
 #include "BallisticsCalculator.as"
 
-Random _computer_logic_r(53991);
-
 void onInit(CBlob@ this)
 {
 	//setup all calcs to false
@@ -22,6 +20,7 @@ void onInit(CBlob@ this)
 	{
 		this.set_u32(targetingTimerString, 0);
 		this.set_u16(currentTargetIDString, 0);
+		this.set_f32(interferenceMultString, 0.0f);
 	}
 	/*
 	ComputerTargetInfo compInfo;
@@ -51,7 +50,8 @@ void onTick(CBlob@ this)
 		updateInventoryCPU( this );
 	}
 
-	//TODO alarm system for being targeted and having missiles locked on self
+	if (!my_player && !isServer()) //only server and player
+	{ return; }
 
 	if (this.get_s32(absoluteCharge_string) <= 0) //no charge? fucked.
 	{ return; }
@@ -59,6 +59,7 @@ void onTick(CBlob@ this)
 	const bool hasNavComp = this.get_bool(hasNavCompString);
 	const bool hasBallistics = this.get_bool(hasBallisticsString);
 	const bool hasTargeting = this.get_bool(hasTargetingString);
+	const f32 interference = this.get_f32(interferenceMultString);
 
 	if (!hasNavComp && !hasBallistics && !hasTargeting)
 	{ return; }
@@ -68,12 +69,40 @@ void onTick(CBlob@ this)
 	int teamNum = this.getTeamNum();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = Maths::Abs(blobAngle) % 360;
+	Vec2f aimPos = this.getAimPos();
+
+	if (interference > 0)
+	{
+		//position interference
+		f32 xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		f32 yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f posInterference = Vec2f(xInterference * maxPosInterference, yInterference * maxPosInterference) * interference;
+		//velocity vector interference
+		xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f velInterference = Vec2f(xInterference * maxVelInterference, yInterference * maxVelInterference) * interference;
+		//angle interference
+		f32 angleInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		//aimpos interference
+		xInterference = 1.0f - (2.0f * _computer_logic_r.NextFloat());
+		yInterference =	1.0f - (2.0f * _computer_logic_r.NextFloat());
+		Vec2f aimInterference = Vec2f(xInterference * maxAimPosInterference, yInterference * maxAimPosInterference) * interference;
+		
+		thisPos += posInterference;
+		thisVel += velInterference;
+		blobAngle += angleInterference * maxAngleInterference * interference;
+		aimPos += aimInterference;
+
+		this.set_f32(interferenceMultString, interference - 0.005f);
+	}
 
 	ComputerBlobInfo ownerInfo;
 	ownerInfo.current_pos = thisPos;
 	ownerInfo.current_vel = thisVel;
 	ownerInfo.team_num = teamNum;
 	ownerInfo.blob_angle = blobAngle;
+	ownerInfo.interference_mult = interference;
+	ownerInfo.current_aimpos = aimPos;
 
 	if (hasNavComp)
 	{
@@ -141,6 +170,7 @@ void runNavigation( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNe
 	if (!ownerBlob.isMyPlayer()) //if not my player, do not do the calcs - CUTOFF POINT
 	{ return; }
 
+	const f32 interference = ownerInfo.interference_mult;
 	const int teamNum = ownerInfo.team_num;
 
 	CBlob@[] hulls;
@@ -163,11 +193,11 @@ void runNavigation( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNe
 
 		if (b.hasTag(smallTag))
 		{
-			smallshipNavigation( b, ticksASecond, b is ownerBlob, color );
+			smallshipNavigation( b, ticksASecond, b is ownerBlob, color, interference );
 		}
 		else if (b.hasTag(mediumTag))
 		{
-			mediumshipNavigation( b, ticksASecond, b is ownerBlob, color );
+			mediumshipNavigation( b, ticksASecond, b is ownerBlob, color, interference );
 		}
 	}
 }
@@ -243,6 +273,14 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 	Vec2f ownerVel = ownerInfo.current_vel;
 	int teamNum = ownerInfo.team_num;
 	f32 ownerAngle = ownerInfo.blob_angle;
+	const f32 interference = ownerInfo.interference_mult;
+	Vec2f ownerAimpos = ownerInfo.current_aimpos;
+
+	if (!ownerBlob.hasTag(smallTag)) //ignores ship's angle if not a smallship
+	{
+		Vec2f aimVec = ownerAimpos - ownerPos;
+		ownerAngle = -aimVec.getAngleDegrees();
+	}
 
 	HitInfo@[] hitInfos;
 	
@@ -309,7 +347,6 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 
 		case OrdinanceType::emp: //cursor radius acquisition
 		{
-			Vec2f ownerAimpos = ownerBlob.getAimPos();
 			const f32 range = 64.0f;
 
 			u16[] validBlobIDs; //detectable enemies go here

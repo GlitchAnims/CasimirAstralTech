@@ -11,7 +11,7 @@ Random _aa_missile_r(12231);
 
 const f32 damage = 0.5f;
 const f32 searchRadius = 128.0f;
-const f32 radius = 24.0f;
+const f32 radius = 32.0f;
 
 void onInit(CBlob@ this)
 {
@@ -79,7 +79,7 @@ void onTick(CBlob@ this)
 		this.setAngleDegrees(-thisVel.getAngleDegrees());
 		this.set_bool(firstTickString, false);
 	}
-
+/*
 	HitInfo@[] hitInfos;
 	bool hasHit = map.getHitInfosFromRay(thisPos, -thisVel.getAngleDegrees(), travelDist, this, @hitInfos);
 	if (hasHit) //hitray scan
@@ -107,99 +107,11 @@ void onTick(CBlob@ this)
 			return;
 		}
 	}
-
+*/
 	MissileInfo@ missile;
 	if (!this.get( "missileInfo", @missile )) 
 	{ return; }
-
-	u16 targetBlobID = this.get_u16(targetNetIDString);
-	CBlob@ targetBlob = getBlobByNetworkID(targetBlobID);
-	if ( targetBlobID == 0 || targetBlob == null)
-	{
-		if (is_server)
-		{
-			CBlob@[] targetCandidates;
-			CBlob@[] blobsInRadius;
-			map.getBlobsInRadius(thisPos, searchRadius, @blobsInRadius); //possible enemies in radius
-			for (uint i = 0; i < blobsInRadius.length; i++)
-			{
-				CBlob@ b = blobsInRadius[i];
-				if (b is null)
-				{ continue; }
-
-				if (b.getTeamNum() == teamNum)
-				{ continue; }
-
-				if ((b.hasTag(smallTag) || b.hasTag(mediumTag)) && !b.hasTag("dead")) //only small and medium ships
-				{ 
-					targetCandidates.push_back(b); //into the list
-				}
-			}
-			u16 candidatesLength = targetCandidates.length();
-			if (candidatesLength > 0)
-			{
-				CBlob@ selectedCandidate = targetCandidates[XORRandom(candidatesLength)]; //selects one from list
-
-				this.set_u16(targetNetIDString, selectedCandidate.getNetworkID());
-				this.Sync(targetNetIDString, true);
-			}
-		}
-
-		turnOffAllThrust( missile );
-		return;
-	}
-
-	//homing logic
-	f32 thisReducedSpeed = missile.max_speed*0.5f; //arbitrary travel speed. TODO actual homing logic
-
-	Vec2f targetPos = targetBlob.getPosition();
-	Vec2f bVel = targetBlob.getVelocity() - (thisVel); //compensates for missile speed
-
-	Vec2f targetVec = targetPos - thisPos;
-	f32 targetDist = targetVec.getLength(); //distance to target
-
-	if (targetDist > searchRadius) //lose target logic
-	{
-		u32 hasTargetTicks = this.get_u32(hasTargetTicksString);
-		if (hasTargetTicks < missile.lose_target_ticks)
-		{
-			this.set_u32(hasTargetTicksString, hasTargetTicks + 1); //up by one
-		}
-		else //set target to null and stop the code
-		{
-			this.set_u16(targetNetIDString, 0);
-			if (is_server)
-			{ this.Sync(targetNetIDString, true); }
-			
-			this.set_u32(hasTargetTicksString, 0);
-			return;
-		}
-	}
-	else //resets lose target timer if in range
-	{
-		this.set_u32(hasTargetTicksString, 0); 
-		if (is_server)
-		{ this.Sync(hasTargetTicksString, true); }
-	}
-
-	if (is_server) //server only detonation
-	{
-		if (targetDist < radius*0.8f) //if closer than 80% of explosion radius, detonate.
-		{
-			this.server_Die();
-			return;
-		}
-	}
-	
-	f32 travelTicks = targetDist / thisReducedSpeed; //theoretical ticks required to get to the target (again, TODO)
-	Vec2f futureTargetPos = targetPos + (bVel*travelTicks); //matches future target pos with travel time
-	
-	//this block of code re-does the calculation to be more exact
-	targetVec = futureTargetPos - thisPos;
-	targetDist = targetVec.getLength();
-	travelTicks = targetDist / thisReducedSpeed;
-	futureTargetPos = targetPos + (bVel*travelTicks);
-
+/*
 	Vec2f thrustVec = futureTargetPos - thisPos;
 	Vec2f thrustNorm = thrustVec;
 	thrustNorm.Normalize();
@@ -218,25 +130,40 @@ void onTick(CBlob@ this)
 	this.setAngleDegrees(-thrustAngle);
 	missile.forward_thrust = true;
 
-	if (!is_client)
-	{ return; }
-	const f32 gameTimeVariation = gameTime + this.getNetworkID();
-	const f32 targetSquareAngle = (gameTimeVariation * 10.1f) % 360;
-	
-	doThrustParticles(thisPos, -thrustNorm*2.0f); //exhaust particles
-	
-	f32 targetAngle = targetBlob.getAngleDegrees();
-	//client UI and sounds
-	CPlayer@ ownerPlayer = this.getDamageOwnerPlayer();
-	if (ownerPlayer != null && ownerPlayer.isMyPlayer()) //player who launched missiles only
+	doThrustParticles(thisPos, -thrustNorm*2.0f); //exhaust particles - Client only
+*/	
+	const u16 thisNetID = this.getNetworkID();
+	const f32 gameTimeVariation = gameTime + thisNetID;
+	if (gameTimeVariation % 30 == 0) //Interference, Once a second
 	{
-		makeBlobTriangle(targetPos, targetAngle, Vec2f(4.0f, 3.0f)); //enemy triangle
-		makeTargetSquare(futureTargetPos, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f); //target acquired square
-	}
-	CPlayer@ targetPlayer = targetBlob.getPlayer();
-	if (targetPlayer != null && targetPlayer.isMyPlayer()) //targeted player only (if any)
-	{
-		makeTargetSquare(futureTargetPos, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f, redConsoleColor); //target acquired square
+		CBlob@[] blobsInRadius;
+		map.getBlobsInRadius(thisPos, radius, @blobsInRadius);
+		for (uint i = 0; i < blobsInRadius.length; i++)
+		{
+			CBlob@ b = blobsInRadius[i];
+			if (b is null)
+			{ continue; }
+
+			if (b.getTeamNum() == teamNum) //enemies only
+			{ continue; }
+
+			if (b.hasTag("player") && !b.hasTag("dead"))
+			{
+				if (!b.isMyPlayer())
+				{ continue; }
+				f32 targetDist = this.getDistanceTo(b);
+				f32 percentage = 1.0f - (targetDist/radius);
+
+				if (b.get_f32(interferenceMultString) < percentage) //inflict interference only if below threshold
+				{
+					b.set_f32(interferenceMultString, percentage);
+				}
+			}
+			else if (b.hasTag("projectile"))
+			{
+				b.set_u16(targetNetIDString, thisNetID);
+			}
+		} //for loop end
 	}
 }
 
