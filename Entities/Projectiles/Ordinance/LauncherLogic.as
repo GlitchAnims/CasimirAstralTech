@@ -76,13 +76,15 @@ void onTick( CBlob@ this )
 			responsible = p.isBot();
 		}
 	}
-	//
-	CSprite@ sprite = this.getSprite();
+
+	//CSprite@ sprite = this.getSprite();
 	bool hasCurrentOrdinance = launcher.has_ordinance;
-	bool has_aa = hasOrdinance(this, OrdinanceType::aa);
+	u8 defaultOrd = launcher.launchableOrdinance[0];
+	bool has_defaultOrd = hasOrdinance(this, defaultOrd);
 	u32 cooldown = launcher.cooldown;
 	u32 cooldownCap = launcher.max_cooldown;
 	const bool pressed_action2 = this.isKeyPressed(key_action2);
+	const u8 type = launcher.ordinance_type;
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
@@ -100,11 +102,11 @@ void onTick( CBlob@ this )
 		{
 			hasCurrentOrdinance = hasOrdinance(this);
 
-			if (!hasCurrentOrdinance && has_aa)
+			if (!hasCurrentOrdinance && has_defaultOrd)
 			{
 				// set back to default
-				launcher.ordinance_type = OrdinanceType::aa;
-				hasCurrentOrdinance = has_aa;
+				launcher.ordinance_type = defaultOrd;
+				hasCurrentOrdinance = has_defaultOrd;
 			}
 		}
 
@@ -123,7 +125,7 @@ void onTick( CBlob@ this )
 		const bool canFire = hasCurrentOrdinance && reloaded;
 
 		//reload circle at mouse pos
-		if (!canFire && ismyplayer && cooldownCap != 0)
+		if (!reloaded && ismyplayer && cooldownCap != 0)
 		{
 			f32 reloadPercentage = float(cooldown) / float(cooldownCap);
 			Vec2f aimPos = this.getAimPos();
@@ -134,10 +136,10 @@ void onTick( CBlob@ this )
 		{
 			hasCurrentOrdinance = hasOrdinance(this);
 
-			if (!hasCurrentOrdinance && has_aa) //switch to default ammo if current ammo is empty
+			if (!hasCurrentOrdinance && has_defaultOrd) //switch to default ammo if current ammo is empty
 			{
-				launcher.ordinance_type = OrdinanceType::aa;
-				hasCurrentOrdinance = has_aa;
+				launcher.ordinance_type = defaultOrd;
+				hasCurrentOrdinance = has_defaultOrd;
 			}
 
 			if (responsible)
@@ -157,11 +159,14 @@ void onTick( CBlob@ this )
 					failedLaunchEffect(this, "Reloading...");
 				}
 			}
-			else //has ammo
+		}
+
+		if (just_action2 || type == OrdinanceType::flare) //continually fire flares
+		{
+			if (canFire) //has ammo
 			{
 				if (ismyplayer)
 				{
-					const u8 type = launcher.ordinance_type;
 					u32 addedCooldown = getOrdinanceCooldown(type);
 
 					u8 ammoCount = this.getBlobCount(ordinanceTypeNames[type]);
@@ -274,7 +279,7 @@ void onTick( CBlob@ this )
 							f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
 							Vec2f launchpos = Vec2f(-4.0f, 0).RotateByDegrees(launchAngle);
 							launchAngle += 30.0f * (1.0f - ( 2.0f * _launcher_logic_r.NextFloat() ));
-							Vec2f launchVec = Vec2f(-1.0f, 0).RotateByDegrees(launchAngle);
+							Vec2f launchVec = Vec2f(-3.0f, 0).RotateByDegrees(launchAngle);
 							launchInfo.launch_pos 	= launchpos+thisPos;
 							launchInfo.launch_vec 	= launchVec+thisVel;
 
@@ -341,9 +346,9 @@ void onCreateInventoryMenu(CBlob@ this, CBlob@ forBlob, CGridMenu @gridmenu)
 	{ return; }
 
 	AddIconToken("$MissileAA$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 0, this.getTeamNum());
-	AddIconToken("$MissileCruise$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 1, this.getTeamNum());
-	AddIconToken("$MissileEMP$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 2, this.getTeamNum());
-	AddIconToken("$MissileFlare$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 3, this.getTeamNum());
+	AddIconToken("$MissileCruise$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 3, this.getTeamNum());
+	AddIconToken("$MissileEMP$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 1, this.getTeamNum());
+	AddIconToken("$MissileFlare$", "Entities/Characters/Archer/ArcherIcons.png", Vec2f(16, 32), 2, this.getTeamNum());
 
 	this.ClearGridMenusExceptInventory();
 	Vec2f pos(gridmenu.getUpperLeftPosition().x + 0.5f * (gridmenu.getLowerRightPosition().x - gridmenu.getUpperLeftPosition().x),
