@@ -85,8 +85,8 @@ void MakeTradeMenu(CBlob@ trader)
 	addItemForCoin(trader, "Targeting Unit", cost_targeting, true, "$targeting_unit$", "targeting_unit", Descriptions::targeting_unit);
 
 	addItemForCoin(trader, "AA Missiles", cost_aa, true, "$mat_arrows$", "mat_missile_aa", Descriptions::mat_missile_aa);
-	addItemForCoin(trader, "Cruise Missiles", cost_cruise, true, "$mat_bombarrows$", "mat_missile_cruise", Descriptions::mat_missile_cruise);
-	addItemForCoin(trader, "EMP Missiles", cost_emp, true, "$mat_waterarrows$", "mat_missile_emp", Descriptions::mat_missile_emp);
+	//addItemForCoin(trader, "Cruise Missiles", cost_cruise, true, "$mat_bombarrows$", "mat_missile_cruise", Descriptions::mat_missile_cruise);
+	//addItemForCoin(trader, "EMP Missiles", cost_emp, true, "$mat_waterarrows$", "mat_missile_emp", Descriptions::mat_missile_emp);
 	addItemForCoin(trader, "Flares", cost_flare, true, "$mat_firearrows$", "mat_missile_flare", Descriptions::mat_missile_flare);
 }
 
