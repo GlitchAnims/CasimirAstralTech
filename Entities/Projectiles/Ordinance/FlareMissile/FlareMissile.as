@@ -32,7 +32,7 @@ void onInit(CBlob@ this)
 	if (shape != null)
 	{
 		shape.getConsts().mapCollisions = true;
-		shape.getConsts().bullet = true;
+		shape.getConsts().bullet = false;
 		shape.getConsts().net_threshold_multiplier = 4.0f;
 		shape.SetGravityScale(0.0f);
 	}
@@ -62,57 +62,10 @@ void onTick(CBlob@ this)
 	const bool is_client = isClient();
 	const bool is_server = isServer();
 
-/*
-	HitInfo@[] hitInfos;
-	bool hasHit = map.getHitInfosFromRay(thisPos, -thisVel.getAngleDegrees(), travelDist, this, @hitInfos);
-	if (hasHit) //hitray scan
-	{
-		for (uint i = 0; i < hitInfos.length; i++)
-		{
-			HitInfo@ hi = hitInfos[i];
-			CBlob@ b = hi.blob;
-			if (b == null) // check
-			{ continue; }
-			
-			if (!doesCollideWithBlob(this, b))
-			{ continue; }
-
-			thisPos = hi.hitpos;
-
-			if (b.hasTag("barrier"))
-			{
-				if(doesBypassBarrier(b, thisPos, thisVel))
-				{ continue; }
-			}
-
-			this.setPosition(thisPos);
-			this.server_Die();
-			return;
-		}
-	}
-*/
 	MissileInfo@ missile;
 	if (!this.get( "missileInfo", @missile )) 
 	{ return; }
-/*
-	Vec2f thrustVec = futureTargetPos - thisPos;
-	Vec2f thrustNorm = thrustVec;
-	thrustNorm.Normalize();
-	f32 thrustAngle = thrustNorm.getAngleDegrees();
 
-	Vec2f newVel = thisVel + (thrustNorm * missile.main_engine_force);
-
-	f32 maxSpeed = missile.max_speed;
-	if (maxSpeed != 0 && newVel.getLength() > maxSpeed) //max speed logic - 0 means no cap
-	{
-		newVel.Normalize();
-		newVel *= maxSpeed;
-	}
-
-	this.setVelocity(newVel);
-	this.setAngleDegrees(-thrustAngle);
-	missile.forward_thrust = true;
-*/	
 	if (!missile.forward_thrust)
 	{
 		missile.forward_thrust = true;
@@ -145,7 +98,7 @@ void onTick(CBlob@ this)
 					b.set_f32(interferenceMultString, percentage);
 				}
 			}
-			else if (b.hasTag("projectile"))
+			else if (b.hasTag(quickHomingTag))
 			{
 				b.set_u16(targetNetIDString, thisNetID);
 			}
@@ -189,7 +142,8 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 
 	if (blob.hasTag("barrier"))
 	{
-		if(doesBypassBarrier(blob, collisionPos, thisVel))
+		Vec2f blobVel = blob.getVelocity();
+		if(doesBypassBarrier(blob, collisionPos, thisVel - blobVel))
 		{ return; }
 	}
 

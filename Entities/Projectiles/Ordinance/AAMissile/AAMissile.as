@@ -40,6 +40,7 @@ void onInit(CBlob@ this)
 
 	this.Tag("projectile");
 	this.Tag("hull");
+	this.Tag(quickHomingTag);
 
 	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 

@@ -5,6 +5,8 @@
 const string targetNetIDString = "target_net_ID";
 const string hasTargetTicksString = "has_target_ticks";
 
+const string quickHomingTag = "quick_homing";
+
 namespace AAMissileParams
 {
 	// movement general
