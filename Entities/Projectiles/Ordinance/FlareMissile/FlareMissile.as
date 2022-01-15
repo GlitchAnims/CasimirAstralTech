@@ -11,7 +11,7 @@ Random _aa_missile_r(12231);
 
 const f32 damage = 0.5f;
 const f32 searchRadius = 128.0f;
-const f32 radius = 32.0f;
+const f32 radius = 64.0f;
 
 void onInit(CBlob@ this)
 {
@@ -24,8 +24,7 @@ void onInit(CBlob@ this)
 	missile.lose_target_ticks 			= AAMissileParams::lose_target_ticks;
 	this.set("missileInfo", @missile);
 
-	this.server_SetTimeToDie(2);
-	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
+	this.server_SetTimeToDie(10);
 	this.set_u32(hasTargetTicksString, 0);
 	this.set_u16(targetNetIDString, 0);
 
@@ -40,8 +39,6 @@ void onInit(CBlob@ this)
 
 	this.Tag("projectile");
 	this.Tag("hull");
-
-	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
 	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
@@ -65,20 +62,6 @@ void onTick(CBlob@ this)
 	const bool is_client = isClient();
 	const bool is_server = isServer();
 
-	if (this.get_bool(firstTickString))
-	{
-		if (is_client)
-		{
-			doMuzzleFlash(thisPos, thisVel);
-		}
-		if (is_server) //bullet range moderation
-		{
-			float lifeTime = this.get_f32(shotLifetimeString);
-			this.server_SetTimeToDie(lifeTime);
-		}
-		this.setAngleDegrees(-thisVel.getAngleDegrees());
-		this.set_bool(firstTickString, false);
-	}
 /*
 	HitInfo@[] hitInfos;
 	bool hasHit = map.getHitInfosFromRay(thisPos, -thisVel.getAngleDegrees(), travelDist, this, @hitInfos);
@@ -129,9 +112,12 @@ void onTick(CBlob@ this)
 	this.setVelocity(newVel);
 	this.setAngleDegrees(-thrustAngle);
 	missile.forward_thrust = true;
-
-	doThrustParticles(thisPos, -thrustNorm*2.0f); //exhaust particles - Client only
 */	
+	if (!missile.forward_thrust)
+	{
+		missile.forward_thrust = true;
+	}
+
 	const u16 thisNetID = this.getNetworkID();
 	const f32 gameTimeVariation = gameTime + thisNetID;
 	if (gameTimeVariation % 30 == 0) //Interference, Once a second
@@ -165,80 +151,6 @@ void onTick(CBlob@ this)
 			}
 		} //for loop end
 	}
-}
-
-void onDie( CBlob@ this )
-{
-	Vec2f thisPos = this.getPosition();
-
-	makeMissileEffect(thisPos); //boom effect
-	makeMissileDamage(this, thisPos); //AOE damage
-}
-
-void doThrustParticles(Vec2f pPos = Vec2f_zero, Vec2f pVel = Vec2f_zero)
-{
-	if (!isClient())
-	{ return; }
-
-	if (pPos == Vec2f_zero || pVel == Vec2f_zero)
-	{ return; }
-
-	if (_aa_missile_r.NextFloat() > 0.8f) //percentage chance of spawned particles
-	{ return; }
-
-	f32 pAngle = 360.0f * _aa_missile_r.NextFloat();
-	pVel.RotateByDegrees( 20.0f * (1.0f - (2.0f * _aa_missile_r.NextFloat())) );
-
-   	CParticle@ p = ParticleAnimated("GenericSmoke4.png", pPos, pVel, pAngle, 0.4f, 1, 0, true);
-   	if(p !is null)
-   	{
-		p.fastcollision = true;
-		p.gravity = Vec2f_zero;
-		p.bounce = 0;
-		p.Z = 8;
-		p.timeout = 10;
-	}
-
-}
-
-void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
-{
-	if (!isClient())
-	{ return; }
-
-	if (thisPos == Vec2f_zero || flashVec == Vec2f_zero)
-	{ return; }
-	
-	Vec2f flashNorm = flashVec;
-	flashNorm.Normalize();
-
-	const int particleNum = 4; //particle amount
-
-	for(int i = 0; i < particleNum; i++)
-   	{
-		Vec2f pPos = thisPos;
-		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + _aa_missile_r.NextFloat();
-
-		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * _aa_missile_r.NextFloat());
-		pVel.RotateByDegrees(randomDegrees);
-		pVel *= 2.5; //final speed multiplier
-
-		f32 pAngle = 360.0f * _aa_missile_r.NextFloat();
-
-		CParticle@ p = ParticleAnimated("GenericBlast6.png", pPos, pVel, pAngle, 0.5f, 1, 0, true);
-    	if(p !is null)
-    	{
-			p.collides = false;
-			p.gravity = Vec2f_zero;
-			p.bounce = 0;
-			p.Z = 8;
-			p.timeout = 10;
-		}
-	}
-	
-	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * _aa_missile_r.NextFloat()));
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
@@ -282,112 +194,4 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 	}
 
 	this.server_Die();
-}
-
-void makeMissileEffect(Vec2f thisPos = Vec2f_zero)
-{
-	if(!isClient() || thisPos == Vec2f_zero)
-	{return;}
-
-	u16 particleNum = XORRandom(5)+5;
-
-	Sound::Play("Bomb.ogg", thisPos, 0.8f, 0.8f + (0.4f * _aa_missile_r.NextFloat()) );
-
-	for (int i = 0; i < particleNum; i++)
-    {
-        Vec2f pOffset(_aa_missile_r.NextFloat() * radius, 0);
-        pOffset.RotateBy(_aa_missile_r.NextFloat() * 360.0f);
-
-        CParticle@ p = ParticleAnimated("GenericSmoke1.png", 
-									thisPos + pOffset, 
-									Vec2f_zero, 
-									_aa_missile_r.NextFloat() * 360.0f, 
-									0.5f + (_aa_missile_r.NextFloat() * 0.5f), 
-									XORRandom(3)+1, 
-									0.0f, 
-									false );
-									
-        if(p is null) continue; //bail if we stop getting particles
-		
-    	p.collides = false;
-		p.Z = 200.0f;
-		p.lighting = false;
-    }
-}
-
-void makeMissileDamage(CBlob@ this, Vec2f thisPos = Vec2f_zero)
-{
-	if (!isServer() || thisPos == Vec2f_zero)
-	{ return; }
-
-	CMap@ map = getMap(); //standard map check
-	if (map is null)
-	{ return; }
-
-	int teamNum = this.getTeamNum();
-
-	CBlob@[] blobsInRadius;
-	map.getBlobsInRadius(thisPos, radius, @blobsInRadius); //tent aura push
-	for (uint i = 0; i < blobsInRadius.length; i++)
-	{
-		CBlob@ b = blobsInRadius[i];
-		if (b is null)
-		{ continue; }
-
-		if (b.getTeamNum() == teamNum || b.hasTag("dead"))
-		{ continue; }
-
-		if (b.hasTag("barrier"))
-		{
-			if (b.get_bool("active"))
-			{
-				this.server_Hit(b, thisPos, Vec2f_zero, damage, Hitters::explosion, false);
-			}
-			continue;
-		}
-
-		Vec2f targetPos = b.getPosition();
-		Vec2f targetVec = targetPos - thisPos;
-		float targetDist = targetVec.getLength();
-
-		bool targetIsValid = true;
-		HitInfo@[] hitInfos;
-		bool hasHit = map.getHitInfosFromRay(thisPos, -targetVec.getAngleDegrees(), targetDist, this, @hitInfos);
-		if (hasHit) //hitray scan
-		{
-			for (uint i = 0; i < hitInfos.length; i++)
-			{
-				HitInfo@ hi = hitInfos[i];
-				CBlob@ b2 = hi.blob;
-				if (b2 == null) // check
-				{ continue; }
-				
-				if (b2.getTeamNum() != teamNum && b2.hasTag("barrier") && !doesBypassBarrier(b2, hi.hitpos, targetVec))
-				{ 
-					targetIsValid = false;
-					break;
-				}
-			}
-		} //hitscan loop end
-
-		if (targetIsValid)
-		{
-			this.server_Hit(b, targetPos, Vec2f_zero, damage, Hitters::explosion, false);
-		}
-	} //radius loop end
-}
-
-void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ targetBlob, u8 customData )
-{
-	if (!isClient())
-	{ return; }
-
-	if (targetBlob.hasTag("hull"))
-	{
-		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * _aa_missile_r.NextFloat()), 1.0f + (0.2f * _aa_missile_r.NextFloat()));
-	}
-	else if (targetBlob.hasTag("flesh"))
-	{
-		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * _aa_missile_r.NextFloat()), 1.2f );
-	}
 }
