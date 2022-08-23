@@ -335,7 +335,7 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 void onDie( CBlob@ this )
 {
-	genericShipExplosion( this.getPosition() , 12);
+	//empty
 }
 
 void spawnAttachments(CBlob@ ownerBlob)

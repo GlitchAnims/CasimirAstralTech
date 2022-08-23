@@ -216,36 +216,5 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 void onDie( CBlob@ this )
 {
-	Vec2f thisPos = this.getPosition();
-	blast( thisPos , 12);
-}
-
-void blast( Vec2f pos , int amount)
-{
-	if(!isClient())
-	{return;}
-
-	Sound::Play("GenericExplosion1.ogg", pos, 0.8f, 0.8f + XORRandom(10)/10.0f);
-
-	for (int i = 0; i < amount; i++)
-    {
-        Vec2f vel(_fighter_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_fighter_logic_r.NextFloat() * 360.0f);
-
-        CParticle@ p = ParticleAnimated("GenericBlast6.png", 
-									pos, 
-									vel, 
-									float(XORRandom(360)), 
-									1.5f, 
-									2 + XORRandom(4), 
-									0.0f, 
-									false );
-									
-        if(p is null) continue; //bail if we stop getting particles
-		
-    	p.fastcollision = true;
-        p.damping = 0.85f;
-		p.Z = 200.0f;
-		p.lighting = false;
-    }
+	//empty
 }
