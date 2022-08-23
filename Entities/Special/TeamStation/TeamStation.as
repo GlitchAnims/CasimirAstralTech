@@ -1,10 +1,12 @@
 // TDM Ruins logic
 
+#include "SpaceshipGlobal.as"
 #include "ClassSelectMenu.as"
 #include "StandardRespawnCommand.as"
 #include "StandardControlsCommon.as"
 #include "RespawnCommandCommon.as"
 #include "GenericButtonCommon.as"
+#include "Hitters.as"
 #include "ChargeCommon.as"
 #include "CommonFX.as"
 
@@ -12,6 +14,19 @@ Random _TDM_ruins_r(67656);
 
 void onInit(CBlob@ this)
 {
+	this.set_s32(absoluteCharge_string, 0);
+	this.set_s32(absoluteMaxCharge_string, 0);
+	if (isServer())
+	{
+		ChargeInfo chargeInfo;
+		chargeInfo.charge 			= 1.0f;
+		chargeInfo.chargeMax 		= 3000;
+		chargeInfo.chargeRegen 		= 10;
+		chargeInfo.chargeRate 		= 30;
+		this.set("chargeInfo", @chargeInfo);
+	}
+	this.Tag(denyChargeInputTag);
+
 	this.CreateRespawnPoint("ruins", Vec2f(0.0f, 16.0f));
 	AddIconToken("$change_class$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 12, 2);
 
@@ -40,6 +55,9 @@ void onInit(CBlob@ this)
 
 	this.Tag("change class drop inventory");
 
+	this.Tag("hull");
+	this.Tag(bigTag);
+
 	this.getSprite().SetZ(-50.0f);   // push to background
 }
 
@@ -67,9 +85,14 @@ void onTick(CBlob@ this)
 	{ return; }
 
 	Vec2f thisPos = this.getPosition();
-	f32 radius = 64.0f;
+	f32 radius = 128.0f;
 	u32 gameTime = getGameTime();
 	int teamNum = this.getTeamNum();
+	
+	if (isServer() && gameTime < 90) //for the first 3 seconds, server only
+	{ 
+		spawnAttachments(this);
+	}
 
 	if (isServer() && gameTime % 30 == 0)
 	{
@@ -86,7 +109,7 @@ void onTick(CBlob@ this)
 			if (b.getTeamNum() != teamNum)
 			{ continue; }
 
-			if (!b.hasTag(chargeTag) || b.hasTag("dead"))
+			if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag) || b.hasTag(smallTag))
 			{ continue; }
 
 			addCharge(b, chargeAmount);
@@ -107,7 +130,7 @@ void onTick(CBlob@ this)
 		if (b.getTeamNum() != teamNum)
 		{ continue; }
 
-		if (!b.hasTag(chargeTag) || b.hasTag("dead"))
+		if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag) || b.hasTag(smallTag))
 		{ continue; }
 
 		Vec2f blobPos = b.getPosition();
@@ -161,4 +184,118 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 bool isInRadius(CBlob@ this, CBlob @caller)
 {
 	return (this.getPosition() - caller.getPosition()).Length() < this.getRadius();
+}
+
+f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
+{
+    if (customData == Hitters::suicide)
+	{
+		return 0;
+	}
+	else if (customData == Hitters::arrow)
+	{
+		damage *= 0.25;
+	}
+
+	if (isClient())
+	{
+		makeHullHitSparks( worldPoint, 15 );
+	}
+
+    return damage;
+}
+
+void spawnAttachments(CBlob@ ownerBlob)
+{
+	if (ownerBlob == null)
+	{ return; }
+
+	CAttachment@ attachments = ownerBlob.getAttachments();
+	if (attachments == null)
+	{ return; }
+
+	Vec2f ownerPos = ownerBlob.getPosition();
+	int teamNum = ownerBlob.getTeamNum();
+
+	AttachmentPoint@ wingNW = attachments.getAttachmentPointByName("WINGNW");
+	AttachmentPoint@ wingNE = attachments.getAttachmentPointByName("WINGNE");
+	AttachmentPoint@ wingSE = attachments.getAttachmentPointByName("WINGSE");
+	AttachmentPoint@ wingSW = attachments.getAttachmentPointByName("WINGSW");
+
+	if (wingNW != null)
+	{
+		Vec2f slotOffset = wingNW.offset;
+		CBlob@ slotBlob = wingNW.getOccupied();
+		if (slotBlob == null)
+		{
+			CBlob@ blob = server_CreateBlob( "station_wing_nw" , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, wingNW);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				
+			}
+		}
+	}
+
+	if (wingNE != null)
+	{
+		Vec2f slotOffset = wingNE.offset;
+		CBlob@ slotBlob = wingNE.getOccupied();
+		if (slotBlob == null)
+		{
+			CBlob@ blob = server_CreateBlob( "station_wing_ne" , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, wingNE);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.SetFacingLeft(false);
+			}
+		}
+	}
+
+	if (wingSE != null)
+	{
+		Vec2f slotOffset = wingSE.offset;
+		CBlob@ slotBlob = wingSE.getOccupied();
+		if (slotBlob == null)
+		{
+			CBlob@ blob = server_CreateBlob( "station_wing_se" , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, wingSE);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.SetFacingLeft(false);
+			}
+		}
+	}
+
+	if (wingSW != null)
+	{
+		Vec2f slotOffset = wingSW.offset;
+		CBlob@ slotBlob = wingSW.getOccupied();
+		if (slotBlob == null)
+		{
+			CBlob@ blob = server_CreateBlob( "station_wing_sw" , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, wingSW);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+			}
+		}
+	}
+	
+}
+
+void onDie( CBlob@ this )
+{
+	genericShipExplosion( this.getPosition() , 12);
 }

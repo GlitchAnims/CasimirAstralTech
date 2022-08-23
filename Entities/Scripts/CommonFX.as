@@ -274,3 +274,33 @@ void drawParticlePartialCircle( Vec2f circlePos = Vec2f_zero, f32 radius = 0, f3
 		}
 	}
 }
+
+void genericShipExplosion( Vec2f pos , int particleNum)
+{
+	if(!isClient())
+	{return;}
+
+	Sound::Play("GenericExplosion1.ogg", pos, 0.8f, 0.8f + XORRandom(10)/10.0f);
+
+	for (int i = 0; i < particleNum; i++)
+    {
+        Vec2f vel(_sprk_r2.NextFloat() * 3.0f, 0);
+        vel.RotateBy(_sprk_r2.NextFloat() * 360.0f);
+
+        CParticle@ p = ParticleAnimated("GenericBlast6.png", 
+									pos, 
+									vel, 
+									float(XORRandom(360)), 
+									1.5f, 
+									2 + XORRandom(4), 
+									0.0f, 
+									false );
+									
+        if(p is null) continue; //bail if we stop getting particles
+		
+    	p.fastcollision = true;
+        p.damping = 0.85f;
+		p.Z = 200.0f;
+		p.lighting = false;
+    }
+}

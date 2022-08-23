@@ -18,6 +18,7 @@ void onInit( CBlob@ this )
 	turret.firing_spread 		= GatlingParams::firing_spread;
 	turret.firing_cost 			= GatlingParams::firing_cost;
 	turret.shot_speed 			= GatlingParams::shot_speed;
+	turret.auto_target_ID		= 0;
 	this.set("shipInfo", @turret);
 	
 	/*ManaInfo manaInfo;
@@ -29,6 +30,8 @@ void onInit( CBlob@ this )
 
 	this.set_u32( "space_heldTime", 0 );
 	this.set_u32( "space_shotTime", 0 );
+
+	this.set_bool( "automatic", false);
 	
 	this.Tag("npc");
 	//this.Tag("hull");
@@ -73,6 +76,9 @@ void onTick( CBlob@ this )
 	if (!isServer()) return;
 	if (this.isInInventory()) return;
 
+	bool isAuto = this.get_bool("automatic");
+	u32 gameTime = getGameTime();
+
 	bool attached = this.isAttached();
 	u32 ownerBlobID = this.get_u32("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
@@ -95,6 +101,70 @@ void onTick( CBlob@ this )
 	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
+
+	if (isAuto)
+	{
+		int teamNum = this.getTeamNum();
+		f32 shotSpeed = turret.shot_speed;
+		
+		if ((gameTime + this.getNetworkID()) % 60 == 0) //once every 2 seconds
+		{
+			turret.auto_target_ID = 0;
+
+			CMap@ map = getMap(); //standard map check
+			if (map is null)
+			{ return; }
+
+			CBlob@[] blobsInRadius;
+			map.getBlobsInRadius(thisPos, 512.0f, @blobsInRadius); //get a target
+			for (uint i = 0; i < blobsInRadius.length; i++)
+			{
+				CBlob@ b = blobsInRadius[i];
+				if (b is null)
+				{ continue; }
+
+				if (b.getTeamNum() == teamNum)
+				{ continue; }
+
+				if (!b.hasTag(mediumTag))
+				{ continue; }
+				
+				turret.auto_target_ID = b.getNetworkID();
+				break;
+			}
+		}
+
+		bool activateFire = false;
+		CBlob@ b = getBlobByNetworkID(turret.auto_target_ID);
+		if (b != null)
+		{
+			Vec2f bPos = b.getPosition();
+			Vec2f bVel = b.getVelocity() - thisVel;
+			//bPos += bVel * playerPing;
+
+			Vec2f targetVec = bPos - thisPos;
+			f32 targetDist = targetVec.getLength();
+			if (targetDist > 512) //too far away, lose target
+			{
+				turret.auto_target_ID = 0;
+			}
+			else
+			{
+				f32 travelTicks = targetDist / shotSpeed;
+				Vec2f futureTargetPos = bPos + (bVel*travelTicks);
+				
+				targetVec = futureTargetPos - thisPos;
+				targetDist = targetVec.getLength();
+				travelTicks = targetDist / shotSpeed;
+				futureTargetPos = bPos + (bVel*travelTicks);
+
+				ownerBlob.setAimPos(futureTargetPos);
+				activateFire = true;
+			}
+		}
+
+		ownerBlob.setKeyPressed(key_action3, activateFire);
+	}
 
 	Vec2f ownerAimpos = ownerBlob.getAimPos();
 	Vec2f aimVec = ownerAimpos - thisPos;

@@ -626,16 +626,16 @@ shared class TDMCore : RulesCore
 		for (int i = 0; i < teams.length; i++)
 			teams_alive.push_back(false);
 
-		CBlob@[] mediumShips;
-		getBlobsByTag("medium_ship", @mediumShips);
-		for (uint i = 0; i < mediumShips.length; i++) //check with each mediumship
+		CBlob@[] missionTargets;
+		getBlobsByName("team_station", @missionTargets);
+		for (uint i = 0; i < missionTargets.length; i++) //check with each target
 		{
-			CBlob@ b = mediumShips[i];
+			CBlob@ b = missionTargets[i];
 			s32 team = b.getTeamNum();
 			if
 			(
 				b !is null &&
-				!b.hasTag("dead") && //blob alive
+				!b.hasTag("dead") && //is blob alive
 				team >= 0 && team < teams.length //team sensible
 			)
 			{

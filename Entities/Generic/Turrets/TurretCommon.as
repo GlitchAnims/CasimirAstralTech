@@ -37,6 +37,8 @@ class TurretInfo
 	s32 firing_cost; // charge cost
 	f32 shot_speed; // pixels per tick, 0 = instant
 
+	u16 auto_target_ID; //current target for automatic mode
+
 	TurretInfo()
 	{
 		turret_turn_speed = 1.0f;
@@ -47,6 +49,8 @@ class TurretInfo
 		firing_spread = 1;
 		firing_cost = 1;
 		shot_speed = 3.0f;
+
+		auto_target_ID = 0;
 	}
 };
 
