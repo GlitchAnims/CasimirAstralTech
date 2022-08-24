@@ -66,6 +66,10 @@ void MakeTradeMenu(CBlob@ trader)
 	s32 cost_emp = cfg.read_s32("cost_emp", 20);
 	s32 cost_flare = cfg.read_s32("cost_flare", 10);
 
+	//ships
+	s32 cost_martyr = cfg.read_s32("cost_martyr", 120);
+	s32 cost_balthazar = cfg.read_s32("cost_balthazar", 100);
+
 	s32 menu_width = cfg.read_s32("trade_menu_width", 3);
 	s32 menu_height = cfg.read_s32("trade_menu_height", 5);
 
@@ -88,6 +92,8 @@ void MakeTradeMenu(CBlob@ trader)
 	//addItemForCoin(trader, "Cruise Missiles", cost_cruise, true, "$mat_bombarrows$", "mat_missile_cruise", Descriptions::mat_missile_cruise);
 	//addItemForCoin(trader, "EMP Missiles", cost_emp, true, "$mat_waterarrows$", "mat_missile_emp", Descriptions::mat_missile_emp);
 	addItemForCoin(trader, "Flares", cost_flare, true, "$mat_firearrows$", "mat_missile_flare", Descriptions::mat_missile_flare);
+	addItemForCoin(trader, "Martyr", cost_martyr, true, "$mat_firearrows$", "martyr", Descriptions::buy_martyr);
+	addItemForCoin(trader, "Balthazar", cost_balthazar, true, "$mat_firearrows$", "balthazar", Descriptions::buy_balthazar);
 }
 
 // load coins amount

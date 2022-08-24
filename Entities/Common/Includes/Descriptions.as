@@ -101,5 +101,9 @@ namespace Descriptions
 	mat_missile_aa 				= getTranslatedString("Anti-Air Missile ordinance. Useful against swarms of enemies."),
 	mat_missile_cruise 			= getTranslatedString("High yield, long-range warhead. Damages and disables multiple enemies within explosion radius. Direct hits are often lethal."),
 	mat_missile_emp 			= getTranslatedString("Produces a strong electromagnetic pulse on detonation."),
-	mat_missile_flare 			= getTranslatedString("Multi-purpose disposable flare munitions. Strong targeting deterrant.");
+	mat_missile_flare 			= getTranslatedString("Multi-purpose disposable flare munitions. Strong targeting deterrant."),
+
+	//Ships
+	buy_martyr 					= getTranslatedString("Assault frigate. This is a temporary way to recover ships."),
+	buy_balthazar 				= getTranslatedString("Logistics frigate. This is a temporary way to recover ships.");
 }

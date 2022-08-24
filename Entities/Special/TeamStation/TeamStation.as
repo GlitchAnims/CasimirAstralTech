@@ -109,7 +109,7 @@ void onTick(CBlob@ this)
 			if (b.getTeamNum() != teamNum)
 			{ continue; }
 
-			if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag) || b.hasTag(smallTag))
+			if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag))
 			{ continue; }
 
 			addCharge(b, chargeAmount);
@@ -130,7 +130,7 @@ void onTick(CBlob@ this)
 		if (b.getTeamNum() != teamNum)
 		{ continue; }
 
-		if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag) || b.hasTag(smallTag))
+		if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag))
 		{ continue; }
 
 		Vec2f blobPos = b.getPosition();
