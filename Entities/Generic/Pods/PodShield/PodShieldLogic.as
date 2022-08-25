@@ -120,6 +120,11 @@ void onTick( CBlob@ this )
 			blobAngle = this.getAngleDegrees();
 		}
 	}
+	else
+	{
+		this.set_bool(isCarriedBoolString, false);
+		this.set_u16(carrierBlobNetidString, 0);
+	}
 
 	//sound logic
 	/*Vec2f vel = this.getVelocity();
