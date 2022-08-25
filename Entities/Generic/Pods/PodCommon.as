@@ -6,6 +6,8 @@ const string canCarryBoolString = "pod_can_carry";
 const string isCarriedBoolString = "pod_carried";
 const string carrierBlobNetidString = "pod_carrier_netid";
 
+const string quickSlotCheckBoolString = "pod_slot_check";
+
 const string pod_carry_toggle_ID = "pod_carry_toggle";
 
 namespace PodShieldParams
@@ -34,7 +36,7 @@ namespace PodFlakParams
 	//carrying
 	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
 	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
-	const ::f32 carry_vel = 0.10f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_vel = 0.05f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
 	const ::f32 carry_dist = 20.0f; // minimum carrying distance - distance at which no more force is applied
 }
 
@@ -49,7 +51,52 @@ namespace PodGatlingParams
 	//carrying
 	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
 	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.03f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 20.0f; // minimum carrying distance - distance at which no more force is applied
+}
+
+namespace PodArtilleryParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.0f; // percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 400; // max charge amount
+	const ::s32 CHARGE_REGEN = 0; // amount per regen
+	const ::s32 CHARGE_RATE = 0; // ticks per regen
+
+	//carrying
+	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.02f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 25.0f; // minimum carrying distance - distance at which no more force is applied
+}
+
+namespace PodPDParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.2f; // percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 200; // max charge amount
+	const ::s32 CHARGE_REGEN = 1; // amount per regen
+	const ::s32 CHARGE_RATE = 30; // ticks per regen
+
+	//carrying
+	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 carry_vel = 0.08f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 16.0f; // minimum carrying distance - distance at which no more force is applied
+}
+
+namespace PodGeneratorParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.1f; // percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 1000; // max charge amount
+	const ::s32 CHARGE_REGEN = 5; // amount per regen
+	const ::s32 CHARGE_RATE = 30; // ticks per regen
+
+	//carrying
+	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.02f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
 	const ::f32 carry_dist = 20.0f; // minimum carrying distance - distance at which no more force is applied
 }
 

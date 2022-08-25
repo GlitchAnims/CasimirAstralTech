@@ -2,6 +2,7 @@
 
 #include "SpaceshipGlobal.as"
 
+Random _turret_logic_r(98444);
 namespace FlakParams
 {
 	const ::f32 turret_turn_speed = 8.0f; // degrees per tick, 0 = instant (30 ticks a second)
@@ -16,14 +17,38 @@ namespace FlakParams
 
 namespace GatlingParams
 {
-	const ::f32 turret_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 turret_turn_speed = 2.0f; // degrees per tick, 0 = instant (30 ticks a second)
 
 	const ::u32 firing_rate = 3; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 2; // bullets per shot, won't fire if 0
 	const ::u32 firing_delay = 30; // ticks before first shot
 	const ::u32 firing_spread = 5; // degrees
-	const ::s32 firing_cost = 4; // charge cost
+	const ::s32 firing_cost = 2; // charge cost
 	const ::f32 shot_speed = 20.0f; // pixels per tick, won't fire if 0
+}
+
+namespace ArtilleryParams
+{
+	const ::f32 turret_turn_speed = 1.5f; // degrees per tick, 0 = instant (30 ticks a second)
+
+	const ::u32 firing_rate = 30; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 0; // ticks before first shot
+	const ::u32 firing_spread = 1; // degrees
+	const ::s32 firing_cost = 6; // charge cost
+	const ::f32 shot_speed = 8.0f; // pixels per tick, won't fire if 0
+}
+
+namespace PDParams
+{
+	const ::f32 turret_turn_speed = 12.0f; // degrees per tick, 0 = instant (30 ticks a second)
+
+	const ::u32 firing_rate = 1; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 0; // ticks before first shot
+	const ::u32 firing_spread = 0; // degrees
+	const ::s32 firing_cost = 1; // charge cost
+	const ::f32 shot_speed = 1.0f; // pixels per tick, won't fire if 0
 }
 
 class TurretInfo

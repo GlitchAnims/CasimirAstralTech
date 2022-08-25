@@ -15,18 +15,18 @@ void onInit( CBlob@ this )
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= PodFlakParams::CHARGE_START * PodFlakParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= PodFlakParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= PodFlakParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= PodFlakParams::CHARGE_RATE;
+		chargeInfo.charge 			= PodArtilleryParams::CHARGE_START * PodArtilleryParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= PodArtilleryParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= PodArtilleryParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= PodArtilleryParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 
 	PodInfo pod;
-	pod.carry_can_turn 		= PodFlakParams::carry_can_turn;
-	pod.carry_turn_speed 	= PodFlakParams::carry_turn_speed;
-	pod.carry_vel 			= PodFlakParams::carry_vel;
-	pod.carry_dist 			= PodFlakParams::carry_dist;
+	pod.carry_can_turn 		= PodArtilleryParams::carry_can_turn;
+	pod.carry_turn_speed 	= PodArtilleryParams::carry_turn_speed;
+	pod.carry_vel 			= PodArtilleryParams::carry_vel;
+	pod.carry_dist 			= PodArtilleryParams::carry_dist;
 	this.set("podInfo", @pod);
 
 	this.getShape().SetRotationsAllowed(pod.carry_can_turn);
@@ -66,7 +66,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 		CBlob@ turret = podSlot.getOccupied();
 		if (turret == null)
 		{
-			CBlob@ blob = server_CreateBlob( "turret_flak" , teamNum, ownerPos + slotOffset);
+			CBlob@ blob = server_CreateBlob( "turret_artillery" , teamNum, ownerPos + slotOffset);
 			if (blob !is null)
 			{
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );

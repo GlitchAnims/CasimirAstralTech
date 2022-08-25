@@ -11,6 +11,8 @@ void onInit( CBlob@ this )
 	this.set_bool(canCarryBoolString, true);
 	this.set_bool(isCarriedBoolString, false);
 	this.set_u16(carrierBlobNetidString, 0);
+
+	this.set_bool(quickSlotCheckBoolString, true);
 	
 	this.Tag("npc");
 	this.Tag("hull");
@@ -212,5 +214,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			this.set_bool(isCarriedBoolString, true);
 			this.set_u16(carrierBlobNetidString, newCarrierNetID);
 		}
+
+		this.set_bool(quickSlotCheckBoolString, true);
 	}
 }

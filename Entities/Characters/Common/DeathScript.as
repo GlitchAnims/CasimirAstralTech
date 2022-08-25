@@ -36,8 +36,7 @@ void onDie( CBlob@ this )
 		}
 		else
 		{
-			genericShipExplosion( thisPos , 1);
-			print("death and bypassed hull tag");
+			genericShipExplosion( thisPos , 2);
 		}
 	}
 	else

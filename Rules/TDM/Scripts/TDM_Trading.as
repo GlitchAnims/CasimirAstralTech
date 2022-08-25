@@ -104,9 +104,9 @@ void MakeTradeMenu(CBlob@ trader)
 	addItemForCoin(trader, "Balthazar", cost_balthazar, true, "$mat_firearrows$", "balthazar", Descriptions::buy_balthazar);
 
 	addItemForCoin(trader, "Shield Pod", cost_pod_shield, true, "$pod_shield$", "pod_shield", Descriptions::buy_pod_shield);
-	//addItemForCoin(trader, "Flak Pod", cost_pod_flak, true, "$pod_flak$", "pod_shield", Descriptions::buy_pod_flak);
-	//addItemForCoin(trader, "Gatling Pod", cost_pod_gatling, true, "$pod_gatling$", "pod_shield", Descriptions::buy_pod_gatling);
-	//addItemForCoin(trader, "Artillery Pod", cost_pod_artillery, true, "$mat_firearrows$", "pod_shield", Descriptions::buy_pod_artillery);
+	addItemForCoin(trader, "Flak Pod", cost_pod_flak, true, "$pod_flak$", "pod_flak", Descriptions::buy_pod_flak);
+	addItemForCoin(trader, "Gatling Pod", cost_pod_gatling, true, "$pod_gatling$", "pod_gatling", Descriptions::buy_pod_gatling);
+	addItemForCoin(trader, "Artillery Pod", cost_pod_artillery, true, "$pod_artillery$", "pod_artillery", Descriptions::buy_pod_artillery);
 	//addItemForCoin(trader, "Point Defense Pod", cost_pod_pd, true, "$mat_firearrows$", "pod_shield", Descriptions::buy_pod_pd);
 }
 

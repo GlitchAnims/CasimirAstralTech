@@ -186,8 +186,3 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 
     return damage;
 }
-
-void onDie( CBlob@ this )
-{
-	genericShipExplosion( this.getPosition() , 12);
-}

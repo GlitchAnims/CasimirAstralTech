@@ -1,12 +1,6 @@
-// PodShield animations
+// PodFlak animations
 
-#include "RunnerAnimCommon.as";
-#include "RunnerCommon.as";
-#include "KnockedCommon.as";
-#include "PixelOffsets.as"
-#include "RunnerTextures.as"
 #include "CommonFX.as"
-#include "ShieldCommon.as"
 #include "PodCommon.as"
 
 const string up_fire = "forward_burn";
@@ -46,7 +40,7 @@ void LoadSprites(CSprite@ this)
 		upFire.SetRelativeZ(-1.1f);
 		downFire.ScaleBy(0.3f, 0.3f);
 		//upFire.RotateBy(0, Vec2f_zero);
-		upFire.SetOffset(Vec2f(7, 0));
+		upFire.SetOffset(Vec2f(7.5f, 0));
 	}
 	if (downFire !is null)
 	{
@@ -57,7 +51,7 @@ void LoadSprites(CSprite@ this)
 		downFire.SetRelativeZ(-1.2f);
 		downFire.ScaleBy(0.3f, 0.3f);
 		downFire.RotateBy(180, Vec2f_zero);
-		downFire.SetOffset(Vec2f(-10, 0));
+		downFire.SetOffset(Vec2f(-7.5f, 0));
 	}
 	if (leftFire !is null)
 	{
@@ -68,7 +62,7 @@ void LoadSprites(CSprite@ this)
 		leftFire.SetRelativeZ(-1.3f);
 		leftFire.ScaleBy(0.3f, 0.3f);
 		leftFire.RotateBy(270, Vec2f_zero);
-		leftFire.SetOffset(Vec2f(0, 4));
+		leftFire.SetOffset(Vec2f(0, 7.5f));
 	}
 	if (rightFire !is null)
 	{
@@ -79,7 +73,7 @@ void LoadSprites(CSprite@ this)
 		rightFire.SetRelativeZ(-1.4f);
 		rightFire.ScaleBy(0.3f, 0.3f);
 		rightFire.RotateBy(90, Vec2f_zero);
-		rightFire.SetOffset(Vec2f(0, -4));
+		rightFire.SetOffset(Vec2f(0, -7.5f));
 	}
 }
 
@@ -116,24 +110,4 @@ void onTick(CSprite@ this)
 	{ leftFire.SetVisible(pod.port_thrust); }
 	if (rightFire !is null)
 	{ rightFire.SetVisible(pod.starboard_thrust); }
-}
-
-/*
-void onGib(CSprite@ this)
-{
-	if (g_kidssafe)
-	{
-		return;
-	}
-
-	CBlob@ blob = this.getBlob();
-	Vec2f pos = blob.getPosition();
-	Vec2f vel = blob.getVelocity();
-	vel.y -= 3.0f;
-	f32 hp = Maths::Min(Maths::Abs(blob.getHealth()), 2.0f) + 1.0f;
-	const u8 team = blob.getTeamNum();
-	CParticle@ Body     = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 0, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
-	CParticle@ Arm      = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp - 0.2 , 80), 1, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
-	CParticle@ Shield   = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 2, 0, Vec2f(16, 16), 2.0f, 0, "Sounds/material_drop.ogg", team);
-	CParticle@ Sword    = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp + 1 , 80), 3, 0, Vec2f(16, 16), 2.0f, 0, "Sounds/material_drop.ogg", team);
 }

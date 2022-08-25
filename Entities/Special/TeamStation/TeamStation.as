@@ -44,6 +44,7 @@ void onInit(CBlob@ this)
 	AddIconToken("$pod_shield$", "PodShield.png", Vec2f(18, 10), 0);
 	AddIconToken("$pod_flak$", "FlakTurret.png", Vec2f(20, 8), 0);
 	AddIconToken("$pod_gatling$", "GatlingTurret.png", Vec2f(20, 8), 0);
+	AddIconToken("$pod_artillery$", "ArtilleryTurret.png", Vec2f(22, 10), 0);
 
 	//TDM classes
 	//addPlayerClass(this, "Knight", "$knight_class_icon$", "knight", "Hack and Slash.");
@@ -302,9 +303,4 @@ void spawnAttachments(CBlob@ ownerBlob)
 		}
 	}
 	
-}
-
-void onDie( CBlob@ this )
-{
-	genericShipExplosion( this.getPosition() , 12);
 }

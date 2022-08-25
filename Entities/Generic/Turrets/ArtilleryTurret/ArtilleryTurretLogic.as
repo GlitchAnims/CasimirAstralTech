@@ -1,4 +1,4 @@
-// Fighter logic
+// Artillery Turret logic
 
 #include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
@@ -9,22 +9,17 @@
 void onInit( CBlob@ this )
 {
 	TurretInfo turret;
-	turret.turret_turn_speed 	= GatlingParams::turret_turn_speed;
+	turret.turret_turn_speed 	= ArtilleryParams::turret_turn_speed;
 	
-	turret.firing_rate 			= GatlingParams::firing_rate;
-	turret.firing_burst 		= GatlingParams::firing_burst;
-	turret.firing_delay 		= GatlingParams::firing_delay;
-	turret.firing_spread 		= GatlingParams::firing_spread;
-	turret.firing_cost 			= GatlingParams::firing_cost;
-	turret.shot_speed 			= GatlingParams::shot_speed;
+	turret.firing_rate 			= ArtilleryParams::firing_rate;
+	turret.firing_burst 		= ArtilleryParams::firing_burst;
+	turret.firing_delay 		= ArtilleryParams::firing_delay;
+	turret.firing_spread 		= ArtilleryParams::firing_spread;
+	turret.firing_cost 			= ArtilleryParams::firing_cost;
+	turret.shot_speed 			= ArtilleryParams::shot_speed;
 	turret.auto_target_ID		= 0;
 	this.set("shipInfo", @turret);
 	
-	/*ManaInfo manaInfo;
-	manaInfo.maxMana = FrigateParams::MAX_MANA;
-	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
-	this.set("manaInfo", @manaInfo);*/
-
 	this.set_u32("ownerBlobID", 0);
 
 	this.set_u32( "space_heldTime", 0 );
@@ -33,15 +28,10 @@ void onInit( CBlob@ this )
 	this.set_bool( "automatic", false);
 	
 	this.Tag("npc");
-	//this.Tag("hull");
-	this.Tag("ignore crouch");
 
-	//centered on arrows
-	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
-	
 	this.getShape().SetRotationsAllowed(false); //no spinning
 	this.getShape().SetGravityScale(0);
 	this.getShape().getConsts().mapCollisions = false;
@@ -50,16 +40,6 @@ void onInit( CBlob@ this )
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";
-	
-
-	if(isClient())
-	{
-		CSprite@ thisSprite = this.getSprite();
-		thisSprite.SetEmitSound("gatling_windup.ogg");
-		thisSprite.SetEmitSoundPaused(false);
-		thisSprite.SetEmitSoundVolume(0);
-		thisSprite.SetEmitSoundSpeed(0);
-	}
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -97,7 +77,6 @@ void onTick( CBlob@ this )
     }
 
 	Vec2f thisPos = this.getPosition();
-	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 
@@ -122,7 +101,7 @@ void onTick( CBlob@ this )
 			{ return; }
 
 			CBlob@[] blobsInRadius;
-			map.getBlobsInRadius(thisPos, 512.0f, @blobsInRadius); //get a target
+			map.getBlobsInRadius(thisPos, 800.0f, @blobsInRadius); //get a target
 			for (uint i = 0; i < blobsInRadius.length; i++)
 			{
 				CBlob@ b = blobsInRadius[i];
@@ -132,7 +111,12 @@ void onTick( CBlob@ this )
 				if (b.getTeamNum() == teamNum)
 				{ continue; }
 
-				if (!b.hasTag(mediumTag))
+				float bSpeed = b.getVelocity().getLength();
+				print("speed: " + bSpeed);
+				if (!b.hasTag("hull") || b.hasTag(smallTag) || bSpeed > 1.5f)
+				{ continue; }
+
+				if (map.rayCastSolidNoBlobs(thisPos, b.getPosition()))
 				{ continue; }
 				
 				turret.auto_target_ID = b.getNetworkID();
@@ -144,12 +128,11 @@ void onTick( CBlob@ this )
 		if (b != null)
 		{
 			Vec2f bPos = b.getPosition();
-			Vec2f bVel = b.getVelocity() - thisVel;
-			//bPos += bVel * playerPing;
+			Vec2f bVel = b.getVelocity();
 
 			Vec2f targetVec = bPos - thisPos;
 			f32 targetDist = targetVec.getLength();
-			if (targetDist > 512) //too far away, lose target
+			if (targetDist > 800 || bVel.getLength() > 1.5f) //too far away, lose target
 			{
 				turret.auto_target_ID = 0;
 			}
@@ -169,7 +152,7 @@ void onTick( CBlob@ this )
 				f32 angleDiff = aimAngle - blobAngle;
 				angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
 
-				forceActivateFire = Maths::Abs(angleDiff) < 30;
+				forceActivateFire = Maths::Abs(angleDiff) < 20;
 			}
 		}
 	}
@@ -210,13 +193,13 @@ void onTick( CBlob@ this )
 		{
 			removeCharge(ownerBlob, spaceChargeCost, true);
 
-			u8 shotType = 1; //shot type
-			f32 lifeTime = 0.8; //shot lifetime
+			u8 shotType = 2; //shot type
+			f32 lifeTime = 3.8; //shot lifetime
 			
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				Vec2f firePos = Vec2f(8.0f, 0.0f); //barrel pos
+				Vec2f firePos = Vec2f(10.0f, 0.0f); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
@@ -249,29 +232,6 @@ void onTick( CBlob@ this )
 	{
 		spaceShotTicks++;
 		this.set_u32( "space_shotTime", spaceShotTicks );
-	}
-
-	//sound logic
-	f32 windupPercentage = float(spaceTime) / spaceFiringDelay;
-	//sound logic
-	CSprite@ thisSprite = this.getSprite();
-	if(windupPercentage <= 0.0f)
-	{
-		if (!thisSprite.getEmitSoundPaused())
-		{
-			thisSprite.SetEmitSoundPaused(true);
-		}
-		thisSprite.SetEmitSoundVolume(0.0f);
-		thisSprite.SetEmitSoundSpeed(0.0f);
-	}
-	else
-	{
-		if (thisSprite.getEmitSoundPaused())
-		{
-			thisSprite.SetEmitSoundPaused(false);
-		}
-		thisSprite.SetEmitSoundVolume(windupPercentage);
-		thisSprite.SetEmitSoundSpeed(windupPercentage);
 	}
 }
 
