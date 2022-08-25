@@ -83,6 +83,9 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
+	if (this == null)
+	{ return; }
+
 	if (!isServer())
 	{ return; }
 
@@ -101,6 +104,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		f32 parasiteHealth = parasiteBlob.getHealth();
 		if (parasiteHealth <= 0)
 		{ return; }
+
 		string parasiteName = parasiteBlob.getName();
 
 		CPlayer@ parasitePlayer = parasiteBlob.getPlayer();
@@ -143,7 +147,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			if (newBlob.exists("spawn immunity time"))
 			{
 				newBlob.set_u32("spawn immunity time", 0);
-				newBlob.Sync("spawn immunity time", true);
+				//newBlob.Sync("spawn immunity time", true);
 			}
 
 			newBlob.server_SetPlayer(player);

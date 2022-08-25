@@ -21,6 +21,9 @@ void onInit(CBlob@ this)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
+	if (this == null)
+	{ return; }
+	
 	if (cmd == this.getCommandID("throw"))
 	{
 		Vec2f pos = params.read_Vec2f();

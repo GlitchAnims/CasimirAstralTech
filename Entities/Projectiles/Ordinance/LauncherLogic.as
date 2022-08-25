@@ -415,6 +415,9 @@ void CycleToOrdinanceType(CBlob@ this, LauncherInfo@ launcher, u8 ordinanceType)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
+	if (this == null)
+	{ return; }
+	
 	if (cmd == this.getCommandID(fire_ordinance_command_ID))
 	{
 		u8 ordinanceType;

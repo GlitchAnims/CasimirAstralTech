@@ -33,15 +33,13 @@ void onTick( CBlob@ this )
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
+    if (this == null)
+	{ return; }
+
     if (cmd == this.getCommandID("shiftpress"))
     {
-        if(params.read_bool())
-        {
-            this.set_bool("shifting", true);
-        }
-        else
-        {
-            this.set_bool("shifting", false);
-        }
+        bool isShifting = false;
+        if (!params.saferead_bool(isShifting)) return;
+        this.set_bool("shifting", isShifting);
     }
 }

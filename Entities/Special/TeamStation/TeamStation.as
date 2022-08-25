@@ -141,9 +141,14 @@ void onTick(CBlob@ this)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
+	if (this == null)
+	{ return; }
+
 	if (cmd == this.getCommandID("class menu"))
 	{
-		u16 callerID = params.read_u16();
+		u16 callerID;
+		if (!params.saferead_u16(callerID)) return;
+
 		CBlob@ caller = getBlobByNetworkID(callerID);
 
 		if (caller !is null && caller.isMyPlayer())

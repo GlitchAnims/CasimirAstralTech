@@ -9,6 +9,9 @@ void onInit( CBlob@ this )
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
+	if (this == null)
+	{ return; }
+	
     if (cmd == this.getCommandID(shot_command_ID)) // 1 shot instance
     {
 		if (!isServer())
