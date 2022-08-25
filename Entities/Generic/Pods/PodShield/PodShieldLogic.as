@@ -1,74 +1,55 @@
-// Fighter logic
+// PodShield logic
 
 #include "SpaceshipGlobal.as"
 #include "ChargeCommon.as"
-#include "TurretCommon.as"
+#include "PodCommon.as"
 #include "SpaceshipVars.as"
 #include "CommonFX.as"
+#include "BarrierCommon.as"
 
 Random _flak_turret_logic_r(98444);
 void onInit( CBlob@ this )
 {
-	TurretInfo turret;
-	turret.turret_turn_speed 	= FlakParams::turret_turn_speed;
+	this.set_s32(absoluteCharge_string, 0);
+	this.set_s32(absoluteMaxCharge_string, 0);
+	if (isServer())
+	{
+		ChargeInfo chargeInfo;
+		chargeInfo.charge 			= PodShieldParams::CHARGE_START * PodShieldParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= PodShieldParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= PodShieldParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= PodShieldParams::CHARGE_RATE;
+		this.set("chargeInfo", @chargeInfo);
+	}
+
+	PodInfo pod;
+	pod.carry_can_turn 		= PodShieldParams::carry_can_turn;
+	pod.carry_turn_speed 	= PodShieldParams::carry_turn_speed;
+	pod.carry_vel 			= PodShieldParams::carry_vel;
+	pod.carry_dist 			= PodShieldParams::carry_dist;
+	this.set("podInfo", @pod);
 	
-	turret.firing_rate 			= FlakParams::firing_rate;
-	turret.firing_burst 		= FlakParams::firing_burst;
-	turret.firing_delay 		= FlakParams::firing_delay;
-	turret.firing_spread 		= FlakParams::firing_spread;
-	turret.firing_cost 			= FlakParams::firing_cost;
-	turret.shot_speed 			= FlakParams::shot_speed;
-	turret.auto_target_ID		= 0;
-	this.set("shipInfo", @turret);
-	
-	/*ManaInfo manaInfo;
-	manaInfo.maxMana = FrigateParams::MAX_MANA;
-	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
-	this.set("manaInfo", @manaInfo);*/
-
-	this.set_u32("ownerBlobID", 0);
-
-	this.set_u32( "space_heldTime", 0 );
-	this.set_u32( "m2_heldTime", 0 );
-
-	this.set_u32( "space_shotTime", 0 );
-	this.set_u32( "m2_shotTime", 0 );
-
-	this.set_bool( "leftCannonTurn", false);
-	this.set_bool( "automatic", false);
+	this.set_bool(canCarryBoolString, true);
+	this.set_bool(isCarriedBoolString, false);
+	this.set_u16(carrierBlobNetidString, 0);
 	
 	this.Tag("npc");
-	//this.Tag("hull");
-	this.Tag("ignore crouch");
+	this.Tag("hull");
 
-	//centered on arrows
-	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
-	//centered on items
-	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
+	//this.getShape().SetRotationsAllowed(false); //no spinning
 
-	
-	this.getShape().SetRotationsAllowed(false); //no spinning
 	this.getShape().SetGravityScale(0);
-	this.getShape().getConsts().mapCollisions = false;
+	this.getShape().getConsts().mapCollisions = true;
 
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
+	//this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	
-	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
+	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
 	this.getCurrentScript().removeIfTag = "dead";
 	
-
-	/*if(isClient())
-	{
-		this.getSprite().SetEmitSound("engine_loop.ogg");
-		this.getSprite().SetEmitSoundPaused(true);
-	}*/
-}
-
-void onSetPlayer( CBlob@ this, CPlayer@ player )
-{
-	if (player !is null){
-		player.SetScoreboardVars("ScoreboardIcons.png", 2, Vec2f(16,16));
-	}
+	AddIconToken("$new_carry$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 23);
+	AddIconToken("$stop_carry$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 27);
+	AddIconToken("$carry_blocked$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 9);
+	this.addCommandID( pod_carry_toggle_ID );
 }
 
 void onTick( CBlob@ this )
@@ -77,193 +58,67 @@ void onTick( CBlob@ this )
 	if (!isServer()) return;
 	if (this.isInInventory()) return;
 
-	bool isAuto = this.get_bool("automatic");
-	u32 gameTime = getGameTime();
-
-	bool attached = this.isAttached();
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
-	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
-	if (!attached || ownerBlobID == 0 || ownerBlob == null)
-	{ 
-		this.server_Die();
-		return;
-	}
-
-    TurretInfo@ turret;
-	if (!this.get( "shipInfo", @turret )) 
+	PodInfo@ pod;
+	if (!this.get( "podInfo", @pod )) 
 	{ return; }
 
-	SpaceshipVars@ moveVars;
-    if (!ownerBlob.get( "moveVars", @moveVars )) {
-        return;
-    }
+	u32 gameTime = getGameTime();
 
-	Vec2f thisPos = this.getPosition();
-	Vec2f thisVel = this.getVelocity();
-	f32 blobAngle = this.getAngleDegrees();
-	blobAngle = (blobAngle+360.0f) % 360;
+	if ((gameTime + this.getNetworkID()) % 90 == 0) //once every 3 seconds, server only
+	{ 
+		spawnAttachments(this);
+	}
 
-	if (isAuto)
-	{
-		int teamNum = this.getTeamNum();
-		f32 shotSpeed = turret.shot_speed;
+	if (!this.get_bool(isCarriedBoolString))
+	{ return; }
+
+	u16 ownerBlobID = this.get_u16(carrierBlobNetidString);
+	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
+	if (ownerBlobID != 0 && ownerBlob != null)
+	{ 
+		Vec2f thisPos = this.getPosition();
+		Vec2f thisVel = this.getVelocity();
+		f32 blobAngle = this.getAngleDegrees();
+		blobAngle = (blobAngle+360.0f) % 360;
 		
-		if ((gameTime + this.getNetworkID()) % 60 == 0) //once every 2 seconds
+		Vec2f ownerPos = ownerBlob.getPosition();
+		Vec2f ownerAimpos = ownerBlob.getAimPos();
+		Vec2f aimVec = ownerAimpos - thisPos;
+		Vec2f ownerVec = ownerPos - thisPos;
+		Vec2f ownerVecNorm = ownerVec;
+		ownerVecNorm.Normalize();
+		f32 ownerDist = ownerVec.getLength();
+		f32 aimAngle = aimVec.getAngleDegrees();
+		aimAngle *= -1.0f;
+
+		float minCarryDist = pod.carry_dist;
+		float carrySpeed = pod.carry_vel * Maths::Clamp(ownerDist - minCarryDist, 0, minCarryDist);
+
+		if (carrySpeed > 0)
 		{
-			turret.auto_target_ID = 0;
-
-			CMap@ map = getMap(); //standard map check
-			if (map is null)
-			{ return; }
-
-			CBlob@[] blobsInRadius;
-			map.getBlobsInRadius(thisPos, 512.0f, @blobsInRadius); //get a target
-			for (uint i = 0; i < blobsInRadius.length; i++)
-			{
-				CBlob@ b = blobsInRadius[i];
-				if (b is null)
-				{ continue; }
-
-				if (b.getTeamNum() == teamNum)
-				{ continue; }
-
-				if (!b.hasTag(smallTag))
-				{ continue; }
-				
-				turret.auto_target_ID = b.getNetworkID();
-				break;
-			}
+			Vec2f carryVel = ownerVecNorm * pod.carry_vel;
+			this.setVelocity(thisVel + carryVel);
 		}
-
-		bool activateFire = false;
-		CBlob@ b = getBlobByNetworkID(turret.auto_target_ID);
-		if (b != null)
+		
+		if (pod.carry_can_turn && blobAngle != aimAngle) //aiming logic
 		{
-			Vec2f bPos = b.getPosition();
-			Vec2f bVel = b.getVelocity() - thisVel;
-			//bPos += bVel * playerPing;
+			f32 turnSpeed = pod.carry_turn_speed; //turn rate
 
-			Vec2f targetVec = bPos - thisPos;
-			f32 targetDist = targetVec.getLength();
-			if (targetDist > 512) //too far away, lose target
+			f32 angleDiff = blobAngle - aimAngle;
+			angleDiff = (angleDiff + 180) % 360 - 180;
+
+			if (turnSpeed <= 0 || (angleDiff < turnSpeed && angleDiff > -turnSpeed)) //if turn difference is smaller than turn speed, snap to it
 			{
-				turret.auto_target_ID = 0;
+				this.setAngleDegrees(aimAngle);
 			}
 			else
 			{
-				f32 travelTicks = targetDist / shotSpeed;
-				Vec2f futureTargetPos = bPos + (bVel*travelTicks);
-				
-				targetVec = futureTargetPos - thisPos;
-				targetDist = targetVec.getLength();
-				travelTicks = targetDist / shotSpeed;
-				futureTargetPos = bPos + (bVel*travelTicks);
-
-				ownerBlob.setAimPos(futureTargetPos);
-				activateFire = true;
+				f32 turnAngle = angleDiff > 0 ? -turnSpeed : turnSpeed; //either left or right turn
+				this.setAngleDegrees(blobAngle + turnAngle);
+				this.setAngleDegrees(blobAngle + turnAngle);
 			}
+			blobAngle = this.getAngleDegrees();
 		}
-
-		ownerBlob.setKeyPressed(key_action3, activateFire);
-	}
-
-	Vec2f ownerAimpos = ownerBlob.getAimPos();
-	Vec2f aimVec = ownerAimpos - thisPos;
-	f32 aimAngle = aimVec.getAngleDegrees();
-	aimAngle *= -1.0f;
-
-	if (blobAngle != aimAngle) //aiming logic
-	{
-		f32 turnSpeed = turret.turret_turn_speed; //turn rate
-
-		f32 angleDiff = blobAngle - aimAngle;
-		angleDiff = (angleDiff + 180) % 360 - 180;
-
-		if (turnSpeed <= 0 || (angleDiff < turnSpeed && angleDiff > -turnSpeed)) //if turn difference is smaller than turn speed, snap to it
-		{
-			this.setAngleDegrees(aimAngle);
-		}
-		else
-		{
-			f32 turnAngle = angleDiff > 0 ? -turnSpeed : turnSpeed; //either left or right turn
-			this.setAngleDegrees(blobAngle + turnAngle);
-			this.setAngleDegrees(blobAngle + turnAngle);
-		}
-		blobAngle = this.getAngleDegrees();
-	}
-
-
-	//gun logic
-	s32 ownerCharge = ownerBlob.get_s32(absoluteCharge_string);
-
-	s32 spaceChargeCost = turret.firing_cost;
-
-	bool pressed_space = ownerBlob.isKeyPressed(key_action3);
-	bool pressed_m2 = this.isKeyPressed(key_action2);
-	
-	u32 spaceTime = this.get_u32( "space_heldTime");
-	u32 m2Time = this.get_u32( "m2_heldTime");
-
-	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
-	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
-
-	if (pressed_space && spaceTime >= turret.firing_delay && ownerCharge >= spaceChargeCost)
-	{
-		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
-		{
-			removeCharge(ownerBlob, spaceChargeCost, true);
-			bool leftCannon = this.get_bool( "leftCannonTurn" );
-			this.set_bool( "leftCannonTurn", !leftCannon);
-
-			f32 aimDist = aimVec.getLength();	//detonation zone
-			u8 shotType = 0; //shot type
-
-			f32 minLifetime = 0.25f; //minimum detonation time
-			f32 lifeTime = Maths::Max((aimDist / turret.shot_speed) / getTicksASecond(), minLifetime*2); //shot lifetime
-			
-			uint bulletCount = turret.firing_burst;
-			for (uint i = 0; i < bulletCount; i ++)
-			{
-				f32 lifeTimeRandom = 0.5f - _flak_turret_logic_r.NextFloat(); //lifetime variation
-				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f); 
-
-				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8.0f, 0.0f * leftMult); //barrel pos
-				firePos.RotateByDegrees(blobAngle);
-				firePos += thisPos; //fire pos
-
-				Vec2f fireVec = Vec2f(1.0f,0) * turret.shot_speed; 
-				f32 randomSpread = turret.firing_spread * (1.0f - (2.0f * _flak_turret_logic_r.NextFloat()) ); //shot spread
-				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
-				fireVec += ownerBlob.getVelocity(); //adds owner ship speed
-
-				turretFire(this, shotType, firePos, fireVec, lifeTime); //at TurretCommon.as
-			}
-
-			spaceShotTicks = 0;
-		}
-	}
-
-	if (pressed_space)
-	{ spaceTime++; }
-	else { spaceTime = 0; }
-	
-	if (pressed_m2)
-	{ m2Time++; }
-	else { m2Time = 0; }
-	this.set_u32( "space_heldTime", spaceTime );
-	this.set_u32( "m2_heldTime", m2Time );
-
-	if (spaceShotTicks < 1000)
-	{
-		spaceShotTicks++;
-		this.set_u32( "space_shotTime", spaceShotTicks );
-	}
-
-	if (m2ShotTicks < 1000)
-	{
-		//m2ShotTicks++;
-		this.set_u32( "m2_shotTime", m2ShotTicks );
 	}
 
 	//sound logic
@@ -280,6 +135,38 @@ void onTick( CBlob@ this )
 	}*/
 }
 
+void spawnAttachments(CBlob@ ownerBlob)
+{
+	if (ownerBlob == null)
+	{ return; }
+
+	CAttachment@ attachments = ownerBlob.getAttachments();
+	if (attachments == null)
+	{ return; }
+
+	Vec2f ownerPos = ownerBlob.getPosition();
+	int teamNum = ownerBlob.getTeamNum();
+
+	AttachmentPoint@ podSlot = attachments.getAttachmentPointByName("PODSLOT");
+
+	if (podSlot != null)
+	{
+		Vec2f slotOffset = podSlot.offset;
+		CBlob@ turret = podSlot.getOccupied();
+		if (turret == null)
+		{
+			CBlob@ blob = server_CreateBlob( "shield_full" , teamNum, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
+				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
+				ownerBlob.server_AttachTo(blob, podSlot);
+				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16(shieldModeNumString, 2);
+			}
+		}
+	}
+}
 
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
@@ -300,38 +187,86 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 	//empty
 }
 
-void onDie( CBlob@ this )
+bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
 {
-	Vec2f thisPos = this.getPosition();
-	blast( thisPos , 12);
+	return false;
 }
 
-void blast( Vec2f pos , int amount)
+void onThisAddToInventory(CBlob@ this, CBlob@ inventoryBlob)
 {
-	if(!isClient())
-	{return;}
+	this.doTickScripts = true;
+}
 
-	Sound::Play("GenericExplosion1.ogg", pos, 0.8f, 0.8f + XORRandom(10)/10.0f);
+void GetButtonsFor(CBlob@ this, CBlob@ caller)
+{
+	bool hasCarrier = true;
 
-	for (int i = 0; i < amount; i++)
-    {
-        Vec2f vel(_flak_turret_logic_r.NextFloat() * 3.0f, 0);
-        vel.RotateBy(_flak_turret_logic_r.NextFloat() * 360.0f);
+	u16 ownerBlobID = this.get_u16(carrierBlobNetidString);
+	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
+	if (ownerBlobID == 0 || ownerBlob == null)
+	{ 
+		hasCarrier = false;
+	}
 
-        CParticle@ p = ParticleAnimated("GenericBlast6.png", 
-									pos, 
-									vel, 
-									float(XORRandom(360)), 
-									1.5f, 
-									2 + XORRandom(4), 
-									0.0f, 
-									false );
-									
-        if(p is null) continue; //bail if we stop getting particles
+	if (caller.getTeamNum() == this.getTeamNum()) 
+	{
+		u16 newCarrierNetID = 0;
 		
-    	p.fastcollision = true;
-        p.damping = 0.85f;
-		p.Z = 200.0f;
-		p.lighting = false;
-    }
+		string buttonIconString = "$new_carry$";
+		string buttonDescString = "Start Carrying";
+		if(!this.get_bool(canCarryBoolString))
+		{
+			buttonIconString = "$carry_blocked$";
+			buttonDescString = "This pod cannot be carried";
+			caller.CreateGenericButton(buttonIconString, Vec2f(0, 0), this, 0, getTranslatedString(buttonDescString));
+			return;
+		}
+
+		if(hasCarrier && caller is ownerBlob) //disconnect if carrier
+		{
+			buttonIconString = "$stop_carry$";
+			buttonDescString = "Stop Carrying";
+		}
+		else
+		{
+			newCarrierNetID = caller.getNetworkID();
+		}
+
+		CBitStream params;
+		params.write_u16(newCarrierNetID);
+		caller.CreateGenericButton(buttonIconString, Vec2f(0, 0), this, this.getCommandID(pod_carry_toggle_ID), getTranslatedString(buttonDescString), params);
+	}
+}
+
+void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
+{
+	if (this == null)
+	{ return; }
+	
+    if (cmd == this.getCommandID(pod_carry_toggle_ID)) // 1 shot instance
+    {
+		bool hasCarrier = true;
+		bool isBeingCarried = this.get_bool(isCarriedBoolString);
+
+		u16 ownerBlobID = this.get_u16(carrierBlobNetidString);
+		CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
+		if (ownerBlobID == 0 || ownerBlob == null)
+		{ 
+			hasCarrier = false;
+		}
+
+		u16 newCarrierNetID;
+		if (!params.saferead_u16(newCarrierNetID)) return;
+		
+		if (newCarrierNetID == 0)
+		{
+			this.set_bool(isCarriedBoolString, false);
+			this.set_u16(carrierBlobNetidString, 0);
+		}
+		else
+		{
+			this.set_bool(isCarriedBoolString, true);
+			this.set_u16(carrierBlobNetidString, newCarrierNetID);
+		}
+	}
 }

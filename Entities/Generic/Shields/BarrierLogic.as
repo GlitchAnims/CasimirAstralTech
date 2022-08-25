@@ -14,7 +14,11 @@ void onInit( CBlob@ this )
 	this.getShape().getConsts().mapCollisions = false;
 
 	this.set_bool("active", false);
+	this.set_u16(shieldModeNumString, 0);
 	this.set_u32("ownerBlobID", 0);
+
+	this.set_u16("frame", 0);
+	this.set_u8("spriteTimer", 0);
 
 	AddIconToken("$shield_activate$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 23);
 	AddIconToken("$shield_deactivate$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 27);
@@ -30,8 +34,6 @@ void onInit( CSprite@ this )
 	CBlob@ thisBlob = this.getBlob();
 	if (thisBlob == null)
 	{ return; }
-
-	thisBlob.set_u8("spriteTimer", 0);
 }
 
 void onTick( CSprite@ this )
@@ -56,47 +58,60 @@ void onTick( CSprite@ this )
 		this.SetFrame(0);
 	}
 
-	u16 frame = this.getFrame();
-	u8 spriteTimer = thisBlob.get_u8("spriteTimer");
+	u16 frame = thisBlob.get_u16("frame"); this.getFrame();
+	u16 frameIndex = thisBlob.get_u16(shieldModeNumString);
 
-	if (frame < 2)
-	{
-		if (spriteTimer >= 10)
-		{
-			this.SetFrame(frame + 1);
-			thisBlob.set_u8("spriteTimer", 0);
-		}
-		else
-		{
-			thisBlob.set_u8("spriteTimer", spriteTimer + 1);
-		}
-	}
+	u16 trueFrame = frameIndex + (3*frame);
+	this.SetFrame(trueFrame);
 }
 
 void onTick( CBlob@ this )
 {
+	if (!this.get_bool("active"))
+	{ return; }
+
+	u32 gameTime = getGameTime();
+	u8 spriteTimer = this.get_u8("spriteTimer");
+	if (spriteTimer < 10) //thrice a second
+	{
+		this.set_u8("spriteTimer", spriteTimer+1);
+	}
+	else
+	{
+		u16 frame = this.get_u16("frame");
+		if (frame < 2)
+		{
+			this.set_u16("frame", frame+1);
+		}
+		this.set_u8("spriteTimer", 0);
+	}
+
 	if (!isServer())
 	{ return; }
 
 	u32 ownerBlobID = this.get_u32("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!this.isAttached() || ownerBlobID == 0 || ownerBlob == null)
-	{ 
+	{
 		this.server_Die();
 		return;
 	}
-
-	if (!this.get_bool("active"))
-	{ return; }
 
 	ChargeInfo@ chargeInfo;
 	if (!ownerBlob.get( "chargeInfo", @chargeInfo )) 
 	{ return; }
 
+	u16 shieldMode = this.get_u16(shieldModeNumString);
+	if (shieldMode != 0)
+	{
+		this.setAngleDegrees(ownerBlob.getAngleDegrees());
+	}
+
 	s32 regen = chargeInfo.chargeRegen;
 	s32 rate = chargeInfo.chargeRate;
+	if (rate == 0) { rate = 290; }
 
-	if ((getGameTime() + this.getNetworkID()) % (rate + 1) != 0) //overcomplicated way to spread about the ticks
+	if ((gameTime + this.getNetworkID()) % (rate + 1) != 0) //overcomplicated way to spread about the ticks
 	{ return; }
 
 	if (!removeCharge(ownerBlob, regen, true))
@@ -107,10 +122,13 @@ void onTick( CBlob@ this )
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
 {
+	this.set_u16("frame", 0);
+	this.set_u8("spriteTimer", 0);
+
 	if (isClient())
 	{
 		makeTeamAura(worldPoint, this.getTeamNum(), this.getVelocity(), 40, 5.0f);
-		this.getSprite().SetFrame(0);
+		//this.getSprite().SetFrame(0);
 		Sound::Play("individual_boom.ogg", worldPoint, 1.5f, 0.9f + ( 0.2f * _barrier_logic_r.NextFloat()));
 	}
 
@@ -188,8 +206,9 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 
 	bool isShieldActive = this.get_bool("active");
 	bool enoughCharge = charge > (maxCharge * 0.25f); 
-	if (caller is ownerBlob) //does not show button if not enough charge
+	if ((caller is ownerBlob) || (ownerBlob.hasTag("npc") && caller.getTeamNum() == ownerBlob.getTeamNum())) 
 	{
+		//does not show button if not enough charge
 		string buttonIconString = "$shield_activate$";
 		string buttonDescString = "Activate Shielding";
 		if(isShieldActive)
@@ -209,6 +228,9 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
+	if (this == null)
+	{ return; }
+	
     if (cmd == this.getCommandID(shield_toggle_ID)) // 1 shot instance
     {
 		u32 ownerBlobID = this.get_u32("ownerBlobID");

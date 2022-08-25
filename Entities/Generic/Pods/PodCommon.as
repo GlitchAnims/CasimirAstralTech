@@ -1,59 +1,87 @@
-//Turret Include
+//Pod Include
 
 #include "SpaceshipGlobal.as"
 
-namespace FlakParams
-{
-	const ::f32 turret_turn_speed = 8.0f; // degrees per tick, 0 = instant (30 ticks a second)
+const string canCarryBoolString = "pod_can_carry";
+const string isCarriedBoolString = "pod_carried";
+const string carrierBlobNetidString = "pod_carrier_netid";
 
-	const ::u32 firing_rate = 8; // ticks per shot, won't fire if 0
-	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
-	const ::u32 firing_delay = 0; // ticks before first shot
-	const ::u32 firing_spread = 12; // degrees
-	const ::s32 firing_cost = 2; // charge cost
-	const ::f32 shot_speed = 10.0f; // pixels per tick, won't fire if 0
+const string pod_carry_toggle_ID = "pod_carry_toggle";
+
+namespace PodShieldParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.0f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 300; //max charge amount
+	const ::s32 CHARGE_REGEN = 1; //amount per regen
+	const ::s32 CHARGE_RATE = 0; //ticks per regen
+
+	//carrying
+	const ::bool carry_can_turn = true; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 8.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.15f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 16.0f; // minimum carrying distance - distance at which no more force is applied
 }
 
-namespace GatlingParams
+namespace PodFlakParams
 {
-	const ::f32 turret_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	//charge
+	const ::f32 CHARGE_START = 0.0f; // percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 300; // max charge amount
+	const ::s32 CHARGE_REGEN = 1; // amount per regen
+	const ::s32 CHARGE_RATE = 0; // ticks per regen
 
-	const ::u32 firing_rate = 3; // ticks per shot, won't fire if 0
-	const ::u32 firing_burst = 2; // bullets per shot, won't fire if 0
-	const ::u32 firing_delay = 30; // ticks before first shot
-	const ::u32 firing_spread = 5; // degrees
-	const ::s32 firing_cost = 4; // charge cost
-	const ::f32 shot_speed = 20.0f; // pixels per tick, won't fire if 0
+	//carrying
+	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.10f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 20.0f; // minimum carrying distance - distance at which no more force is applied
 }
 
-class TurretInfo
+namespace PodGatlingParams
 {
-	f32 turret_turn_speed; // degrees per tick, 0 = instant (30 ticks a second)
+	//charge
+	const ::f32 CHARGE_START = 0.0f; // percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 400; // max charge amount
+	const ::s32 CHARGE_REGEN = 0; // amount per regen
+	const ::s32 CHARGE_RATE = 0; // ticks per regen
 
-	u32 firing_rate; // ticks per shot, won't fire if 0
-	u32 firing_burst; // bullets per shot, won't fire if 0
-	u32 firing_delay; // ticks before first shot
-	u32 firing_spread; // degrees
-	s32 firing_cost; // charge cost
-	f32 shot_speed; // pixels per tick, 0 = instant
+	//carrying
+	const ::bool carry_can_turn = false; // whether or not the pod turns toward the carrier's aimpos
+	const ::f32 carry_turn_speed = 0.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_vel = 0.08f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	const ::f32 carry_dist = 20.0f; // minimum carrying distance - distance at which no more force is applied
+}
 
-	u16 auto_target_ID; //current target for automatic mode
+class PodInfo
+{
+	bool forward_thrust;
+	bool backward_thrust;
+	bool port_thrust;
+	bool starboard_thrust;
 
-	TurretInfo()
+	//carrying
+	bool carry_can_turn; // whether or not the pod turns toward the carrier's aimpos
+	f32 carry_turn_speed; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	f32 carry_vel; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
+	f32 carry_dist; // minimum carrying distance - distance at which no more force is applied
+
+	PodInfo()
 	{
-		turret_turn_speed = 1.0f;
+		forward_thrust = false;
+		backward_thrust = false;
+		port_thrust = false;
+		starboard_thrust = false;
 
-		firing_rate = 2;
-		firing_burst = 1;
-		firing_delay = 1;
-		firing_spread = 1;
-		firing_cost = 1;
-		shot_speed = 3.0f;
-
-		auto_target_ID = 0;
+		//carrying
+		bool carry_can_turn = false;
+		f32 carry_turn_speed = 0.0f;
+		f32 carry_vel = 0.15f;
+		f32 carry_dist = 16.0f;
 	}
 };
 
+/*
 void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, float lifeTime = 1.0f)
 {
 	if (ownerBlob == null || ownerBlob.hasTag("dead"))
@@ -71,4 +99,4 @@ void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, V
 		blob.setVelocity( blobVel );
 		blob.set_f32(shotLifetimeString, lifeTime);
 	}
-}
+}*/

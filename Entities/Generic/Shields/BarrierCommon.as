@@ -1,4 +1,5 @@
 const string shield_toggle_ID = "shield_toggle";
+const string shieldModeNumString = "shield_mode_number";
 
 bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel = Vec2f_zero)
 {
@@ -16,6 +17,40 @@ bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel
 	if (distanceFromCenter < 0.9f)
 	{ return true;}
 
+	// half and quarter check
+	u16 shieldMode = barrier.get_u16(shieldModeNumString);
+	if (shieldMode != 0)
+	{
+		float maxAngle = 90.0f;
+		switch (shieldMode)
+		{
+			case 1:
+			maxAngle = 90.0f;
+			break;
+			case 2:
+			maxAngle = 45.0f;
+			break;
+		}
+
+		Vec2f dirQ = thisPos - barrierPos;
+
+		f32 angleQ = -dirQ.getAngleDegrees() + 360;
+		f32 thisAngleQ = barrier.getAngleDegrees();
+		print ("angleQ: "+ angleQ);
+		print ("thisAngleQ: "+ thisAngleQ);
+
+		f32 angleDiffQ = angleQ - thisAngleQ;
+		angleDiffQ += angleDiffQ > 180 ? -360 : angleDiffQ < -180 ? 360 : 0;
+		//angleDiffQ = (angleDiffQ + 180) % 360 - 180;
+		//angleDiffQ = Maths::FMod(angleDiffQ + 180.0f, 360.0f) - 180.0f;
+
+		print ("angleDiff: "+ angleDiffQ);
+
+		if (angleDiffQ < -maxAngle || angleDiffQ > maxAngle)
+		{ return true; }
+	}
+
+	// entry direction check
 	f32 angle = dir.getAngleDegrees();
 	f32 thisAngle = thisVel.getAngleDegrees();
 	
