@@ -30,7 +30,8 @@ void onInit(CBlob@ this)
 
 	this.getShape().SetGravityScale(0);
 
-	spawnAttachments(this);
+	if (isServer())
+	{ spawnAttachments(this); }
 
 	this.getSprite().SetZ(-60.0f);   // push behind station core
 }
