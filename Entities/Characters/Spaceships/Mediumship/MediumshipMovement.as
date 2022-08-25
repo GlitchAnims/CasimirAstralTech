@@ -21,8 +21,6 @@ void onInit(CMovement@ this)
 	thisBlob.set_s32("downTap",0);
 
 	thisBlob.set_bool("movementFirstTick", true);
-
-	
 }
 
 void onTick(CMovement@ this)
@@ -123,7 +121,7 @@ void onTick(CMovement@ this)
 	f32 blobSpinVel = thisBlob.getAngularVelocity();
 	f32 oldSpinVel = blobSpinVel;
 	
-	if (keysPressedAmount != 0)
+	if (keysPressedAmount != 0 && !thisBlob.isAttached())
 	{
 		Vec2f forward		= Vec2f_zero;
 		Vec2f backward		= Vec2f_zero;

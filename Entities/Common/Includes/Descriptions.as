@@ -105,5 +105,11 @@ namespace Descriptions
 
 	//Ships
 	buy_martyr 					= getTranslatedString("Assault frigate. This is a temporary way to recover ships."),
-	buy_balthazar 				= getTranslatedString("Logistics frigate. This is a temporary way to recover ships.");
+	buy_balthazar 				= getTranslatedString("Logistics frigate. This is a temporary way to recover ships."),
+
+	buy_pod_shield 				= getTranslatedString("Stationary, chargeable pod. Projects a 90º arc shield in front of itself."),
+	buy_pod_flak 				= getTranslatedString("Stationary, chargeable pod. Only targets small, piloted ships. Great for area denial."),
+	buy_pod_gatling 			= getTranslatedString("Stationary, chargeable pod. Ignores small targets. Useful against slow or stationary ships."),
+	buy_pod_artillery 			= getTranslatedString("Stationary, chargeable pod. Prioritizes medium to big structures, and stationary targets (like other pods). Has a higher targeting range than other pods."),
+	buy_pod_pd 					= getTranslatedString("Stationary, chargeable pod. Targets incoming ordinance with a pinpoint laser. Can be distracted by flares.");
 }

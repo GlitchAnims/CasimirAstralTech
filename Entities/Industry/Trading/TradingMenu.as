@@ -306,7 +306,11 @@ TradeItem@ AddItemToShip(CBlob@ this, CBlob@ caller, const uint itemIndex, const
 		{
 			blob.set_u16("buyer", caller.getPlayer().getNetworkID());
 			blob.server_setTeamNum(caller.getTeamNum());
-			if (!item.buyIntoInventory || !caller.server_PutInInventory(blob))
+			if (blob.hasTag("hull"))
+			{
+				blob.setPosition(caller.getPosition());
+			}
+			else if (!item.buyIntoInventory || !caller.server_PutInInventory(blob))
 			{
 				caller.server_Pickup(blob);
 			}

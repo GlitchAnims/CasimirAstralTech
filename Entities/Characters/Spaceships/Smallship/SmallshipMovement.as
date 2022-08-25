@@ -39,6 +39,8 @@ void onTick(CMovement@ this)
 	const bool right	= thisBlob.isKeyPressed(key_right);
 	const bool up		= thisBlob.isKeyPressed(key_up);
 	const bool down		= thisBlob.isKeyPressed(key_down);
+
+	const bool isDocked = thisBlob.isAttached();
 	
 	bool[] allKeys =
 	{
@@ -49,11 +51,14 @@ void onTick(CMovement@ this)
 	};
 
 	u8 keysPressedAmount = 0;
-	for (uint i = 0; i < allKeys.length; i ++)
+	if (!isDocked)
 	{
-		bool currentKey = allKeys[i];
-		if (currentKey)
-		{ keysPressedAmount++; }
+		for (uint i = 0; i < allKeys.length; i ++)
+		{
+			bool currentKey = allKeys[i];
+			if (currentKey)
+			{ keysPressedAmount++; }
+		}
 	}
 	
 	const bool isknocked = isKnocked(thisBlob) || (thisBlob.get_bool("frozen") == true);
@@ -69,7 +74,7 @@ void onTick(CMovement@ this)
 	Vec2f aimVec = aimPos - pos;
 	f32 aimAngle = -aimVec.getAngleDegrees();
 
-	if (blobAngle != aimAngle) //aiming logic
+	if (blobAngle != aimAngle && !isDocked) //aiming logic
 	{
 		f32 turnSpeed = ship.ship_turn_speed * moveVars.turnSpeedFactor; //multiplier for turn speed
 
@@ -108,7 +113,7 @@ void onTick(CMovement@ this)
 	const f32 vellen = shape.vellen;
 	const bool onground = thisBlob.isOnGround() || thisBlob.isOnLadder();
 
-	if (keysPressedAmount != 0)
+	if (keysPressedAmount != 0 && !isDocked)
 	{
 		Vec2f forward		= Vec2f_zero;
 		Vec2f backward		= Vec2f_zero;

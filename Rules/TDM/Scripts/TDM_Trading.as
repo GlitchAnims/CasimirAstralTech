@@ -70,6 +70,13 @@ void MakeTradeMenu(CBlob@ trader)
 	s32 cost_martyr = cfg.read_s32("cost_martyr", 120);
 	s32 cost_balthazar = cfg.read_s32("cost_balthazar", 100);
 
+	//pods
+	s32 cost_pod_shield = cfg.read_s32("cost_pod_shield", 30);
+	s32 cost_pod_flak = cfg.read_s32("cost_pod_flak", 30);
+	s32 cost_pod_gatling = cfg.read_s32("cost_pod_gatling", 30);
+	s32 cost_pod_artillery = cfg.read_s32("cost_pod_artillery", 30);
+	s32 cost_pod_pd = cfg.read_s32("cost_pod_pd", 30);
+
 	s32 menu_width = cfg.read_s32("trade_menu_width", 3);
 	s32 menu_height = cfg.read_s32("trade_menu_height", 5);
 
@@ -92,8 +99,15 @@ void MakeTradeMenu(CBlob@ trader)
 	//addItemForCoin(trader, "Cruise Missiles", cost_cruise, true, "$mat_bombarrows$", "mat_missile_cruise", Descriptions::mat_missile_cruise);
 	//addItemForCoin(trader, "EMP Missiles", cost_emp, true, "$mat_waterarrows$", "mat_missile_emp", Descriptions::mat_missile_emp);
 	addItemForCoin(trader, "Flares", cost_flare, true, "$mat_firearrows$", "mat_missile_flare", Descriptions::mat_missile_flare);
+
 	addItemForCoin(trader, "Martyr", cost_martyr, true, "$mat_firearrows$", "martyr", Descriptions::buy_martyr);
 	addItemForCoin(trader, "Balthazar", cost_balthazar, true, "$mat_firearrows$", "balthazar", Descriptions::buy_balthazar);
+
+	addItemForCoin(trader, "Shield Pod", cost_pod_shield, true, "$pod_shield$", "pod_shield", Descriptions::buy_pod_shield);
+	//addItemForCoin(trader, "Flak Pod", cost_pod_flak, true, "$pod_flak$", "pod_shield", Descriptions::buy_pod_flak);
+	//addItemForCoin(trader, "Gatling Pod", cost_pod_gatling, true, "$pod_gatling$", "pod_shield", Descriptions::buy_pod_gatling);
+	//addItemForCoin(trader, "Artillery Pod", cost_pod_artillery, true, "$mat_firearrows$", "pod_shield", Descriptions::buy_pod_artillery);
+	//addItemForCoin(trader, "Point Defense Pod", cost_pod_pd, true, "$mat_firearrows$", "pod_shield", Descriptions::buy_pod_pd);
 }
 
 // load coins amount
