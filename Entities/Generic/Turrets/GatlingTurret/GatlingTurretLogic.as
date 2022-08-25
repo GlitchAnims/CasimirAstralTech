@@ -102,6 +102,13 @@ void onTick( CBlob@ this )
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 
+	Vec2f ownerAimpos = ownerBlob.getAimPos();
+	Vec2f aimVec = ownerAimpos - thisPos;
+	f32 aimAngle = aimVec.getAngleDegrees();
+	aimAngle *= -1.0f;
+
+	bool forceActivateFire = false;
+
 	if (isAuto)
 	{
 		int teamNum = this.getTeamNum();
@@ -134,7 +141,6 @@ void onTick( CBlob@ this )
 			}
 		}
 
-		bool activateFire = false;
 		CBlob@ b = getBlobByNetworkID(turret.auto_target_ID);
 		if (b != null)
 		{
@@ -158,18 +164,16 @@ void onTick( CBlob@ this )
 				travelTicks = targetDist / shotSpeed;
 				futureTargetPos = bPos + (bVel*travelTicks);
 
-				ownerBlob.setAimPos(futureTargetPos);
-				activateFire = true;
+				aimVec = futureTargetPos - thisPos;
+				aimAngle = aimVec.getAngleDegrees() * -1.0f;
+
+				f32 angleDiff = aimAngle - blobAngle;
+				angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
+
+				forceActivateFire = Maths::Abs(angleDiff) > 30;
 			}
 		}
-
-		ownerBlob.setKeyPressed(key_action3, activateFire);
 	}
-
-	Vec2f ownerAimpos = ownerBlob.getAimPos();
-	Vec2f aimVec = ownerAimpos - thisPos;
-	f32 aimAngle = aimVec.getAngleDegrees();
-	aimAngle *= -1.0f;
 
 	if (blobAngle != aimAngle) //aiming logic
 	{
@@ -195,7 +199,7 @@ void onTick( CBlob@ this )
 	s32 ownerCharge = ownerBlob.get_s32(absoluteCharge_string);
 	s32 spaceChargeCost = turret.firing_cost;
 
-	bool pressed_space = ownerBlob.isKeyPressed(key_action3);
+	bool pressed_space = ownerBlob.isKeyPressed(key_action3) || forceActivateFire;
 	u32 spaceTime = this.get_u32( "space_heldTime");
 
 	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
