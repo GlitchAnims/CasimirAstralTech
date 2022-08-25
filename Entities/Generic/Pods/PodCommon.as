@@ -18,7 +18,7 @@ namespace PodShieldParams
 
 	//carrying
 	const ::bool carry_can_turn = true; // whether or not the pod turns toward the carrier's aimpos
-	const ::f32 carry_turn_speed = 8.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 carry_turn_speed = 1.0f; // carrying turn speed - degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 carry_vel = 0.15f; // carrying speed - velocity applied when carrying - lower = 'heavier' pod
 	const ::f32 carry_dist = 16.0f; // minimum carrying distance - distance at which no more force is applied
 }

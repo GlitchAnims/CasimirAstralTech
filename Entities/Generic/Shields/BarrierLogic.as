@@ -109,7 +109,7 @@ void onTick( CBlob@ this )
 
 	s32 regen = chargeInfo.chargeRegen;
 	s32 rate = chargeInfo.chargeRate;
-	if (rate == 0) { rate = 290; }
+	if (rate == 0) { rate = 299; }
 
 	if ((gameTime + this.getNetworkID()) % (rate + 1) != 0) //overcomplicated way to spread about the ticks
 	{ return; }

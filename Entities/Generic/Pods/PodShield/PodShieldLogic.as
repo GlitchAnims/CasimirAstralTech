@@ -92,11 +92,11 @@ void onTick( CBlob@ this )
 		aimAngle *= -1.0f;
 
 		float minCarryDist = pod.carry_dist;
-		float carrySpeed = pod.carry_vel * Maths::Clamp(ownerDist - minCarryDist, 0, minCarryDist);
+		float carrySpeed = pod.carry_vel * (Maths::Clamp(ownerDist - minCarryDist, 0, minCarryDist) * 0.1f);
 
 		if (carrySpeed > 0)
 		{
-			Vec2f carryVel = ownerVecNorm * pod.carry_vel;
+			Vec2f carryVel = ownerVecNorm * carrySpeed;
 			this.setVelocity(thisVel + carryVel);
 		}
 		

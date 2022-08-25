@@ -36,15 +36,11 @@ bool doesBypassBarrier(CBlob@ barrier, Vec2f thisPos = Vec2f_zero, Vec2f thisVel
 
 		f32 angleQ = -dirQ.getAngleDegrees() + 360;
 		f32 thisAngleQ = barrier.getAngleDegrees();
-		print ("angleQ: "+ angleQ);
-		print ("thisAngleQ: "+ thisAngleQ);
-
+		
 		f32 angleDiffQ = angleQ - thisAngleQ;
 		angleDiffQ += angleDiffQ > 180 ? -360 : angleDiffQ < -180 ? 360 : 0;
 		//angleDiffQ = (angleDiffQ + 180) % 360 - 180;
 		//angleDiffQ = Maths::FMod(angleDiffQ + 180.0f, 360.0f) - 180.0f;
-
-		print ("angleDiff: "+ angleDiffQ);
 
 		if (angleDiffQ < -maxAngle || angleDiffQ > maxAngle)
 		{ return true; }
