@@ -5,6 +5,9 @@ const string denyChargeInputTag = "deny_charge_input";
 const string drain_charge_ID = "drain_charge";
 const string transfer_charge_ID = "transfer_charge";
 
+const string abscharge_update_ID = "update_charge";
+const string max_abscharge_update_ID = "update_abscharge";
+
 const string absoluteCharge_string = "absolute_charge";
 const string absoluteMaxCharge_string = "absolute_max_charge";
 
@@ -162,13 +165,15 @@ bool removeCharge(CBlob@ blob, s32 chargeAmount = 0, bool mustHaveEnough = false
 
 void updateAbsoluteCharge(CBlob@ blob, s32 chargeAmount)
 {
-	blob.set_s32(absoluteCharge_string, chargeAmount);
-	blob.Sync(absoluteCharge_string, true);
+	CBitStream params;
+	params.write_s32(chargeAmount);
+	blob.SendCommand(blob.getCommandID(abscharge_update_ID), params);
 }
 void updateAbsoluteMaxCharge(CBlob@ blob, s32 maxAmount)
 {
-	blob.set_s32(absoluteMaxCharge_string, maxAmount);
-	blob.Sync(absoluteMaxCharge_string, true);
+	CBitStream params;
+	params.write_s32(maxAmount);
+	blob.SendCommand(blob.getCommandID(max_abscharge_update_ID), params);
 }
 
 s32 findBatteries(CBlob@ blob)

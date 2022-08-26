@@ -5,6 +5,9 @@
 const string targetNetIDString = "target_net_ID";
 const string hasTargetTicksString = "has_target_ticks";
 
+const string has_ordinance_update_ID = "has_ordinance_update";
+const string homing_target_update_ID = "homing_target_update";
+
 const string quickHomingTag = "quick_homing";
 
 namespace AAMissileParams
@@ -218,4 +221,26 @@ u32 getOrdinanceCooldown(u8 type)
 	}
 
 	return 30;
+}
+
+void updateOrdinanceTarget( CBlob@ this, u16 newTargetNetID = 0, bool resetTimer = false)
+{
+	CBitStream params;
+	params.write_u16(newTargetNetID);
+	params.write_bool(resetTimer);
+	this.SendCommand(this.getCommandID(homing_target_update_ID), params);
+}
+
+void updateOrdinanceAvailability( CBlob@ this, bool hasOrd = false )
+{
+	if (isServer())
+	{
+		CBitStream params;
+		params.write_bool(hasOrd);
+		this.SendCommand(this.getCommandID(has_ordinance_update_ID), params);
+	}
+	else
+	{
+		this.set_bool("has_ord", hasOrd);
+	}
 }

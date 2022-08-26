@@ -29,4 +29,11 @@ void onInit(CBlob@ this)
 	this.maxQuantity = stackQuantity;
 
 	this.getCurrentScript().runFlags |= Script::remove_after_this;
+
+	CShape@ shape = this.getShape();
+	if (shape != null)
+	{
+		shape.getConsts().mapCollisions = true;
+		shape.SetGravityScale(0.0f);
+	}
 }

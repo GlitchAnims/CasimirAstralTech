@@ -56,6 +56,7 @@ void onInit( CBlob@ this )
 
 	this.addCommandID(fire_ordinance_command_ID);
 	this.addCommandID(pick_ordinance_command_ID);
+	this.addCommandID(has_ordinance_update_ID);
 	
 	this.Tag("launcher");
 }
@@ -113,8 +114,7 @@ void onTick( CBlob@ this )
 
 		if (hasCurrentOrdinance != this.get_bool("has_ord"))
 		{
-			this.set_bool("has_ord", hasCurrentOrdinance);
-			this.Sync("has_ord", isServer());
+			updateOrdinanceAvailability(this, hasCurrentOrdinance);
 		}
 	}
 	
@@ -145,8 +145,7 @@ void onTick( CBlob@ this )
 
 			if (responsible)
 			{
-				this.set_bool("has_ord", hasCurrentOrdinance);
-				this.Sync("has_ord", isServer());
+				updateOrdinanceAvailability(this, hasCurrentOrdinance);
 			}
 
 			if (!canFire) // playing annoying no ammo sound
@@ -480,6 +479,12 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		{
 			CycleToOrdinanceType(this, launcher, type);
 		}
+	}
+	else if (cmd == this.getCommandID(has_ordinance_update_ID)) //update the "has_ord" bool variable
+	{
+		bool updatedHasOrd;
+		if (!params.saferead_bool(updatedHasOrd)) return;
+		this.set_bool("has_ord", updatedHasOrd);
 	}
 }
 

@@ -25,26 +25,8 @@ void onInit(CBlob@ this)
 	this.set("missileInfo", @missile);
 
 	this.server_SetTimeToDie(2);
-	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
-	this.set_u32(hasTargetTicksString, 0);
-	this.set_u16(targetNetIDString, 0);
-
-	CShape@ shape = this.getShape();
-	if (shape != null)
-	{
-		shape.getConsts().mapCollisions = true;
-		shape.getConsts().bullet = true;
-		shape.getConsts().net_threshold_multiplier = 4.0f;
-		shape.SetGravityScale(0.0f);
-	}
-
-	this.Tag("projectile");
-	this.Tag("hull");
-
-	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
-	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
 }
 
 void onTick(CBlob@ this)

@@ -6,8 +6,11 @@ void onInit(CBlob@ this)
 	this.Tag(chargeTag);
 	this.getCurrentScript().removeIfTag = "dead";
 	this.set_bool("chargeFirstTick", true);
-	this.addCommandID( drain_charge_ID ); //SpaceshipGlobal.as
-	this.addCommandID( transfer_charge_ID ); //SpaceshipGlobal.as
+
+	this.addCommandID( drain_charge_ID ); //ChargeCommon.as
+	this.addCommandID( transfer_charge_ID );
+	this.addCommandID( abscharge_update_ID );
+	this.addCommandID( max_abscharge_update_ID );
 }
 
 void onTick(CBlob@ this)
@@ -106,5 +109,21 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 
 			transferCharge(fromBlob, toBlob, chargeAmount);
 		}
+	}
+	else if (cmd == this.getCommandID(abscharge_update_ID))
+	{
+		s32 chargeAmount;
+
+		if (!params.saferead_s32(chargeAmount)) return;
+
+		this.set_s32(absoluteCharge_string, chargeAmount);
+	}
+	else if (cmd == this.getCommandID(max_abscharge_update_ID))
+	{
+		s32 newMaxCharge;
+
+		if (!params.saferead_s32(newMaxCharge)) return;
+
+		this.set_s32(absoluteMaxCharge_string, newMaxCharge);
 	}
 }

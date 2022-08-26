@@ -25,27 +25,9 @@ void onInit(CBlob@ this)
 	this.set("missileInfo", @missile);
 
 	this.server_SetTimeToDie(2);
-	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
-	this.set_u32(hasTargetTicksString, 0);
-	this.set_u16(targetNetIDString, 0);
 
-	CShape@ shape = this.getShape();
-	if (shape != null)
-	{
-		shape.getConsts().mapCollisions = true;
-		shape.getConsts().bullet = true;
-		shape.getConsts().net_threshold_multiplier = 4.0f;
-		shape.SetGravityScale(0.0f);
-	}
-
-	this.Tag("projectile");
-	this.Tag("hull");
 	this.Tag(quickHomingTag);
-
-	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
-
 	this.getSprite().SetFrame(0);
-	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
 }
 
 void onTick(CBlob@ this)
@@ -140,9 +122,7 @@ void onTick(CBlob@ this)
 			if (candidatesLength > 0)
 			{
 				CBlob@ selectedCandidate = targetCandidates[XORRandom(candidatesLength)]; //selects one from list
-
-				this.set_u16(targetNetIDString, selectedCandidate.getNetworkID());
-				this.Sync(targetNetIDString, true);
+				updateOrdinanceTarget(this, selectedCandidate.getNetworkID(), false);
 			}
 		}
 
@@ -159,28 +139,30 @@ void onTick(CBlob@ this)
 	Vec2f targetVec = targetPos - thisPos;
 	f32 targetDist = targetVec.getLength(); //distance to target
 
+	u32 hasTargetTicks = this.get_u32(hasTargetTicksString);
+
 	if (targetDist > searchRadius) //lose target logic
 	{
-		u32 hasTargetTicks = this.get_u32(hasTargetTicksString);
 		if (hasTargetTicks < missile.lose_target_ticks)
 		{
-			this.set_u32(hasTargetTicksString, hasTargetTicks + 1); //up by one
+			hasTargetTicks++; //up by one
+			this.set_u32(hasTargetTicksString, hasTargetTicks);
 		}
 		else //set target to null and stop the code
 		{
-			this.set_u16(targetNetIDString, 0);
 			if (is_server)
-			{ this.Sync(targetNetIDString, true); }
-			
-			this.set_u32(hasTargetTicksString, 0);
+			{
+				updateOrdinanceTarget(this, 0, true);
+			}
 			return;
 		}
 	}
-	else //resets lose target timer if in range
+	else if ((gameTime + this.getNetworkID()) % 10 == 0) //resets lose target timer if in range (thrice a second)
 	{
-		this.set_u32(hasTargetTicksString, 0); 
 		if (is_server)
-		{ this.Sync(hasTargetTicksString, true); }
+		{
+			updateOrdinanceTarget(this, targetBlobID, true);
+		}
 	}
 
 	if (is_server) //server only detonation

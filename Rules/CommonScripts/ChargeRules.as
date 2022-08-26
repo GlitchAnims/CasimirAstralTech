@@ -1,17 +1,12 @@
-
-// some magic rules
+#include "SpaceshipGlobal.as"
+#include "ChargeCommon.as"
 
 void onInit(CRules@ this)
 {
-	if (!this.exists("default class"))
-	{
-		this.set_string("default class", "builder");
-	}
-	PlayerInfo@[] playerList;
-	this.set("playerList", playerList);
-
-	updatePlayerList(this);
-	//getPlayersCount()
+	this.addCommandID( drain_charge_ID ); //ChargeCommon.as
+	this.addCommandID( transfer_charge_ID );
+	this.addCommandID( charge_update_ID );
+	this.addCommandID( absolute_charge_update_ID );
 }
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
@@ -61,20 +56,12 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			transferCharge(fromBlob, toBlob, chargeAmount);
 		}
 	}
-	else if (cmd == this.getCommandID(abscharge_update_ID))
+	else if (cmd == this.getCommandID(charge_update_ID))
 	{
-		s32 chargeAmount;
 
-		if (!params.saferead_s32(chargeAmount)) return;
-
-		this.set_s32(absoluteCharge_string, chargeAmount);
 	}
-	else if (cmd == this.getCommandID(max_abscharge_update_ID))
+	else if (cmd == this.getCommandID(absolute_charge_update_ID))
 	{
-		s32 newMaxCharge;
-
-		if (!params.saferead_s32(newMaxCharge)) return;
-
-		this.set_s32(absoluteMaxCharge_string, newMaxCharge);
+		
 	}
 }
