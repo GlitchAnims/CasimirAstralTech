@@ -33,9 +33,6 @@ void onInit( CBlob@ this )
 
 void onTick( CBlob@ this )
 {
-	// vvvvvvvvvvvvvv SERVER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
-	if (!isServer()) return;
-
 	PodInfo@ pod;
 	if (!this.get( "podInfo", @pod )) 
 	{ return; }
@@ -43,17 +40,23 @@ void onTick( CBlob@ this )
 	u32 gameTime = getGameTime();
 
 	if (!this.get_bool(isCarriedBoolString))
-	{ return; }
+	{
+		cancelAllThrust(pod);
+		return;
+	}
 
 	u16 ownerBlobID = this.get_u16(carrierBlobNetidString);
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
+	
+	Vec2f thisPos = this.getPosition();
+	Vec2f thisVel = this.getVelocity();
+	f32 blobAngle = this.getAngleDegrees();
+	blobAngle = Maths::FMod(blobAngle+360.0f, 360.0f);
+
+	Vec2f carryVel = Vec2f_zero;
+
 	if (ownerBlobID != 0 && ownerBlob != null)
 	{ 
-		Vec2f thisPos = this.getPosition();
-		Vec2f thisVel = this.getVelocity();
-		f32 blobAngle = this.getAngleDegrees();
-		blobAngle = (blobAngle+360.0f) % 360;
-		
 		Vec2f ownerPos = ownerBlob.getPosition();
 		Vec2f ownerAimpos = ownerBlob.getAimPos();
 		Vec2f aimVec = ownerAimpos - thisPos;
@@ -65,11 +68,11 @@ void onTick( CBlob@ this )
 		aimAngle *= -1.0f;
 
 		float minCarryDist = pod.carry_dist;
-		float carrySpeed = pod.carry_vel * (Maths::Clamp(ownerDist - minCarryDist, 0, minCarryDist) * 0.1f);
+		float carrySpeed = pod.carry_vel * Maths::Clamp(ownerDist - minCarryDist, 0, minCarryDist) * 0.1f;
 
 		if (carrySpeed > 0)
 		{
-			Vec2f carryVel = ownerVecNorm * carrySpeed;
+			carryVel = ownerVecNorm * carrySpeed;
 			this.setVelocity(thisVel + carryVel);
 		}
 		
@@ -99,6 +102,26 @@ void onTick( CBlob@ this )
 		this.set_u16(carrierBlobNetidString, 0);
 	}
 
+	if (isClient())
+	{
+		if (carryVel != Vec2f_zero)
+		{
+			float carryAngle = carryVel.getAngleDegrees();
+
+			if (blobAngle > 0) carryAngle = Maths::FMod(carryAngle + blobAngle, 360.0f);
+			if (carryAngle > 180.0f) carryAngle = -360.0f + carryAngle;
+			print ("carryAngle: " + carryAngle);
+			pod.forward_thrust = carryAngle < 90.0f && carryAngle > -90.0f;
+			pod.backward_thrust = carryAngle > 90.0f || carryAngle < -90.0f;
+			pod.port_thrust = carryAngle < 180.0f && carryAngle > 0.0f ;
+			pod.starboard_thrust = carryAngle < 0.0f && carryAngle > -180.0f ;
+		}
+		else
+		{
+			cancelAllThrust(pod);
+		}
+	}
+
 	//sound logic
 	/*Vec2f vel = this.getVelocity();
 	float posVelX = Maths::Abs(vel.x);
@@ -113,6 +136,13 @@ void onTick( CBlob@ this )
 	}*/
 }
 
+void cancelAllThrust( PodInfo@ pod )
+{
+	pod.forward_thrust = false;
+	pod.backward_thrust = false;
+	pod.port_thrust = false;
+	pod.starboard_thrust = false;
+}
 
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
@@ -189,7 +219,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 	if (this == null)
 	{ return; }
 	
-    if (cmd == this.getCommandID(pod_carry_toggle_ID)) // 1 shot instance
+    if (cmd == this.getCommandID(pod_carry_toggle_ID)) // toggles the carry state
     {
 		bool hasCarrier = true;
 		bool isBeingCarried = this.get_bool(isCarriedBoolString);

@@ -38,7 +38,7 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		upFire.SetVisible(false);
 		upFire.SetRelativeZ(-1.1f);
-		downFire.ScaleBy(0.3f, 0.3f);
+		upFire.ScaleBy(0.5f, 0.5f);
 		//upFire.RotateBy(0, Vec2f_zero);
 		upFire.SetOffset(Vec2f(7.5f, 0));
 	}
@@ -49,7 +49,7 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		downFire.SetVisible(false);
 		downFire.SetRelativeZ(-1.2f);
-		downFire.ScaleBy(0.3f, 0.3f);
+		downFire.ScaleBy(0.5f, 0.5f);
 		downFire.RotateBy(180, Vec2f_zero);
 		downFire.SetOffset(Vec2f(-7.5f, 0));
 	}
@@ -60,7 +60,7 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		leftFire.SetVisible(false);
 		leftFire.SetRelativeZ(-1.3f);
-		leftFire.ScaleBy(0.3f, 0.3f);
+		leftFire.ScaleBy(0.5f, 0.5f);
 		leftFire.RotateBy(270, Vec2f_zero);
 		leftFire.SetOffset(Vec2f(0, 7.5f));
 	}
@@ -71,7 +71,7 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		rightFire.SetVisible(false);
 		rightFire.SetRelativeZ(-1.4f);
-		rightFire.ScaleBy(0.3f, 0.3f);
+		rightFire.ScaleBy(0.5f, 0.5f);
 		rightFire.RotateBy(90, Vec2f_zero);
 		rightFire.SetOffset(Vec2f(0, -7.5f));
 	}
