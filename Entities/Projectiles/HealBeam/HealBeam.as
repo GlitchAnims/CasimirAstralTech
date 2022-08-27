@@ -55,17 +55,11 @@ void onTick(CBlob@ this)
 		{
 			doMuzzleFlash(thisPos, thisVel);
 		}
-		if (isServer()) //bullet range moderation
-		{
-			float lifeTime = this.get_f32(shotLifetimeString);
-			this.server_SetTimeToDie(lifeTime);
-		}
 		this.set_bool(firstTickString, false);
 	}
 	if (is_client)
 	{
 		Vec2f thisOldPos = this.get_Vec2f(oldPosString);
-		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
 	}
 
