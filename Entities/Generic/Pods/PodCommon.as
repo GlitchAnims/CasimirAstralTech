@@ -90,7 +90,7 @@ namespace PodGeneratorParams
 	//charge
 	const ::f32 CHARGE_START = 0.1f; // percentage charge to start with (0.0f - 1.0f)
 	const ::s32 CHARGE_MAX = 1000; // max charge amount
-	const ::s32 CHARGE_REGEN = 5; // amount per regen
+	const ::s32 CHARGE_REGEN = 10; // amount per regen
 	const ::s32 CHARGE_RATE = 30; // ticks per regen
 
 	//carrying

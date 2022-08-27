@@ -275,6 +275,52 @@ void drawParticlePartialCircle( Vec2f circlePos = Vec2f_zero, f32 radius = 0, f3
 	}
 }
 
+void makePodCarryAura( Vec2f auraCenter = Vec2f_zero, int teamNum = 0, Vec2f auraVel = Vec2f_zero, float pixelStagger = 1.0f, float waveSpan = 40.0f, f32 radius = 10.0f )
+{
+	SColor color = getTeamColor(teamNum);
+	u32 gameTime = getGameTime();
+	float rotationSpeed = gameTime * 8.0f;
+
+	f32 circumference = (radius*2) * simplePi;
+	f32 degreesPerStep = 360.0f / circumference;
+	float midWave = Maths::FMod(rotationSpeed, 360.0f);
+	
+	for(f32 i = 0; i < circumference; i += pixelStagger) 
+	{
+		Vec2f circleDeviation = Vec2f((1.0f * radius) + _sprk_r2.NextFloat(), 0);
+		float pAngle = degreesPerStep*i;
+
+		f32 angleDiff = pAngle - midWave;
+		angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
+		angleDiff = Maths::Abs(angleDiff);
+		if (angleDiff < waveSpan)
+		{
+			f32 sinInput = (waveSpan - angleDiff) / waveSpan;
+			f32 stepDeviation = (Maths::Sin(sinInput * simplePi * 0.5f) * 0.2f) + 1.0f; //particle deviation multiplier
+			circleDeviation *= stepDeviation;
+		}
+		
+		circleDeviation.RotateByDegrees(pAngle);
+
+		Vec2f pPos = auraCenter + circleDeviation;
+		Vec2f pVel = auraVel;
+
+		u8 alpha = 100.0f * _sprk_r2.NextFloat(); //randomize alpha
+		color.setAlpha(alpha);
+
+		CParticle@ p = ParticlePixelUnlimited(pPos, pVel, color, true);
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = -7;
+			p.timeout = 2;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
+}
+
 void genericShipExplosion( Vec2f pos , int particleNum)
 {
 	if(!isClient())

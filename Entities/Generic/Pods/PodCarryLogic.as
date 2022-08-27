@@ -41,7 +41,7 @@ void onTick( CBlob@ this )
 
 	if (!this.get_bool(isCarriedBoolString))
 	{
-		cancelAllThrust(pod);
+		if (isClient()) cancelAllThrust(pod);
 		return;
 	}
 
@@ -110,7 +110,7 @@ void onTick( CBlob@ this )
 
 			if (blobAngle > 0) carryAngle = Maths::FMod(carryAngle + blobAngle, 360.0f);
 			if (carryAngle > 180.0f) carryAngle = -360.0f + carryAngle;
-			print ("carryAngle: " + carryAngle);
+			
 			pod.forward_thrust = carryAngle < 90.0f && carryAngle > -90.0f;
 			pod.backward_thrust = carryAngle > 90.0f || carryAngle < -90.0f;
 			pod.port_thrust = carryAngle > 0.0f ;
@@ -120,6 +120,8 @@ void onTick( CBlob@ this )
 		{
 			cancelAllThrust(pod);
 		}
+
+		makePodCarryAura(thisPos, this.getTeamNum(), thisVel);
 	}
 
 	//sound logic

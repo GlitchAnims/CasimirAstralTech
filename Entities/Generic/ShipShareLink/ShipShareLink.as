@@ -56,7 +56,7 @@ void onTick( CBlob@ this )
 	}
 	this.set_u32(activeTimeString, activeTime);
 
-	const float maxRadius = 100.0f;
+	const float maxRadius = ownerBlob.hasTag("npc") ? 80.0f : 100.0f;
 	f32 shareLinkRadius = Maths::Clamp(float(activeTime) / activeTimeCap, 0.0f, 1.0f);
 	shareLinkRadius *= maxRadius;
 
@@ -155,7 +155,7 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 	}
 
 	bool isLinkActive = this.get_bool(activeBoolString);
-	if (caller is ownerBlob) //does not show button if not enough charge
+	if ((caller is ownerBlob) || (ownerBlob.hasTag("npc") && caller.getTeamNum() == ownerBlob.getTeamNum()))
 	{
 		string buttonIconString = "$link_toggle$";
 		string buttonDescString = "Activate Charge Field";
