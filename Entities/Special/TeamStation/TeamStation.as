@@ -45,6 +45,8 @@ void onInit(CBlob@ this)
 	AddIconToken("$pod_flak$", "FlakTurret.png", Vec2f(20, 8), 0);
 	AddIconToken("$pod_gatling$", "GatlingTurret.png", Vec2f(20, 8), 0);
 	AddIconToken("$pod_artillery$", "ArtilleryTurret.png", Vec2f(22, 10), 0);
+	AddIconToken("$pod_healgun$", "HealgunTurret.png", Vec2f(16, 8), 0);
+	AddIconToken("$pod_generator$", "PodGenerator.png", Vec2f(16, 16), 0);
 
 	//TDM classes
 	//addPlayerClass(this, "Knight", "$knight_class_icon$", "knight", "Hack and Slash.");

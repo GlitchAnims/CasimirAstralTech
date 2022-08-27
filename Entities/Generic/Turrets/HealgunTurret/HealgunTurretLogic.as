@@ -9,15 +9,16 @@
 void onInit( CBlob@ this )
 {
 	TurretInfo turret;
-	turret.turret_turn_speed 	= ArtilleryParams::turret_turn_speed;
+	turret.turret_turn_speed 		= HealgunParams::turret_turn_speed;
+	turret.turret_targeting_range 	= HealgunParams::turret_targeting_range;
 	
-	turret.firing_rate 			= ArtilleryParams::firing_rate;
-	turret.firing_burst 		= ArtilleryParams::firing_burst;
-	turret.firing_delay 		= ArtilleryParams::firing_delay;
-	turret.firing_spread 		= ArtilleryParams::firing_spread;
-	turret.firing_cost 			= ArtilleryParams::firing_cost;
-	turret.shot_speed 			= ArtilleryParams::shot_speed;
-	turret.auto_target_ID		= 0;
+	turret.firing_rate 				= HealgunParams::firing_rate;
+	turret.firing_burst 			= HealgunParams::firing_burst;
+	turret.firing_delay 			= HealgunParams::firing_delay;
+	turret.firing_spread 			= HealgunParams::firing_spread;
+	turret.firing_cost 				= HealgunParams::firing_cost;
+	turret.shot_speed 				= HealgunParams::shot_speed;
+	turret.auto_target_ID			= 0;
 	this.set("shipInfo", @turret);
 	
 	this.set_u32("ownerBlobID", 0);
@@ -28,9 +29,6 @@ void onInit( CBlob@ this )
 	this.set_bool( "automatic", false);
 	
 	this.Tag("npc");
-
-	//centered on items
-	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
 	this.getShape().SetRotationsAllowed(false); //no spinning
 	this.getShape().SetGravityScale(0);
@@ -87,6 +85,8 @@ void onTick( CBlob@ this )
 
 	bool forceActivateFire = false;
 
+	float targetingRange = turret.turret_targeting_range;
+
 	if (isAuto)
 	{
 		int teamNum = this.getTeamNum();
@@ -101,19 +101,19 @@ void onTick( CBlob@ this )
 			{ return; }
 
 			CBlob@[] blobsInRadius;
-			map.getBlobsInRadius(thisPos, 800.0f, @blobsInRadius); //get a target
+			map.getBlobsInRadius(thisPos, targetingRange, @blobsInRadius); //get a target
 			for (uint i = 0; i < blobsInRadius.length; i++)
 			{
 				CBlob@ b = blobsInRadius[i];
 				if (b is null)
 				{ continue; }
 
-				if (b.getTeamNum() == teamNum)
+				if (b.getTeamNum() != teamNum)
 				{ continue; }
 
 				float bSpeed = b.getVelocity().getLength();
 				
-				if (!b.hasTag("hull") || b.hasTag(smallTag) || bSpeed > 1.5f)
+				if (!b.hasTag("hull") || bSpeed > 1.5f || b.getHealth() >= b.getInitialHealth())
 				{ continue; }
 
 				if (map.rayCastSolidNoBlobs(thisPos, b.getPosition()))
@@ -132,27 +132,19 @@ void onTick( CBlob@ this )
 
 			Vec2f targetVec = bPos - thisPos;
 			f32 targetDist = targetVec.getLength();
-			if (targetDist > 800 || bVel.getLength() > 1.5f) //too far away, lose target
+			if (targetDist > targetingRange || bVel.getLength() > 1.5f || b.getHealth() >= b.getInitialHealth()) //too far away, lose target
 			{
 				turret.auto_target_ID = 0;
 			}
 			else
 			{
-				f32 travelTicks = targetDist / shotSpeed;
-				Vec2f futureTargetPos = bPos + (bVel*travelTicks);
-				
-				targetVec = futureTargetPos - thisPos;
-				targetDist = targetVec.getLength();
-				travelTicks = targetDist / shotSpeed;
-				futureTargetPos = bPos + (bVel*travelTicks);
-
-				aimVec = futureTargetPos - thisPos;
-				aimAngle = aimVec.getAngleDegrees() * -1.0f;
+				aimVec = targetVec;
+				aimAngle = targetVec.getAngleDegrees() * -1.0f;
 
 				f32 angleDiff = aimAngle - blobAngle;
 				angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
 
-				forceActivateFire = Maths::Abs(angleDiff) < 20;
+				forceActivateFire = Maths::Abs(angleDiff) < 5;
 			}
 		}
 	}
@@ -193,8 +185,8 @@ void onTick( CBlob@ this )
 		{
 			removeCharge(ownerBlob, spaceChargeCost, true);
 
-			u8 shotType = 2; //shot type
-			f32 lifeTime = 3.8; //shot lifetime
+			u8 shotType = 10; //shot type
+			f32 lifeTime = targetingRange; //shot lifetime
 			
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)

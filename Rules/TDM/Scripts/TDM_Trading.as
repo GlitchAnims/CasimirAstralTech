@@ -76,6 +76,8 @@ void MakeTradeMenu(CBlob@ trader)
 	s32 cost_pod_gatling = cfg.read_s32("cost_pod_gatling", 30);
 	s32 cost_pod_artillery = cfg.read_s32("cost_pod_artillery", 30);
 	s32 cost_pod_pd = cfg.read_s32("cost_pod_pd", 30);
+	s32 cost_pod_healgun = cfg.read_s32("cost_pod_healgun", 30);
+	s32 cost_pod_generator = cfg.read_s32("cost_pod_generator", 30);
 
 	s32 menu_width = cfg.read_s32("trade_menu_width", 3);
 	s32 menu_height = cfg.read_s32("trade_menu_height", 5);
@@ -86,7 +88,7 @@ void MakeTradeMenu(CBlob@ trader)
 
 	
 	//yummy stuff
-	addItemForCoin(trader, "Burger", cost_burger, true, "$food$", "food", Descriptions::food);
+	//addItemForCoin(trader, "Burger", cost_burger, true, "$food$", "food", Descriptions::food);
 	//vehicles
 	//addItemForCoin(trader, "Catapult", cost_catapult, true, "$catapult$", "catapult", Descriptions::catapult);
 	//addItemForCoin(trader, "Ballista", cost_ballista, true, "$ballista$", "ballista", Descriptions::ballista);
@@ -108,6 +110,8 @@ void MakeTradeMenu(CBlob@ trader)
 	addItemForCoin(trader, "Gatling Pod", cost_pod_gatling, true, "$pod_gatling$", "pod_gatling", Descriptions::buy_pod_gatling);
 	addItemForCoin(trader, "Artillery Pod", cost_pod_artillery, true, "$pod_artillery$", "pod_artillery", Descriptions::buy_pod_artillery);
 	//addItemForCoin(trader, "Point Defense Pod", cost_pod_pd, true, "$mat_firearrows$", "pod_shield", Descriptions::buy_pod_pd);
+	addItemForCoin(trader, "Healing Turret Pod", cost_pod_healgun, true, "$pod_healgun$", "pod_healgun", Descriptions::buy_pod_healgun);
+	addItemForCoin(trader, "Generator Pod", cost_pod_generator, true, "$pod_generator$", "pod_generator", Descriptions::buy_pod_generator);
 }
 
 // load coins amount

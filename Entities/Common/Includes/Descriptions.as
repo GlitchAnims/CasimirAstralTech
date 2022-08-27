@@ -111,5 +111,7 @@ namespace Descriptions
 	buy_pod_flak 				= getTranslatedString("Stationary, chargeable pod. Only targets small, piloted ships. Great for area denial."),
 	buy_pod_gatling 			= getTranslatedString("Stationary, chargeable pod. Ignores small targets. Useful against slow or stationary ships."),
 	buy_pod_artillery 			= getTranslatedString("Stationary, chargeable pod. Prioritizes medium to big structures, and stationary targets (like other pods). Has a higher targeting range than other pods."),
-	buy_pod_pd 					= getTranslatedString("Stationary, chargeable pod. Targets incoming ordinance with a pinpoint laser. Can be distracted by flares.");
+	buy_pod_pd 					= getTranslatedString("Stationary, chargeable pod. Targets incoming ordinance with a pinpoint laser. Can be distracted by flares."),
+	buy_pod_healgun 			= getTranslatedString("Stationary, chargeable pod. Targets friendly, stationary damaged ships. Low targeting range."),
+	buy_pod_generator 			= getTranslatedString("This pod generates its own charge, and is able to share it with nearby ships of the same team.");
 }
