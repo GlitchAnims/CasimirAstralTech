@@ -16,6 +16,7 @@ void onInit( CBlob@ this )
 	
 	this.Tag("npc");
 	this.Tag("hull");
+	this.Tag("pod");
 
 	this.getShape().SetGravityScale(0);
 	this.getShape().getConsts().mapCollisions = true;
@@ -173,6 +174,11 @@ bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
 void onThisAddToInventory(CBlob@ this, CBlob@ inventoryBlob)
 {
 	this.doTickScripts = true;
+}
+
+bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
+{
+	return blob.hasTag("pod");
 }
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
