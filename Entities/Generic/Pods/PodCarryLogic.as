@@ -113,8 +113,8 @@ void onTick( CBlob@ this )
 			print ("carryAngle: " + carryAngle);
 			pod.forward_thrust = carryAngle < 90.0f && carryAngle > -90.0f;
 			pod.backward_thrust = carryAngle > 90.0f || carryAngle < -90.0f;
-			pod.port_thrust = carryAngle < 180.0f && carryAngle > 0.0f ;
-			pod.starboard_thrust = carryAngle < 0.0f && carryAngle > -180.0f ;
+			pod.port_thrust = carryAngle > 0.0f ;
+			pod.starboard_thrust = carryAngle < 0.0f ;
 		}
 		else
 		{
