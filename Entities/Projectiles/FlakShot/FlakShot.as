@@ -5,7 +5,7 @@
 #include "BarrierCommon.as";
 #include "CommonFX.as";
 
-Random shot_r(13444);
+Random _shot_r(13444);
 
 const f32 damage = 0.5f;
 const f32 radius = 24.0f;
@@ -127,11 +127,11 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i += 2)
    	{
-		if (shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		if (_shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
     	CParticle@ p = ParticleAnimated("GenericSmoke4.png", pPos, Vec2f_zero, pAngle, 0.4f, 1, 0, true);
     	if(p !is null)
@@ -162,14 +162,14 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
    	{
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + shot_r.NextFloat();
+		pVel *= 0.2f + _shot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * shot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * _shot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
 		CParticle@ p = ParticleAnimated("GenericBlast6.png", pPos, pVel, pAngle, 0.5f, 1, 0, true);
     	if(p !is null)
@@ -182,7 +182,7 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 		}
 	}
 	
-	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * shot_r.NextFloat()));
+	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * _shot_r.NextFloat()));
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
@@ -225,18 +225,18 @@ void makeFlakEffect(Vec2f thisPos = Vec2f_zero)
 
 	u16 particleNum = XORRandom(5)+5;
 
-	Sound::Play("Bomb.ogg", thisPos, 0.8f, 0.8f + (0.4f * shot_r.NextFloat()) );
+	Sound::Play("Bomb.ogg", thisPos, 0.8f, 0.8f + (0.4f * _shot_r.NextFloat()) );
 
 	for (int i = 0; i < particleNum; i++)
     {
-        Vec2f pOffset(shot_r.NextFloat() * radius, 0);
-        pOffset.RotateBy(shot_r.NextFloat() * 360.0f);
+        Vec2f pOffset(_shot_r.NextFloat() * radius, 0);
+        pOffset.RotateBy(_shot_r.NextFloat() * 360.0f);
 
         CParticle@ p = ParticleAnimated("GenericSmoke1.png", 
 									thisPos + pOffset, 
 									Vec2f_zero, 
-									shot_r.NextFloat() * 360.0f, 
-									0.5f + (shot_r.NextFloat() * 0.5f), 
+									_shot_r.NextFloat() * 360.0f, 
+									0.5f + (_shot_r.NextFloat() * 0.5f), 
 									XORRandom(3)+1, 
 									0.0f, 
 									false );
@@ -309,10 +309,10 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 	if (targetBlob.hasTag("hull"))
 	{
-		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * shot_r.NextFloat()), 1.0f + (0.2f * shot_r.NextFloat()));
+		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * _shot_r.NextFloat()), 1.0f + (0.2f * _shot_r.NextFloat()));
 	}
 	else if (targetBlob.hasTag("flesh"))
 	{
-		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * shot_r.NextFloat()), 1.2f );
+		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * _shot_r.NextFloat()), 1.2f );
 	}
 }

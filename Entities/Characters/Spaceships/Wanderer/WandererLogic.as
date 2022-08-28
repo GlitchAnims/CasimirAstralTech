@@ -11,7 +11,7 @@
 #include "Help.as"
 #include "CommonFX.as"
 
-Random _martyr_logic_r(16661);
+Random _wanderer_logic_r(16661);
 
 void onInit( CBlob@ this )
 {
@@ -162,7 +162,7 @@ void onTick( CBlob@ this )
 				firePos += thisPos; //fire pos
 
 				Vec2f fireVec = Vec2f(0,-1.0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
@@ -199,7 +199,7 @@ void onTick( CBlob@ this )
 			for (uint i = 0; i < bulletCount; i ++)
 			{
 				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _martyr_logic_r.NextFloat()) ); //shot spread
+				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()) ); //shot spread
 				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
 				fireVec += thisVel; //adds ship speed
 
@@ -250,7 +250,7 @@ void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec
 	for(int i = 0; i < particleNum; i++)
 	{
 		Vec2f pNorm = Vec2f(1,0);
-		pNorm.RotateByDegrees(360.0f * _martyr_logic_r.NextFloat());
+		pNorm.RotateByDegrees(360.0f * _wanderer_logic_r.NextFloat());
 
 		Vec2f pVel = (pNorm * mult) * 5.0f;
 		pVel += blobVel;
@@ -262,7 +262,7 @@ void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec
    	        p.collides = false;
    	        p.gravity = pGrav;
             p.bounce = 0;
-            p.Z = 20 * (1.0f - (2.0f * _martyr_logic_r.NextFloat()));
+            p.Z = 20 * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()));
             p.timeout = 3.0f + (15.0f * mult);
 			//p.timeout = 30;
     	}

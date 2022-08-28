@@ -5,7 +5,7 @@
 #include "BarrierCommon.as";
 #include "CommonFX.as";
 
-Random shot_r(95995);
+Random _shot_r(95995);
 
 const f32 damage = 10.0f;
 
@@ -136,11 +136,11 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i++)
    	{
-		if (shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		if (_shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
     	CParticle@ p = ParticleAnimated("RocketFire1.png", pPos, Vec2f_zero, pAngle, 0.4f, 1, 0, true);
     	if(p !is null)
@@ -171,14 +171,14 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
    	{
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + shot_r.NextFloat();
+		pVel *= 0.2f + _shot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * shot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * _shot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
 		CParticle@ p = ParticleAnimated("MissileFire2.png", pPos, pVel, pAngle, 1.5f, 2, 0, true);
     	if(p !is null)
@@ -191,7 +191,7 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 		}
 	}
 	
-	Sound::Play("RailgunFire.ogg", thisPos, 1.0f , 0.9f + (0.2f * shot_r.NextFloat()));
+	Sound::Play("RailgunFire.ogg", thisPos, 1.0f , 0.9f + (0.2f * _shot_r.NextFloat()));
 }
 
 void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
@@ -199,12 +199,12 @@ void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
 	if(!isClient() || thisPos == Vec2f_zero)
 	{return;}
 
-	Sound::Play("RailgunHit.ogg", thisPos, 1.0f + (0.2f * shot_r.NextFloat()), 1.0f + (0.2f * shot_r.NextFloat()));
+	Sound::Play("RailgunHit.ogg", thisPos, 1.0f + (0.2f * _shot_r.NextFloat()), 1.0f + (0.2f * _shot_r.NextFloat()));
 
     CParticle@ p = ParticleAnimated("Swirl.png", 
 								thisPos, 
 								Vec2f_zero, 
-								shot_r.NextFloat() * 360.0f, //angle
+								_shot_r.NextFloat() * 360.0f, //angle
 								1.0f, //scale
 								2, //animate speed
 								0.0f, 
@@ -220,14 +220,14 @@ void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
 	u16 particleNum = 10;
 	for (int i = 0; i < particleNum; i++)
     {
-        Vec2f pOffset(shot_r.NextFloat() * 24.0f, 0);
-        pOffset.RotateBy(shot_r.NextFloat() * 360.0f);
+        Vec2f pOffset(_shot_r.NextFloat() * 24.0f, 0);
+        pOffset.RotateBy(_shot_r.NextFloat() * 360.0f);
 
         CParticle@ p2 = ParticleAnimated("GenericSmoke1.png", 
 									thisPos + pOffset, 
 									Vec2f_zero, 
-									shot_r.NextFloat() * 360.0f, 
-									0.5f + (shot_r.NextFloat() * 0.5f), 
+									_shot_r.NextFloat() * 360.0f, 
+									0.5f + (_shot_r.NextFloat() * 0.5f), 
 									XORRandom(4)+2, 
 									0.0f, 
 									false );

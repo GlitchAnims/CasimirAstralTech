@@ -5,7 +5,7 @@
 #include "BarrierCommon.as";
 #include "CommonFX.as";
 
-Random shot_r(35400);
+Random _shot_r(35400);
 
 const f32 damage = 2.0f;
 
@@ -142,11 +142,11 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i++)
    	{
-		if (shot_r.NextFloat() > 0.2f) //percentage chance of spawned particles
+		if (_shot_r.NextFloat() > 0.2f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
     	CParticle@ p = ParticleAnimated("MissileFire1.png", pPos, Vec2f_zero, pAngle, 0.5f, 1, 0, true);
     	if(p !is null)
@@ -177,14 +177,14 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
    	{
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + shot_r.NextFloat();
+		pVel *= 0.2f + _shot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * shot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * _shot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
-		f32 pAngle = 360.0f * shot_r.NextFloat();
+		f32 pAngle = 360.0f * _shot_r.NextFloat();
 
 		CParticle@ p = ParticleAnimated("RocketFire3.png", pPos, pVel, pAngle, 1.5f, 2, 0, true);
     	if(p !is null)
@@ -197,7 +197,7 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 		}
 	}
 	
-	Sound::Play("tachyon_launch.ogg", thisPos, 1.0f , 0.9f + (0.2f * shot_r.NextFloat()));
+	Sound::Play("tachyon_launch.ogg", thisPos, 1.0f , 0.9f + (0.2f * _shot_r.NextFloat()));
 }
 
 void makeHitEffect(Vec2f thisPos = Vec2f_zero)
@@ -205,7 +205,7 @@ void makeHitEffect(Vec2f thisPos = Vec2f_zero)
 	if(!isClient() || thisPos == Vec2f_zero)
 	{return;}
 
-	Sound::Play("tachyon_hit.ogg", thisPos, 1.0f + (0.2f * shot_r.NextFloat()), 0.9f + (0.2f * shot_r.NextFloat()));
+	Sound::Play("tachyon_hit.ogg", thisPos, 1.0f + (0.2f * _shot_r.NextFloat()), 0.9f + (0.2f * _shot_r.NextFloat()));
 
     const int particleNum = 15; //particle amount
 
@@ -214,11 +214,11 @@ void makeHitEffect(Vec2f thisPos = Vec2f_zero)
 		Vec2f pPos = thisPos;
 		Vec2f pVel = Vec2f(1.0f, 0);
 
-		float randomDegrees = 360.0f * shot_r.NextFloat();
+		float randomDegrees = 360.0f * _shot_r.NextFloat();
 		pVel.RotateByDegrees(randomDegrees);
-		pVel *= 0.2f + shot_r.NextFloat(); //final speed multiplier
+		pVel *= 0.2f + _shot_r.NextFloat(); //final speed multiplier
 
-		float pAngle = 360.0f * shot_r.NextFloat(); // sprite angle
+		float pAngle = 360.0f * _shot_r.NextFloat(); // sprite angle
 
 		CParticle@ p = ParticleAnimated("MissileFire1.png", pPos, pVel, pAngle, 1.0f, 2, 0, true);
     	if(p !is null)
