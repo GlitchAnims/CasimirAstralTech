@@ -5,7 +5,7 @@
 #include "BarrierCommon.as";
 #include "CommonFX.as";
 
-Random _gatling_basicshot_r(67521);
+Random shot_r(67521);
 
 const f32 damage = 0.2f;
 
@@ -109,7 +109,7 @@ void onTick(CBlob@ this)
 		this.setPosition(futurePos);
 		if (is_client)
 		{
-			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _gatling_basicshot_r.NextFloat()), 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()));
+			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * shot_r.NextFloat()), 1.0f + (0.2f * shot_r.NextFloat()));
 		}
 		this.server_Die();
 	}
@@ -141,7 +141,7 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i++)
    	{
-		if (_gatling_basicshot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		if (shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
@@ -175,15 +175,15 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 
 	for(int i = 0; i < particleNum; i++)
    	{
-		u8 alpha = 40 + (170.0f * _gatling_basicshot_r.NextFloat()); //randomize alpha
+		u8 alpha = 40 + (170.0f * shot_r.NextFloat()); //randomize alpha
 		color.setAlpha(alpha);
 
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + _gatling_basicshot_r.NextFloat();
+		pVel *= 0.2f + shot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * _gatling_basicshot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * shot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
@@ -194,11 +194,11 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 			p.gravity = Vec2f_zero;
 			p.bounce = 0;
 			p.Z = 8;
-			p.timeout = 2.0f + (6.0f * _gatling_basicshot_r.NextFloat());
+			p.timeout = 2.0f + (6.0f * shot_r.NextFloat());
 		}
 	}
 	
-	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * _gatling_basicshot_r.NextFloat()));
+	Sound::Play("BasicShotSound.ogg", thisPos, 0.3f , 1.3f + (0.1f * shot_r.NextFloat()));
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
@@ -252,11 +252,11 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 	if (targetBlob.hasTag("hull"))
 	{
-		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()), 1.0f + (0.2f * _gatling_basicshot_r.NextFloat()));
+		Sound::Play("dry_hit.ogg", worldPoint, 1.0f + (0.2f * shot_r.NextFloat()), 1.0f + (0.2f * shot_r.NextFloat()));
 	}
 	else if (targetBlob.hasTag("flesh"))
 	{
-		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * _gatling_basicshot_r.NextFloat()), 1.2f );
+		Sound::Play("ArrowHitFlesh.ogg", worldPoint, 2.0f + (0.1f * shot_r.NextFloat()), 1.2f );
 	}
 
 }

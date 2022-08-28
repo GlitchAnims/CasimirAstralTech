@@ -5,9 +5,9 @@
 #include "BarrierCommon.as";
 #include "CommonFX.as";
 
-Random _railgun_shot_r(95995);
+Random shot_r(35400);
 
-const f32 damage = 10.0f;
+const f32 damage = 2.0f;
 
 void onInit(CBlob@ this)
 {
@@ -64,6 +64,12 @@ void onTick(CBlob@ this)
 		Vec2f thisOldPos = this.get_Vec2f(oldPosString);
 		doTrailParticles(thisOldPos, thisPos);
 		this.set_Vec2f(oldPosString, thisPos);
+		CSprite@ thisSprite = this.getSprite();
+		if (thisSprite != null)
+		{
+			thisSprite.ResetTransform();
+			thisSprite.RotateBy(-thisVel.getAngleDegrees(), Vec2f_zero);
+		}
 	}
 
 	Vec2f wallPos = Vec2f_zero;
@@ -107,7 +113,6 @@ void onTick(CBlob@ this)
 	if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
 	{
 		this.setPosition(futurePos);
-		makeRailgunHitEffect(thisPos);
 		this.server_Die();
 	}
 }
@@ -119,6 +124,7 @@ void onDie( CBlob@ this )
 
 	doTrailParticles(thisOldPos, thisPos); //do one last trail particle on death
 	this.set_Vec2f(oldPosString, thisPos);
+	makeHitEffect(thisPos);
 }
 
 void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
@@ -136,13 +142,13 @@ void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 
 	for(int i = 0; i <= steps; i++)
    	{
-		if (_railgun_shot_r.NextFloat() > 0.5f) //percentage chance of spawned particles
+		if (shot_r.NextFloat() > 0.2f) //percentage chance of spawned particles
 		{ continue; }
 
 		Vec2f pPos = (trailNorm * i) + oldPos;
-		f32 pAngle = 360.0f * _railgun_shot_r.NextFloat();
+		f32 pAngle = 360.0f * shot_r.NextFloat();
 
-    	CParticle@ p = ParticleAnimated("RocketFire1.png", pPos, Vec2f_zero, pAngle, 0.4f, 1, 0, true);
+    	CParticle@ p = ParticleAnimated("MissileFire1.png", pPos, Vec2f_zero, pAngle, 0.5f, 1, 0, true);
     	if(p !is null)
     	{
 			p.collides = false;
@@ -165,22 +171,22 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 	Vec2f flashNorm = flashVec;
 	flashNorm.Normalize();
 
-	const int particleNum = 10; //particle amount
+	const int particleNum = 3; //particle amount
 
 	for(int i = 0; i < particleNum; i++)
    	{
 		Vec2f pPos = thisPos;
 		Vec2f pVel = flashNorm;
-		pVel *= 0.2f + _railgun_shot_r.NextFloat();
+		pVel *= 0.2f + shot_r.NextFloat();
 
 		f32 randomDegrees = 20.0f;
-		randomDegrees *= 1.0f - (2.0f * _railgun_shot_r.NextFloat());
+		randomDegrees *= 1.0f - (2.0f * shot_r.NextFloat());
 		pVel.RotateByDegrees(randomDegrees);
 		pVel *= 2.5; //final speed multiplier
 
-		f32 pAngle = 360.0f * _railgun_shot_r.NextFloat();
+		f32 pAngle = 360.0f * shot_r.NextFloat();
 
-		CParticle@ p = ParticleAnimated("MissileFire2.png", pPos, pVel, pAngle, 1.5f, 2, 0, true);
+		CParticle@ p = ParticleAnimated("RocketFire3.png", pPos, pVel, pAngle, 1.5f, 2, 0, true);
     	if(p !is null)
     	{
 			p.collides = false;
@@ -191,52 +197,39 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 		}
 	}
 	
-	Sound::Play("RailgunFire.ogg", thisPos, 1.0f , 0.9f + (0.2f * _railgun_shot_r.NextFloat()));
+	Sound::Play("tachyon_launch.ogg", thisPos, 1.0f , 0.9f + (0.2f * shot_r.NextFloat()));
 }
 
-void makeRailgunHitEffect(Vec2f thisPos = Vec2f_zero)
+void makeHitEffect(Vec2f thisPos = Vec2f_zero)
 {
 	if(!isClient() || thisPos == Vec2f_zero)
 	{return;}
 
-	Sound::Play("RailgunHit.ogg", thisPos, 1.0f + (0.2f * _railgun_shot_r.NextFloat()), 1.0f + (0.2f * _railgun_shot_r.NextFloat()));
+	Sound::Play("tachyon_hit.ogg", thisPos, 1.0f + (0.2f * shot_r.NextFloat()), 0.9f + (0.2f * shot_r.NextFloat()));
 
-    CParticle@ p = ParticleAnimated("Swirl.png", 
-								thisPos, 
-								Vec2f_zero, 
-								_railgun_shot_r.NextFloat() * 360.0f, //angle
-								1.0f, //scale
-								2, //animate speed
-								0.0f, 
-								false );
-									
-    if(p !is null) //bail if we stop getting particles
-	{
-    	p.collides = false;
-		p.Z = 200.0f;
-		p.lighting = false;
+    const int particleNum = 15; //particle amount
+
+	for(int i = 0; i < particleNum; i++)
+   	{
+		Vec2f pPos = thisPos;
+		Vec2f pVel = Vec2f(1.0f, 0);
+
+		float randomDegrees = 360.0f * shot_r.NextFloat();
+		pVel.RotateByDegrees(randomDegrees);
+		pVel *= 0.2f + shot_r.NextFloat(); //final speed multiplier
+
+		float pAngle = 360.0f * shot_r.NextFloat(); // sprite angle
+
+		CParticle@ p = ParticleAnimated("MissileFire1.png", pPos, pVel, pAngle, 1.0f, 2, 0, true);
+    	if(p !is null)
+    	{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 12;
+			p.timeout = 10;
+		}
 	}
-		
-	u16 particleNum = 10;
-	for (int i = 0; i < particleNum; i++)
-    {
-        Vec2f pOffset(_railgun_shot_r.NextFloat() * 24.0f, 0);
-        pOffset.RotateBy(_railgun_shot_r.NextFloat() * 360.0f);
-
-        CParticle@ p2 = ParticleAnimated("GenericSmoke1.png", 
-									thisPos + pOffset, 
-									Vec2f_zero, 
-									_railgun_shot_r.NextFloat() * 360.0f, 
-									0.5f + (_railgun_shot_r.NextFloat() * 0.5f), 
-									XORRandom(4)+2, 
-									0.0f, 
-									false );
-									
-        if(p2 is null) continue; //bail if we stop getting particles
-    	p2.collides = false;
-		p2.Z = -10.0f;
-		p2.lighting = false;
-    }
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
@@ -264,7 +257,6 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 	Vec2f thisPos = this.getPosition();
 	if ((this == null || blob == null) && solid)
 	{
-		makeRailgunHitEffect(thisPos);
 		this.server_Die();
 		return;
 	}
@@ -280,11 +272,6 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 		{ return; }
 	}
 
-	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::explosion, false);
+	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::cata_stones, false);
 	this.server_Die();
-}
-
-void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ targetBlob, u8 customData )
-{
-	makeRailgunHitEffect(this.getPosition());
 }

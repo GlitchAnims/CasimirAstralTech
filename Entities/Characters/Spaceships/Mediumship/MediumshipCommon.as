@@ -50,6 +50,54 @@ namespace BalthazarParams
 	const ::f32 shot_lifetime = 2.4f; // float, seconds
 }
 
+namespace FoulParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 700; //max charge amount
+	const ::s32 CHARGE_REGEN = 5; //amount per regen
+	const ::s32 CHARGE_RATE = 10; //ticks per regen
+	// ship general
+	const ::f32 main_engine_force = 0.02f;
+	const ::f32 secondary_engine_force = 0.018f;
+	const ::f32 rcs_force = 0.015f;
+	const ::f32 ship_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_drag = 0.2f; // air drag
+	const ::f32 max_speed = 4.0f; // 0 = infinite speed
+	//gun general
+	const ::u32 firing_rate = 9; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 0; // ticks before first shot
+	const ::u32 firing_spread = 2; // degrees
+	const ::s32 firing_cost = 8; // charge cost
+	const ::f32 shot_speed = 10.0f; // pixels per tick, 0 = instant
+	const ::f32 shot_lifetime = 2.4f; // float, seconds
+}
+
+namespace WandererParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 500; //max charge amount
+	const ::s32 CHARGE_REGEN = 3; //amount per regen
+	const ::s32 CHARGE_RATE = 10; //ticks per regen
+	// ship general
+	const ::f32 main_engine_force = 0.02f;
+	const ::f32 secondary_engine_force = 0.015f;
+	const ::f32 rcs_force = 0.01f;
+	const ::f32 ship_turn_speed = 1.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_drag = 0.2f; // air drag
+	const ::f32 max_speed = 5.0f; // 0 = infinite speed
+	//gun general
+	const ::u32 firing_rate = 5; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 1; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 0; // ticks before first shot
+	const ::u32 firing_spread = 0; // degrees
+	const ::s32 firing_cost = 6; // charge cost
+	const ::f32 shot_speed = 15.0f; // pixels per tick, won't fire if 0
+	const ::f32 shot_lifetime = 1.2f; // float, seconds
+}
+
 class MediumshipInfo
 {
 	bool forward_thrust;

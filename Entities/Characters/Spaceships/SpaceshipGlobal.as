@@ -24,35 +24,36 @@ string getBulletName(u8 shotType = 0)
 	{
 		case 0:
 		{
-			blobName = "flak_shot";
+			blobName = "shot_flak";
 		}
 		break;
 
 		case 1:
 		{
-			blobName = "gatling_basicshot";
+			blobName = "shot_gatling_basic";
 		}
 		break;
 
 		case 2:
 		{
-			blobName = "artillery_minishot";
+			blobName = "shot_artillery_mini";
 		}
 		break;
 		case 3:
 		{
-			blobName = "artillery_minishot";
+			blobName = "shot_artillery";
 		}
 		break;
+		
 		case 4:
 		{
-			blobName = "artillery_minishot";
+			blobName = "shot_tachyon";
 		}
 		break;
 
 		case 5:
 		{
-			blobName = "railgun_shot";
+			blobName = "shot_railgun";
 		}
 		break;
 
@@ -82,6 +83,19 @@ string getBulletName(u8 shotType = 0)
 			blobName = "ray_healbeam";
 		}
 		break;
+
+		case 11:
+		{
+			blobName = "ray_pointdefense";
+		}
+		break;
+
+		case 12:
+		{
+			blobName = "ray_neutronbeam";
+		}
+		break;
+
 		default: return blobName;
 	}
     return blobName;

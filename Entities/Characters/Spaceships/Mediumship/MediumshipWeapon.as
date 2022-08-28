@@ -40,7 +40,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 
 			case 1:
 			{
-				blobName = "gatling_basicshot";
+				blobName = "shot_gatling_basic";
 			}
 			break;
 
