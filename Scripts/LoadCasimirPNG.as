@@ -11,7 +11,9 @@ namespace tdm_colors
 		martyr_1 = 0xFF8888FF,
 		martyr_2 = 0xFFFF8888,
 		balthazar_1 = 0xFF7888FF,
-		balthazar_2 = 0xFFFF7888
+		balthazar_2 = 0xFFFF7888,
+		wanderer_1 = 0xFF6888FF,
+		wanderer_2 = 0xFFFF6888
 	};
 }
 
@@ -35,6 +37,8 @@ class TDMPNGLoader : PNGLoader
 			case tdm_colors::martyr_2: autotile(offset); spawnBlob(map, "martyr", offset, 1); break;
 			case tdm_colors::balthazar_1: autotile(offset); spawnBlob(map, "balthazar", offset, 0); break;
 			case tdm_colors::balthazar_2: autotile(offset); spawnBlob(map, "balthazar", offset, 1); break;
+			case tdm_colors::wanderer_1: autotile(offset); spawnBlob(map, "wanderer", offset, 0); break;
+			case tdm_colors::wanderer_2: autotile(offset); spawnBlob(map, "wanderer", offset, 1); break;
 		};
 	}
 };

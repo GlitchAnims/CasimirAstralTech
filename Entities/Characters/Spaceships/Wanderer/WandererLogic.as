@@ -20,28 +20,28 @@ void onInit( CBlob@ this )
 	if (isServer())
 	{
 		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= BalthazarParams::CHARGE_START * BalthazarParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= BalthazarParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= BalthazarParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= BalthazarParams::CHARGE_RATE;
+		chargeInfo.charge 			= WandererParams::CHARGE_START * WandererParams::CHARGE_MAX;
+		chargeInfo.chargeMax 		= WandererParams::CHARGE_MAX;
+		chargeInfo.chargeRegen 		= WandererParams::CHARGE_REGEN;
+		chargeInfo.chargeRate 		= WandererParams::CHARGE_RATE;
 		this.set("chargeInfo", @chargeInfo);
 	}
 	
 	MediumshipInfo ship;
-	ship.main_engine_force 			= BalthazarParams::main_engine_force;
-	ship.secondary_engine_force 	= BalthazarParams::secondary_engine_force;
-	ship.rcs_force 					= BalthazarParams::rcs_force;
-	ship.ship_turn_speed 			= BalthazarParams::ship_turn_speed;
-	ship.ship_drag 					= BalthazarParams::ship_drag;
-	ship.max_speed 					= BalthazarParams::max_speed;
+	ship.main_engine_force 			= WandererParams::main_engine_force;
+	ship.secondary_engine_force 	= WandererParams::secondary_engine_force;
+	ship.rcs_force 					= WandererParams::rcs_force;
+	ship.ship_turn_speed 			= WandererParams::ship_turn_speed;
+	ship.ship_drag 					= WandererParams::ship_drag;
+	ship.max_speed 					= WandererParams::max_speed;
 	
-	ship.firing_rate 				= BalthazarParams::firing_rate;
-	ship.firing_burst 				= BalthazarParams::firing_burst;
-	ship.firing_delay 				= BalthazarParams::firing_delay;
-	ship.firing_spread 				= BalthazarParams::firing_spread;
-	ship.firing_cost 				= BalthazarParams::firing_cost;
-	ship.shot_speed 				= BalthazarParams::shot_speed;
-	ship.shot_lifetime 				= BalthazarParams::shot_lifetime;
+	ship.firing_rate 				= WandererParams::firing_rate;
+	ship.firing_burst 				= WandererParams::firing_burst;
+	ship.firing_delay 				= WandererParams::firing_delay;
+	ship.firing_spread 				= WandererParams::firing_spread;
+	ship.firing_cost 				= WandererParams::firing_cost;
+	ship.shot_speed 				= WandererParams::shot_speed;
+	ship.shot_lifetime 				= WandererParams::shot_lifetime;
 	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
@@ -55,6 +55,17 @@ void onInit( CBlob@ this )
 	this.set_u32( "m1_shotTime", 0 );
 
 	this.set_bool( "leftCannonTurn", false);
+
+	this.set_f32("broadside_chargeup", 0);
+	this.set_bool("broadside_firing", false);
+
+	this.set_bool("broadside_L1", false);
+	this.set_bool("broadside_L2", false);
+	this.set_bool("broadside_L3", false);
+
+	//this.set_bool("broadside_R1", false);
+	//this.set_bool("broadside_R2", false);
+	//this.set_bool("broadside_R3", false);
 
 	this.set_bool("shifted", false);
 	
@@ -125,7 +136,7 @@ void onTick( CBlob@ this )
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
 	f32 blobAngle = this.getAngleDegrees();
-	blobAngle = Maths::Abs(blobAngle) % 360;
+	blobAngle = Maths::Abs(blobAngle+270) % 360;
 	int teamNum = this.getTeamNum();
 	bool facingLeft = this.isFacingLeft();
 	bool isMyPlayer = this.isMyPlayer();
@@ -144,100 +155,208 @@ void onTick( CBlob@ this )
 
 	u32 m1ShotTicks = this.get_u32( "m1_shotTime" );
 
-	if (pressed_m1 && m1Time >= ship.firing_delay && isMyPlayer && thisCharge >= m1ChargeCost)
+	bool broadsideFiring = this.get_bool("broadside_firing"); //checks if firing procedure has been initiated
+	bool canFireBroadside = m1ShotTicks >= ship.firing_rate;
+
+	f32 broadsideLoad = 0.0f;
+	if (broadsideFiring)
 	{
-		if (m1ShotTicks >= ship.firing_rate * moveVars.firingRateFactor)
-		{
-			CBitStream params;
-			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(2); //shot type
-			params.write_f32(ship.shot_lifetime); //shot lifetime
-			params.write_s32(m1ChargeCost); //charge drain
-
-			uint bulletCount = ship.firing_burst;
-			for (uint i = 0; i < bulletCount; i ++)
-			{
-				Vec2f firePos = Vec2f(facingLeft ? -7.5 : 7.5f, -32); //barrel pos
-				firePos.RotateByDegrees(blobAngle);
-				firePos += thisPos; //fire pos
-
-				Vec2f fireVec = Vec2f(0,-1.0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()) ); //shot spread
-				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
-				fireVec += thisVel; //adds ship speed
-
-				params.write_Vec2f(firePos); //shot position
-				params.write_Vec2f(fireVec); //shot velocity
-			}
-			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
-
-			m1ShotTicks = 0;
-		}
+		broadsideLoad = this.get_f32("broadside_chargeup");
+	}
+	else
+	{
+		u32 broadsideDelay = 30; //ticks before firing broadside
+		float m1Mult = thisCharge >= m1ChargeCost ? 1.0f : 0.0f;
+		float m1Chargeup = canFireBroadside ? m1Time : 0;
+		broadsideLoad = Maths::Clamp((Maths::Max(m1Chargeup, 0) / float(broadsideDelay)) * m1Mult, 0.0f, 1.0f); //load percentage
 	}
 
-	/* disabled for now
-	s32 mainCannonDelay = 60; //ticks before firing main cannon
-	f32 m2Mult = thisCharge >= m2ChargeCost ? 1.0f : 0.0f;
-	f32 cannonLoad = (float(m2Time) / float(mainCannonDelay)) * m2Mult; //load percentage
-	if (pressed_m2 && cannonLoad <= 1.0f)
+	Vec2f thisAimVec = this.getAimPos() - thisPos;
+	float thisAimAngle = thisAimVec.AngleDegrees();
+
+	float angleDiff = Maths::FMod(thisAimAngle + blobAngle, 360.0f);
+	if (angleDiff > 180.0f) angleDiff = -360.0f + angleDiff;
+	bool leftBroadside = angleDiff > 0.0f;
+
+	float firingAngle = blobAngle + (leftBroadside ? -90 : 90);
+	if (leftBroadside)
 	{
-		Vec2f firePos = Vec2f(11.0f, 0); //barrel pos
-		firePos.RotateByDegrees(blobAngle);
-		firePos += thisPos; //fire pos
+		firingAngle -= Maths::Clamp(angleDiff, 45.0f, 135.0f) - 90;
+	}
+	else
+	{
+		firingAngle -= Maths::Clamp(angleDiff, -135.0f, -45.0f) + 90;
+	}
 
-		makeCannonChargeParticles(firePos, thisVel, cannonLoad, teamNum); //fancy particle effects
+	float maxSpread = float(ship.firing_spread);
+	float shotSpread = maxSpread - (broadsideLoad * maxSpread); // angle in either direction
 
-		if (cannonLoad >= 1.0f && isMyPlayer) //fires after 2 seconds
+	Vec2f[] cannonPos =
+	{
+		Vec2f(13.0f, -13),
+		Vec2f(12.0f, -1),
+		Vec2f(13.0f, 11)
+	};
+
+	for(int i = 0; i < cannonPos.length(); i++)
+	{
+		if (leftBroadside) cannonPos[i].x *= -1.0f;
+		cannonPos[i].RotateByDegrees(blobAngle+90);
+		cannonPos[i] += thisPos;
+	}
+	
+	if (pressed_m1 && !broadsideFiring && canFireBroadside)
+	{
+		for(int i = 0; i < cannonPos.length(); i++)
 		{
-			CBitStream params;
-			params.write_u16(this.getNetworkID()); //ownerID
-			params.write_u8(5); //shot type, see SpaceshipGlobal.as
-			params.write_f32(1.2f); //shot lifetime
-			params.write_s32(m2ChargeCost); //charge drain
-
-			uint bulletCount = ship.firing_burst;
-			for (uint i = 0; i < bulletCount; i ++)
-			{
-				Vec2f fireVec = Vec2f(1.0f,0) * ship.shot_speed; 
-				f32 randomSpread = ship.firing_spread * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()) ); //shot spread
-				fireVec.RotateByDegrees(blobAngle + randomSpread); //shot vector
-				fireVec += thisVel; //adds ship speed
-
-				params.write_Vec2f(firePos); //shot position
-				params.write_Vec2f(fireVec); //shot velocity
-			}
-			this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
+			makeCannonChargeParticles(cannonPos[i], thisVel, broadsideLoad*0.2f, teamNum); //fancy particle effects
 		}
-	}*/
+		if (isMyPlayer)
+		{
+			SColor guideColor = broadsideLoad < 1.0f ? redConsoleColor : yellowConsoleColor;
+			float guideLength = 256.0f;
+			Vec2f guide1Pos = Vec2f(guideLength, 0);
+			Vec2f guide2Pos = Vec2f(guideLength, 0);
+			if (leftBroadside)
+			{
+				guide1Pos.RotateBy(firingAngle + shotSpread);
+				guide2Pos.RotateBy(firingAngle - shotSpread);
+			}
+			else
+			{
+				guide1Pos.RotateBy(firingAngle - shotSpread);
+				guide2Pos.RotateBy(firingAngle + shotSpread);
+			}
+			drawParticleLine(cannonPos[0], cannonPos[0] + guide1Pos, Vec2f_zero, guideColor, 0, 2.0f);
+			drawParticleLine(cannonPos[2], cannonPos[2] + guide2Pos, Vec2f_zero, guideColor, 0, 2.0f);
+		}
+	}
+	else if (!pressed_m1 && !broadsideFiring && broadsideLoad > 0) //initiate firing procedure
+	{
+		broadsideFiring = true;
+		this.set_bool("broadside_L1", true);
+		this.set_bool("broadside_L2", true);
+		this.set_bool("broadside_L3", true);
+	}
 
-	if (pressed_m1)
+	if (broadsideFiring)	//firing procedure
+	{
+		bool firedThisTick = false;
+
+		bool L1charged = this.get_bool("broadside_L1");
+		bool L2charged = this.get_bool("broadside_L2");
+		bool L3charged = this.get_bool("broadside_L3");
+
+		float shotSpeed = ship.shot_speed;
+		float shotLifetime = ship.shot_lifetime;
+
+		float fireChance = 0.1f + (0.7f * broadsideLoad); // chance for any given cannon to fire each tick
+
+		//individual cannon fire
+		if (L1charged)
+		{
+			print("wtf");
+			if (_wanderer_logic_r.NextFloat() <= fireChance && !firedThisTick) //roll chance if cannon is charged
+			{
+				if (isMyPlayer) fireBroadsideShot(this, cannonPos[0], thisVel, firingAngle, this.getNetworkID(), 4, shotLifetime, m1ChargeCost, shotSpeed, shotSpread);
+				firedThisTick = true;
+				L1charged = false;
+				this.set_bool("broadside_L1", false);
+			}
+			else
+			{
+				makeCannonChargeParticles(cannonPos[0], thisVel, broadsideLoad*0.2f, teamNum); //fancy particle effects
+			}
+		}
+		if (L2charged)
+		{
+			if (_wanderer_logic_r.NextFloat() <= fireChance && !firedThisTick) //roll chance if cannon is charged
+			{
+				if (isMyPlayer) fireBroadsideShot(this, cannonPos[1], thisVel, firingAngle, this.getNetworkID(), 4, shotLifetime, m1ChargeCost, shotSpeed, shotSpread);
+				firedThisTick = true;
+				L2charged = false;
+				this.set_bool("broadside_L2", false);
+			}
+			else
+			{
+				makeCannonChargeParticles(cannonPos[1], thisVel, broadsideLoad*0.2f, teamNum); //fancy particle effects
+			}
+		}
+		if (L3charged)
+		{
+			if (_wanderer_logic_r.NextFloat() <= fireChance && !firedThisTick) //roll chance if cannon is charged
+			{
+				if (isMyPlayer) fireBroadsideShot(this, cannonPos[2], thisVel, firingAngle, this.getNetworkID(), 4, shotLifetime, m1ChargeCost, shotSpeed, shotSpread);
+				firedThisTick = true;
+				L3charged = false;
+				this.set_bool("broadside_L3", false);
+			}
+			else
+			{
+				makeCannonChargeParticles(cannonPos[2], thisVel, broadsideLoad*0.2f, teamNum); //fancy particle effects
+			}
+		}
+
+		bool stillCharged = L1charged || L2charged || L3charged;
+		if (!stillCharged) //if no more cannons left to fire, shutdown procedure
+		{
+			broadsideLoad = 0.0f;
+			broadsideFiring = false;
+		}
+
+		m1ShotTicks = 0;
+	}
+
+	if (pressed_m1 && canFireBroadside)
 	{ m1Time++; }
 	else { m1Time = 0; }
-	
+	this.set_u32( "m1_heldTime", m1Time );
+
 	if (pressed_m2)
 	{ m2Time++; }
 	else { m2Time = 0; }
-	this.set_u32( "m1_heldTime", m1Time );
 	this.set_u32( "m2_heldTime", m2Time );
 
 	if (m1ShotTicks < 500)
 	{ m1ShotTicks++; }
 	this.set_u32( "m1_shotTime", m1ShotTicks );
 
+	this.set_bool("broadside_firing", broadsideFiring);
+	this.set_f32("broadside_chargeup", broadsideLoad);
+
 	//sound logic
 	/*
-	if(cannonLoad > 1.0f)
+	if(broadsideLoad > 1.0f)
 	{
 		this.getSprite().SetEmitSoundVolume(0.0f);
 	}
 	else
 	{
-		this.getSprite().SetEmitSoundVolume(2.0f * cannonLoad);
-		this.getSprite().SetEmitSoundSpeed(2.0f * cannonLoad);
+		this.getSprite().SetEmitSoundVolume(2.0f * broadsideLoad);
+		this.getSprite().SetEmitSoundSpeed(2.0f * broadsideLoad);
 	}*/
 }
 
-void makeCannonChargeParticles(Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, f32 mult = 0.0f, int teamNum = 0)
+void fireBroadsideShot(CBlob@ this, Vec2f barrelPos = Vec2f_zero, Vec2f shipVel = Vec2f_zero, float barrelAngle = 0, u16 thisNetID = 0, u8 shotType = 0, float shotLifetime = 0, s32 chargeDrain = 0, float shotSpeed = 0, float shotSpread = 0)
+{
+	CBitStream params;
+	params.write_u16(thisNetID); //ownerID
+	params.write_u8(shotType); //shot type, see SpaceshipGlobal.as
+	params.write_f32(shotLifetime); //shot lifetime
+	params.write_s32(chargeDrain); //charge drain
+
+	Vec2f fireVec = Vec2f(1.0f,0) * shotSpeed; 
+	f32 randomSpread = shotSpread * (1.0f - (2.0f * _wanderer_logic_r.NextFloat()) ); //shot spread
+	fireVec.RotateByDegrees(barrelAngle + randomSpread); //shot vector
+	fireVec += shipVel; //adds ship speed
+
+	params.write_Vec2f(barrelPos); //shot position
+	params.write_Vec2f(fireVec); //shot velocity
+	
+	this.SendCommandOnlyServer(this.getCommandID(shot_command_ID), params);
+}
+
+void makeCannonChargeParticles( Vec2f barrelPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, f32 mult = 0.0f, int teamNum = 0)
 {
 	if (barrelPos == Vec2f_zero) //abort if no barrel pos
 	{ return; }
@@ -308,45 +427,10 @@ void spawnAttachments(CBlob@ ownerBlob)
 	{ return; }
 
 	Vec2f ownerPos = ownerBlob.getPosition();
-	string turretName = "turret_gatling";
 	int teamNum = ownerBlob.getTeamNum();
 
-	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("TURRETSLOT1");
-	AttachmentPoint@ linkSlot = attachments.getAttachmentPointByName("LINKSLOT");
 	AttachmentPoint@ shieldSlot = attachments.getAttachmentPointByName("SHIELDSLOT");
 
-	if (slot1 != null)
-	{
-		Vec2f slotOffset = slot1.offset;
-		CBlob@ turret = slot1.getOccupied();
-		if (turret == null)
-		{
-			CBlob@ blob = server_CreateBlob( turretName , teamNum, ownerPos + slotOffset);
-			if (blob !is null)
-			{
-				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
-				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
-				ownerBlob.server_AttachTo(blob, slot1);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
-			}
-		}
-	}
-	if (linkSlot != null)
-	{
-		Vec2f slotOffset = linkSlot.offset;
-		CBlob@ turret = linkSlot.getOccupied();
-		if (turret == null)
-		{
-			CBlob@ blob = server_CreateBlob( "ship_sharelink" , teamNum, ownerPos + slotOffset);
-			if (blob !is null)
-			{
-				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
-				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
-				ownerBlob.server_AttachTo(blob, linkSlot);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
-			}
-		}
-	}
 	if (shieldSlot != null)
 	{
 		Vec2f slotOffset = shieldSlot.offset;

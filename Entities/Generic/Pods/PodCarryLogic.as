@@ -183,6 +183,9 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
 {
+	if (this.isAttached())
+	{ return; }
+	
 	bool hasCarrier = true;
 
 	u16 ownerBlobID = this.get_u16(carrierBlobNetidString);

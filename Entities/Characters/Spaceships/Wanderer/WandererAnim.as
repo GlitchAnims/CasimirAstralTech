@@ -70,9 +70,9 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		upFire1.SetVisible(false);
 		upFire1.SetRelativeZ(-1.1f);
-		upFire1.ScaleBy(0.2f, 0.2f);
+		upFire1.ScaleBy(0.8f, 0.8f);
 		upFire1.RotateBy(-90, Vec2f_zero);
-		upFire1.SetOffset(Vec2f(9.5f, 31.0f));
+		upFire1.SetOffset(Vec2f(8.0f, 31.0f));
 	}
 	if (upFire2 !is null)
 	{
@@ -81,8 +81,9 @@ void LoadSprites(CSprite@ this)
 		anim.AddFrames(frames);
 		upFire2.SetVisible(false);
 		upFire2.SetRelativeZ(-1.1f);
+		upFire2.ScaleBy(0.8f, 0.8f);
 		upFire2.RotateBy(-90, Vec2f_zero);
-		upFire2.SetOffset(Vec2f(-3.5f, 30.0f));
+		upFire2.SetOffset(Vec2f(-8.0f, 31.0f));
 	}
 	if (downFire1 !is null)
 	{
@@ -114,8 +115,8 @@ void LoadSprites(CSprite@ this)
 		leftFire1.SetVisible(false);
 		leftFire1.SetRelativeZ(-1.3f);
 		leftFire1.ScaleBy(0.3f, 0.3f);
-		//leftFire1.RotateBy(180, Vec2f_zero);
-		leftFire1.SetOffset(Vec2f(9.5f, -17.0f));
+		leftFire1.RotateBy(180, Vec2f_zero);
+		leftFire1.SetOffset(Vec2f(-10.0f, -21.0f));
 	}
 	if (leftFire2 !is null)
 	{
@@ -125,8 +126,8 @@ void LoadSprites(CSprite@ this)
 		leftFire2.SetVisible(false);
 		leftFire2.SetRelativeZ(-1.3f);
 		leftFire2.ScaleBy(0.3f, 0.3f);
-		//leftFire2.RotateBy(180, Vec2f_zero);
-		leftFire2.SetOffset(Vec2f(14.5f, 25.0f));
+		leftFire2.RotateBy(180, Vec2f_zero);
+		leftFire2.SetOffset(Vec2f(-15.0f, 22.0f));
 	}
 	if (rightFire1 !is null)
 	{
@@ -136,8 +137,8 @@ void LoadSprites(CSprite@ this)
 		rightFire1.SetVisible(false);
 		rightFire1.SetRelativeZ(-1.4f);
 		rightFire1.ScaleBy(0.3f, 0.3f);
-		rightFire1.RotateBy(180, Vec2f_zero);
-		rightFire1.SetOffset(Vec2f(-10.5f, -17.0f));
+		//rightFire1.RotateBy(180, Vec2f_zero);
+		rightFire1.SetOffset(Vec2f(10.0f, -21.0f));
 	}
 	if (rightFire2 !is null)
 	{
@@ -147,8 +148,8 @@ void LoadSprites(CSprite@ this)
 		rightFire2.SetVisible(false);
 		rightFire2.SetRelativeZ(-1.4f);
 		rightFire2.ScaleBy(0.3f, 0.3f);
-		rightFire2.RotateBy(180, Vec2f_zero);
-		rightFire2.SetOffset(Vec2f(-11.5f, 25.0f));
+		//rightFire2.RotateBy(180, Vec2f_zero);
+		rightFire2.SetOffset(Vec2f(15.0f, 22.0f));
 	}
 	
 }
@@ -168,281 +169,10 @@ void onTick(CSprite@ this)
 	bool facingLeft = this.isFacingLeft();
 	int teamNum = blob.getTeamNum();
 
-	/*KnightInfo@ knight;
-	if (!blob.get("knightInfo", @knight))
-	{
-		return;
-	}*/
-
 	MediumshipInfo@ ship;
 	if (!blob.get( "shipInfo", @ship )) 
 	{ return; }
 	
-	/*
-	bool knocked = isKnocked(blob);
-
-	bool shieldState = isShieldState(knight.state);
-	bool specialShieldState = isSpecialShieldState(knight.state);
-	bool swordState = isSwordState(knight.state);
-
-	bool pressed_a1 = blob.isKeyPressed(key_action1);
-	bool pressed_a2 = blob.isKeyPressed(key_action2);
-
-	bool walking = (blob.isKeyPressed(key_left) || blob.isKeyPressed(key_right));
-
-	aimpos = blob.getAimPos();
-	bool inair = (!blob.isOnGround() && !blob.isOnLadder());
-
-	Vec2f vel = blob.getVelocity();
-
-	if (blob.hasTag("dead"))
-	{
-		if (this.animation.name != "dead")
-		{
-			this.RemoveSpriteLayer(shiny_layer);
-			this.SetAnimation("dead");
-		}
-		Vec2f oldvel = blob.getOldVelocity();
-
-		//TODO: trigger frame one the first time we server_Die()()
-		if (vel.y < -1.0f)
-		{
-			this.SetFrameIndex(1);
-		}
-		else if (vel.y > 1.0f)
-		{
-			this.SetFrameIndex(3);
-		}
-		else
-		{
-			this.SetFrameIndex(2);
-		}
-		return;
-	}
-
-	// get the angle of aiming with mouse
-	Vec2f vec;
-	int direction = blob.getAimDirection(vec);
-
-	// set facing
-	bool facingLeft = this.isFacingLeft();
-	// animations
-	bool ended = this.isAnimationEnded() || this.isAnimation("shield_raised");
-	bool wantsChopLayer = false;
-	s32 chopframe = 0;
-	f32 chopAngle = 0.0f;
-
-	const bool left = blob.isKeyPressed(key_left);
-	const bool right = blob.isKeyPressed(key_right);
-	const bool up = blob.isKeyPressed(key_up);
-	const bool down = blob.isKeyPressed(key_down);
-
-	bool shinydot = false;
-
-	if (knocked)
-	{
-		if (inair)
-		{
-			this.SetAnimation("knocked_air");
-		}
-		else
-		{
-			this.SetAnimation("knocked");
-		}
-	}
-	else if (blob.hasTag("seated"))
-	{
-		this.SetAnimation("crouch");
-	}
-	else
-	{
-		switch(knight.state)
-		{
-			case KnightStates::shieldgliding:
-				this.SetAnimation("shield_glide");
-			break;
-
-			case KnightStates::shielddropping:
-				this.SetAnimation("shield_drop");
-			break;
-
-			case KnightStates::resheathing_slash:
-				this.SetAnimation("resheath_slash");
-			break;
-
-			case KnightStates::resheathing_cut:
-				this.SetAnimation("draw_sword");
-			break;
-
-			case KnightStates::sword_cut_mid:
-				this.SetAnimation("strike_mid");
-			break;
-
-			case KnightStates::sword_cut_mid_down:
-				this.SetAnimation("strike_mid_down");
-			break;
-
-			case KnightStates::sword_cut_up:
-				this.SetAnimation("strike_up");
-			break;
-
-			case KnightStates::sword_cut_down:
-				this.SetAnimation("strike_down");
-			break;
-
-			case KnightStates::sword_power:
-			case KnightStates::sword_power_super:
-			{
-				this.SetAnimation("strike_power");
-
-				if (knight.swordTimer <= 1)
-					this.animation.SetFrameIndex(0);
-
-				u8 mintime = 6;
-				u8 maxtime = 8;
-				if (knight.swordTimer >= mintime && knight.swordTimer <= maxtime)
-				{
-					wantsChopLayer = true;
-					chopframe = knight.swordTimer - mintime;
-					chopAngle = -vec.Angle();
-				}
-			}
-			break;
-
-			case KnightStates::sword_drawn:
-			{
-				if (knight.swordTimer < KnightVars::slash_charge)
-				{
-					this.SetAnimation("draw_sword");
-				}
-				else if (knight.swordTimer < KnightVars::slash_charge_level2)
-				{
-					this.SetAnimation("strike_power_ready");
-					this.animation.frame = 0;
-				}
-				else if (knight.swordTimer < KnightVars::slash_charge_limit)
-				{
-					this.SetAnimation("strike_power_ready");
-					this.animation.frame = 1;
-					shinydot = true;
-				}
-				else
-				{
-					this.SetAnimation("draw_sword");
-				}
-			}
-			break;
-
-			case KnightStates::shielding:
-			{
-				if (!isShieldEnabled(blob))
-					break;
-
-				if (walking)
-				{
-					if (direction == 0)
-					{
-						this.SetAnimation("shield_run");
-					}
-					else if (direction == -1)
-					{
-						this.SetAnimation("shield_run_up");
-					}
-					else if (direction == 1)
-					{
-						this.SetAnimation("shield_run_down");
-					}
-				}
-				else
-				{
-					this.SetAnimation("shield_raised");
-
-					if (direction == 1)
-					{
-						this.animation.frame = 2;
-					}
-					else if (direction == -1)
-					{
-						if (vec.y > -0.97)
-						{
-							this.animation.frame = 1;
-						}
-						else
-						{
-							this.animation.frame = 3;
-						}
-					}
-					else
-					{
-						this.animation.frame = 0;
-					}
-				}
-			}
-			break;
-
-			default:
-			{
-				if (inair)
-				{
-					RunnerMoveVars@ moveVars;
-					if (!blob.get("moveVars", @moveVars))
-					{
-						return;
-					}
-					f32 vy = vel.y;
-					if (vy < -0.0f && moveVars.walljumped)
-					{
-						this.SetAnimation("run");
-					}
-					else
-					{
-						this.SetAnimation("fall");
-						this.animation.timer = 0;
-
-						if (vy < -1.5)
-						{
-							this.animation.frame = 0;
-						}
-						else if (vy > 1.5)
-						{
-							this.animation.frame = 2;
-						}
-						else
-						{
-							this.animation.frame = 1;
-						}
-					}
-				}
-				else if (walking || 
-					(blob.isOnLadder() && (blob.isKeyPressed(key_up) || blob.isKeyPressed(key_down))))
-				{
-					this.SetAnimation("run");
-				}
-				else
-				{
-					defaultIdleAnim(this, blob, direction);
-				}
-			}
-		}
-	}
-
-	//set the shiny dot on the sword
-
-	CSpriteLayer@ shiny = this.getSpriteLayer(shiny_layer);
-
-	if (shiny !is null)
-	{
-		shiny.SetVisible(shinydot);
-		if (shinydot)
-		{
-			f32 range = (KnightVars::slash_charge_limit - KnightVars::slash_charge_level2);
-			f32 count = (knight.swordTimer - KnightVars::slash_charge_level2);
-			f32 ratio = count / range;
-			shiny.RotateBy(10, Vec2f());
-			shiny.SetOffset(Vec2f(12, -2 + ratio * 8));
-		}
-	}*/
-
 	//set engine burns to correct places
 
 	CSpriteLayer@ upFire1		= this.getSpriteLayer(up_fire1);
@@ -497,15 +227,15 @@ void onTick(CSprite@ this)
 		downFire2.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
 	}
 	
-	if (leftFire1 !is null)//left side engines
-	{ leftFire1.SetVisible(leftEngine || leftFrontEngine); }
-	if (leftFire2 !is null)
-	{ leftFire2.SetVisible(leftEngine || leftBackEngine); }
-
-	if (rightFire1 !is null)//right side engines
-	{ rightFire1.SetVisible(rightEngine || rightFrontEngine); }
+	if (rightFire1 !is null)//left side engines
+	{ rightFire1.SetVisible(leftEngine || leftFrontEngine); }
 	if (rightFire2 !is null)
-	{ rightFire2.SetVisible(rightEngine || rightBackEngine); }
+	{ rightFire2.SetVisible(leftEngine || leftBackEngine); }
+
+	if (leftFire1 !is null)//right side engines
+	{ leftFire1.SetVisible(rightEngine || rightFrontEngine); }
+	if (leftFire2 !is null)
+	{ leftFire2.SetVisible(rightEngine || rightBackEngine); }
 
 
 	if (mainEngine)
