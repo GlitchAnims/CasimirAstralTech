@@ -71,10 +71,10 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 
 void onTick( CBlob@ this )
 {
-	// vvvvvvvvvvvvvv SERVER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
-	if (!isServer()) return;
 	if (this.isInInventory()) return;
-
+	
+	const bool is_server = isServer();
+	
 	bool isAuto = this.get_bool("automatic");
 	u32 gameTime = getGameTime();
 
@@ -83,18 +83,18 @@ void onTick( CBlob@ this )
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!attached || ownerBlobID == 0 || ownerBlob == null)
 	{ 
-		this.server_Die();
+		if (is_server) this.server_Die();
 		return;
 	}
 
-    TurretInfo@ turret;
+	TurretInfo@ turret;
 	if (!this.get( "shipInfo", @turret )) 
 	{ return; }
 
 	SpaceshipVars@ moveVars;
-    if (!ownerBlob.get( "moveVars", @moveVars )) {
-        return;
-    }
+	if (!ownerBlob.get( "moveVars", @moveVars )) {
+		return;
+	}
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
@@ -108,7 +108,7 @@ void onTick( CBlob@ this )
 
 	bool forceActivateFire = false;
 
-	if (isAuto)
+	if (is_server && isAuto)
 	{
 		int teamNum = this.getTeamNum();
 		f32 shotSpeed = turret.shot_speed;
@@ -174,7 +174,7 @@ void onTick( CBlob@ this )
 		}
 	}
 
-	if (blobAngle != aimAngle) //aiming logic
+	if (is_server && blobAngle != aimAngle) //aiming logic
 	{
 		f32 turnSpeed = turret.turret_turn_speed; //turn rate
 
@@ -193,7 +193,7 @@ void onTick( CBlob@ this )
 		}
 		blobAngle = this.getAngleDegrees();
 	}
-
+	
 	//gun logic
 	s32 ownerCharge = ownerBlob.get_s32(absoluteCharge_string);
 	s32 spaceChargeCost = turret.firing_cost;
@@ -204,7 +204,7 @@ void onTick( CBlob@ this )
 	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
 	u32 spaceFiringDelay = turret.firing_delay;
 
-	if (pressed_space && spaceTime >= spaceFiringDelay && ownerCharge >= spaceChargeCost)
+	if (is_server && pressed_space && spaceTime >= spaceFiringDelay && ownerCharge >= spaceChargeCost)
 	{
 		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
@@ -244,34 +244,36 @@ void onTick( CBlob@ this )
 	}
 	this.set_u32( "space_heldTime", spaceTime );
 	
-
 	if (spaceShotTicks < 500)
 	{
 		spaceShotTicks++;
 		this.set_u32( "space_shotTime", spaceShotTicks );
 	}
 
-	//sound logic
-	f32 windupPercentage = float(spaceTime) / spaceFiringDelay;
-	//sound logic
-	CSprite@ thisSprite = this.getSprite();
-	if(windupPercentage <= 0.0f)
+	if (isClient())
 	{
-		if (!thisSprite.getEmitSoundPaused())
+		//sound logic
+		f32 windupPercentage = float(spaceTime) / spaceFiringDelay;
+		//sound logic
+		CSprite@ thisSprite = this.getSprite();
+		if(windupPercentage <= 0.0f)
 		{
-			thisSprite.SetEmitSoundPaused(true);
+			if (!thisSprite.getEmitSoundPaused())
+			{
+				thisSprite.SetEmitSoundPaused(true);
+			}
+			thisSprite.SetEmitSoundVolume(0.0f);
+			thisSprite.SetEmitSoundSpeed(0.0f);
 		}
-		thisSprite.SetEmitSoundVolume(0.0f);
-		thisSprite.SetEmitSoundSpeed(0.0f);
-	}
-	else
-	{
-		if (thisSprite.getEmitSoundPaused())
+		else
 		{
-			thisSprite.SetEmitSoundPaused(false);
+			if (thisSprite.getEmitSoundPaused())
+			{
+				thisSprite.SetEmitSoundPaused(false);
+			}
+			thisSprite.SetEmitSoundVolume(windupPercentage);
+			thisSprite.SetEmitSoundSpeed(windupPercentage);
 		}
-		thisSprite.SetEmitSoundVolume(windupPercentage);
-		thisSprite.SetEmitSoundSpeed(windupPercentage);
 	}
 }
 

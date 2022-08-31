@@ -39,6 +39,12 @@ void onTick(CBlob@ this)
 	if (map is null)
 	{ return; }
 
+	if (this.hasTag("dead"))
+	{
+		this.server_Die();
+		return;
+	}
+
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
 	
@@ -101,19 +107,19 @@ void onTick(CBlob@ this)
 
 			this.setPosition(thisPos);
 			this.server_Hit(b, thisPos, thisVel, damage, Hitters::arrow, false);
-			this.server_Die();
+			this.Tag("dead");
 			return;
 		}
 	}
 	
-	if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
+	if (hitWall) // if there was no hit, but there is a wall, move bullet there and die
 	{
 		this.setPosition(futurePos);
 		if (is_client)
 		{
 			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _shot_r.NextFloat()), 1.0f + (0.2f * _shot_r.NextFloat()));
 		}
-		this.server_Die();
+		this.Tag("dead");
 	}
 }
 
@@ -220,16 +226,18 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 			blob.hasTag("hull") ||
 			blob.hasTag("barrier")
 		)
-	);
+	) && !this.hasTag("dead");
 }
 
 void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f collisionPos )
 {
 	if ((this == null || blob == null) && solid)
 	{
-		this.server_Die();
+		this.Tag("dead");
 		return;
 	}
+
+	if (this.hasTag("dead")) return;
 
 	if (!doesCollideWithBlob(this, blob))
 	{ return; }
@@ -244,7 +252,7 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 	}
 
 	this.server_Hit(blob, thisPos, thisVel, damage, Hitters::arrow, false);
-	this.server_Die();
+	this.Tag("dead");
 }
 
 void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ targetBlob, u8 customData )
