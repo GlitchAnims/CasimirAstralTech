@@ -27,6 +27,7 @@ void onInit(CBlob@ this)
 
 	this.set_Vec2f(oldPosString, Vec2f_zero); //SpaceshipGlobal.as
 	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
+	this.set_bool(clientFirstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
 	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
@@ -48,19 +49,18 @@ void onTick(CBlob@ this)
 	Vec2f futurePos = thisPos + rayRange;
 
 	const bool is_client = isClient();
+	const bool firstTick = this.get_bool(firstTickString) || (is_client && this.get_bool(clientFirstTickString));
 
-	if (this.get_bool(firstTickString))
-	{
-		if (is_client)
-		{
-			doMuzzleFlash(thisPos, thisVel);
-		}
-		this.set_bool(firstTickString, false);
-	}
+	if (!firstTick) return;
+	this.set_bool(firstTickString, false);
+	
 	if (is_client)
 	{
 		Vec2f thisOldPos = this.get_Vec2f(oldPosString);
 		this.set_Vec2f(oldPosString, thisPos);
+
+		doMuzzleFlash(thisPos, thisVel);
+		this.set_bool(clientFirstTickString, false);
 	}
 
 	Vec2f wallPos = Vec2f_zero;
@@ -97,43 +97,40 @@ void onTick(CBlob@ this)
 			if (b.getHealth() >= b.getInitialHealth())
 			{ continue; }
 
-			this.setPosition(thisPos);
-			if (b.hasTag("hull"))
+			if (isServer() && b.hasTag("hull"))
 			{
 				b.server_Heal(damage);
 			}
-			this.server_Die();
-			return;
+			break;
 		}
 	}
-	
-	if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
+	else if (hitWall) //if there was no hit, but there is a wall, move bullet there and die
 	{
-		this.setPosition(futurePos);
+		thisPos = futurePos;
 		if (is_client)
 		{
 			Sound::Play("dig_dirt2.ogg", futurePos, 1.5f + (0.2f * _ray_shot_r.NextFloat()), 1.0f + (0.2f * _ray_shot_r.NextFloat()));
 		}
-		this.server_Die();
 	}
 
-	this.server_Die(); //ray bullets only live once
+	//this.set_Vec2f(oldPosString, thisPos);
+	doTrailParticles(thisPos, this.getPosition());
 }
 
 void onDie( CBlob@ this )
 {
-	Vec2f thisOldPos = this.get_Vec2f(oldPosString);
-	Vec2f thisPos = this.getPosition();
+	//Vec2f thisOldPos = this.get_Vec2f(oldPosString);
+	//Vec2f thisPos = this.getPosition();
 
-	doTrailParticles(thisOldPos, thisPos); //do one last trail particle on death
-	this.set_Vec2f(oldPosString, thisPos);
+	//doTrailParticles(thisOldPos, thisPos); //do one last trail particle on death
+	//this.set_Vec2f(oldPosString, thisPos);
 }
 
 void doTrailParticles(Vec2f oldPos = Vec2f_zero, Vec2f newPos = Vec2f_zero)
 {
 	if (!isClient())
 	{ return; }
-
+	
 	if (oldPos == Vec2f_zero || newPos == Vec2f_zero)
 	{ return; }
 
@@ -168,7 +165,7 @@ void doMuzzleFlash(Vec2f thisPos = Vec2f_zero, Vec2f flashVec = Vec2f_zero)
 {
 	if (!isClient())
 	{ return; }
-
+	
 	if (thisPos == Vec2f_zero || flashVec == Vec2f_zero)
 	{ return; }
 	
@@ -219,14 +216,13 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 		(
 			blob.hasTag("barrier")
 		)
-	);
+	) && !this.get_bool("expired");
 }
 
 void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f collisionPos )
 {
 	if ((this == null || blob == null) && solid)
 	{
-		this.server_Die();
 		return;
 	}
 
@@ -241,6 +237,4 @@ void onCollision( CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f coll
 		if(doesBypassBarrier(blob, collisionPos, thisVel))
 		{ return; }
 	}
-
-	this.server_Die();
 }

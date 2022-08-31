@@ -27,6 +27,7 @@ void onInit(CBlob@ this)
 
 	this.set_Vec2f(oldPosString, Vec2f_zero); //SpaceshipGlobal.as
 	this.set_bool(firstTickString, true); //SpaceshipGlobal.as
+	this.set_bool(clientFirstTickString, true); //SpaceshipGlobal.as
 
 	this.getSprite().SetFrame(0);
 	this.SetMapEdgeFlags(CBlob::map_collide_up | CBlob::map_collide_down | CBlob::map_collide_sides);
@@ -45,12 +46,13 @@ void onTick(CBlob@ this)
 	Vec2f futurePos = thisPos + thisVel;
 
 	const bool is_client = isClient();
-
-	if (this.get_bool(firstTickString))
+	const bool firstTick = this.get_bool(firstTickString) || (is_client && this.get_bool(clientFirstTickString));
+	if (firstTick)
 	{
 		if (is_client)
 		{
 			doMuzzleFlash(thisPos, thisVel);
+			this.set_bool(clientFirstTickString, false);
 		}
 		if (isServer()) //bullet range moderation
 		{

@@ -5,6 +5,7 @@ const string quit_ship_command_ID = "ship_quit";
 
 const string oldPosString = "old_pos";
 const string firstTickString = "first_tick";
+const string clientFirstTickString = "client_first_tick";
 const string shotLifetimeString = "shot_lifetime";
 const string explosionFXBoolString = "does_explode";
 

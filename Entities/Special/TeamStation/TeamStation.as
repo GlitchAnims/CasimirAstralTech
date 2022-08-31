@@ -119,7 +119,8 @@ void onTick(CBlob@ this)
 			if (!b.hasTag(chargeTag) || b.hasTag("dead") || b.hasTag(bigTag))
 			{ continue; }
 
-			addCharge(b, chargeAmount);
+			transferCharge(this, b, chargeAmount);
+			//addCharge(b, chargeAmount);
 		}
 	}
 
