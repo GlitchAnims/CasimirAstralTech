@@ -53,6 +53,7 @@ void onTick(CBlob@ this)
 		{
 			doMuzzleFlash(thisPos, thisVel);
 			this.set_bool(clientFirstTickString, false);
+		}
 		if (isServer()) //bullet range moderation
 		{
 			float lifeTime = this.get_f32(shotLifetimeString);
