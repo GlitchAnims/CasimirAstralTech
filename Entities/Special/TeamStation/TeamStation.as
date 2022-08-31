@@ -122,6 +122,28 @@ void onTick(CBlob@ this)
 			transferCharge(this, b, chargeAmount);
 			//addCharge(b, chargeAmount);
 		}
+
+		CBlob@[] nonPlayerInRadius;
+		map.getBlobsInRadius(thisPos, radius, @nonPlayerInRadius); //tent aura push
+		for (uint i = 0; i < nonPlayerInRadius.length; i++)
+		{
+			CBlob@ b = nonPlayerInRadius[i];
+			if (b is null)
+			{ continue; }
+
+			if (b.getTeamNum() != teamNum)
+			{ continue; }
+
+			if (b.hasTag(bigTag) || !b.hasTag("hull") || b.getPlayer() != null)
+			{ continue; }
+
+			Vec2f bPos = b.getPosition();
+			Vec2f bVec = bPos - thisPos;
+			Vec2f bVecNorm = bVec;
+			bVecNorm.Normalize();
+
+			b.setVelocity(b.getVelocity() + (bVecNorm*0.1f));
+		}
 	}
 
 	if (!isClient())
