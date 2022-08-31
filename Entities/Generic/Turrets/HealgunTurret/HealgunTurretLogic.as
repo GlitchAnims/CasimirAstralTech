@@ -92,7 +92,7 @@ void onTick( CBlob@ this )
 		int teamNum = this.getTeamNum();
 		f32 shotSpeed = turret.shot_speed;
 		
-		if ((gameTime + this.getNetworkID()) % 60 == 0) //once every 2 seconds
+		if ((gameTime + this.getNetworkID()) % 60 == 0 && turret.auto_target_ID == 0) //once every 2 seconds
 		{
 			turret.auto_target_ID = 0;
 
@@ -105,18 +105,21 @@ void onTick( CBlob@ this )
 			for (uint i = 0; i < blobsInRadius.length; i++)
 			{
 				CBlob@ b = blobsInRadius[i];
-				if (b is null)
+				if (b is null || b is ownerBlob)
 				{ continue; }
 
 				if (b.getTeamNum() != teamNum)
 				{ continue; }
 
 				float bSpeed = b.getVelocity().getLength();
+				Vec2f bPos = b.getPosition();
+				Vec2f bVec = bPos - thisPos;
+				float bDist = bVec.getLength();
 				
-				if (!b.hasTag("hull") || bSpeed > 1.5f || b.getHealth() >= b.getInitialHealth())
+				if (!b.hasTag("hull") || bSpeed > 1.5f || bDist < 8.0f || b.getHealth() >= b.getInitialHealth())
 				{ continue; }
 
-				if (map.rayCastSolidNoBlobs(thisPos, b.getPosition()))
+				if (map.rayCastSolidNoBlobs(thisPos, bPos))
 				{ continue; }
 				
 				turret.auto_target_ID = b.getNetworkID();
