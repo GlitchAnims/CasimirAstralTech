@@ -94,7 +94,7 @@ void LoadSprites(CSprite@ this)
 		downFire1.SetRelativeZ(-1.2f);
 		downFire1.ScaleBy(0.5f, 0.5f);
 		downFire1.RotateBy(90, Vec2f_zero);
-		downFire1.SetOffset(Vec2f(11.0f, 17.0f));
+		downFire1.SetOffset(Vec2f(7.0f, -32.0f));
 	}
 	if (downFire2 !is null)
 	{
@@ -105,7 +105,7 @@ void LoadSprites(CSprite@ this)
 		downFire2.SetRelativeZ(-1.2f);
 		downFire2.ScaleBy(0.5f, 0.5f);
 		downFire2.RotateBy(90, Vec2f_zero);
-		downFire2.SetOffset(Vec2f(-9.0f, 12.0f));
+		downFire2.SetOffset(Vec2f(-7.0f, -32.0f));
 	}
 	if (leftFire1 !is null)
 	{
@@ -240,17 +240,17 @@ void onTick(CSprite@ this)
 
 	if (mainEngine)
 	{
-		Vec2f engineOffset = Vec2f(facingLeft ? 9.5f: -9.5f, 32.0f);
+		Vec2f engineOffset = Vec2f(facingLeft ? 8.0f: -8.0f, 31.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		Vec2f trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 2, blobVel, blobAngle, teamNum);
+		makeEngineTrail(trailPos, 3, blobVel, blobAngle, teamNum);
 
-		engineOffset = Vec2f(facingLeft ? -3.5f : 3.5f , 31.0f);
+		engineOffset = Vec2f(facingLeft ? -8.0f : 8.0f , 31.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 4, blobVel, blobAngle, teamNum);
+		makeEngineTrail(trailPos, 3, blobVel, blobAngle, teamNum);
 	}
 
 }
