@@ -7,14 +7,42 @@
 
 void onInit(CMovement@ this)
 {
-	this.getBlob().set_u32("accelSoundDelay",0);
+	CBlob@ thisBlob = this.getBlob();
+	if (thisBlob == null)
+	{ return; }
 
 	this.getCurrentScript().removeIfTag = "dead";
 
-	this.getBlob().set_s32("rightTap",0);
-	this.getBlob().set_s32("leftTap",0);
-	this.getBlob().set_s32("upTap",0);
-	this.getBlob().set_s32("downTap",0);
+	thisBlob.set_u32("accelSoundDelay",0);
+	thisBlob.set_s32("rightTap",0);
+	thisBlob.set_s32("leftTap",0);
+	thisBlob.set_s32("upTap",0);
+	thisBlob.set_s32("downTap",0);
+
+	CAttachment@ attachments = thisBlob.getAttachments();
+	if (attachments == null)
+	{ return; }
+
+	Vec2f ownerPos = thisBlob.getPosition();
+
+	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("ENGINESLOT1");
+
+	if (slot1 != null)
+	{
+		Vec2f slotOffset = slot1.offset;
+		CBlob@ turret = slot1.getOccupied();
+		if (turret == null)
+		{
+			CBlob@ blob = server_CreateBlob( "engine_blob" , -1, ownerPos + slotOffset);
+			if (blob !is null)
+			{
+				blob.IgnoreCollisionWhileOverlapped( thisBlob );
+				thisBlob.server_AttachTo(blob, slot1);
+				blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
+				blob.set_u8("soundemit_num", 0);
+			}
+		}
+	}
 }
 
 void onTick(CMovement@ this)
