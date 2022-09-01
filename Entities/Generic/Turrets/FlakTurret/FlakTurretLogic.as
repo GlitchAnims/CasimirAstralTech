@@ -33,7 +33,6 @@ void onInit( CBlob@ this )
 	this.set_u32( "space_shotTime", 0 );
 	this.set_u32( "m2_shotTime", 0 );
 
-	this.set_bool( "leftCannonTurn", false);
 	this.set_bool( "automatic", false);
 	
 	this.Tag("npc");
@@ -215,8 +214,6 @@ void onTick( CBlob@ this )
 		if (spaceShotTicks >= turret.firing_rate * moveVars.firingRateFactor)
 		{
 			removeCharge(ownerBlob, spaceChargeCost, true);
-			bool leftCannon = this.get_bool( "leftCannonTurn" );
-			this.set_bool( "leftCannonTurn", !leftCannon);
 
 			f32 aimDist = aimVec.getLength();	//detonation zone
 			u8 shotType = 0; //shot type
@@ -227,11 +224,10 @@ void onTick( CBlob@ this )
 			uint bulletCount = turret.firing_burst;
 			for (uint i = 0; i < bulletCount; i ++)
 			{
-				f32 lifeTimeRandom = 0.5f - _turret_logic_r.NextFloat(); //lifetime variation
-				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f); 
+				f32 lifeTimeRandom = 0.3f - (0.6f*_turret_logic_r.NextFloat()); //lifetime variation
+				lifeTime = Maths::Clamp(lifeTime + lifeTimeRandom, minLifetime, 3.5f);
 
-				f32 leftMult = leftCannon ? 1.0f : -1.0f;
-				Vec2f firePos = Vec2f(8.0f, 0.0f * leftMult); //barrel pos
+				Vec2f firePos = Vec2f(8.0f, 0.0f); //barrel pos
 				firePos.RotateByDegrees(blobAngle);
 				firePos += thisPos; //fire pos
 
@@ -247,13 +243,10 @@ void onTick( CBlob@ this )
 		}
 	}
 
-	if (pressed_space)
-	{ spaceTime++; }
-	else { spaceTime = 0; }
-	
-	if (pressed_m2)
-	{ m2Time++; }
-	else { m2Time = 0; }
+	// heresy
+	if (pressed_space) spaceTime++; else spaceTime = 0;
+	if (pressed_m2) m2Time++; else m2Time = 0;
+
 	this.set_u32( "space_heldTime", spaceTime );
 	this.set_u32( "m2_heldTime", m2Time );
 
@@ -268,22 +261,7 @@ void onTick( CBlob@ this )
 		//m2ShotTicks++;
 		this.set_u32( "m2_shotTime", m2ShotTicks );
 	}
-
-	//sound logic
-	/*Vec2f vel = this.getVelocity();
-	float posVelX = Maths::Abs(vel.x);
-	float posVelY = Maths::Abs(vel.y);
-	if(posVelX > 2.9f)
-	{
-		this.getSprite().SetEmitSoundVolume(3.0f);
-	}
-	else
-	{
-		this.getSprite().SetEmitSoundVolume(1.0f * (posVelX > posVelY ? posVelX : posVelY));
-	}*/
 }
-
-
 
 f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData )
 {

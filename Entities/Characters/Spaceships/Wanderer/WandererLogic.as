@@ -254,7 +254,6 @@ void onTick( CBlob@ this )
 		//individual cannon fire
 		if (L1charged)
 		{
-			print("wtf");
 			if (_wanderer_logic_r.NextFloat() <= fireChance && !firedThisTick) //roll chance if cannon is charged
 			{
 				if (isMyPlayer) fireBroadsideShot(this, cannonPos[0], thisVel, firingAngle, this.getNetworkID(), 4, shotLifetime, m1ChargeCost, shotSpeed, shotSpread);

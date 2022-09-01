@@ -234,13 +234,11 @@ void onTick( CBlob@ this )
 
 	if (pressed_space) //this one's special because of gatling windup
 	{
-		if (spaceTime < spaceFiringDelay)
-		{ spaceTime++; }
+		if (spaceTime < spaceFiringDelay) spaceTime++;
 	}
 	else 
 	{
-		if (spaceTime > 0)
-		{ spaceTime--; }
+		if (spaceTime > 0) spaceTime--;
 	}
 	this.set_u32( "space_heldTime", spaceTime );
 	
