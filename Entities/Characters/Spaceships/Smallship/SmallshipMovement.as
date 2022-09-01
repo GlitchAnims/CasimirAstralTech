@@ -161,10 +161,11 @@ void onTick(CMovement@ this)
 		{ ship.starboard_thrust = false; }
 
 		Vec2f addedVel = Vec2f_zero;
-		addedVel += forward / float(keysPressedAmount); //divide thrust between multiple sides
-		addedVel += backward / float(keysPressedAmount);
-		addedVel += port / float(keysPressedAmount);
-		addedVel += starboard / float(keysPressedAmount);
+		float thrustReduction = Maths::Min(1.0f / (float(keysPressedAmount) * 0.8f), 1.0f); //divide thrust between multiple sides
+		addedVel += forward * thrustReduction;
+		addedVel += backward * thrustReduction;
+		addedVel += port * thrustReduction;
+		addedVel += starboard * thrustReduction;
 		
 		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
 	}

@@ -258,19 +258,21 @@ void onTick(CMovement@ this)
 			}
 		}
 
-		
+		Vec2f addedVel = Vec2f_zero;
 		if (isShifting) //does not divide thrust if using rotational thrust
 		{
-			forward /= float(keysPressedAmount); //divide thrust between multiple sides
-			backward /= float(keysPressedAmount);
-			port /= float(keysPressedAmount);
-			starboard /= float(keysPressedAmount);
+			float thrustReduction = Maths::Min(1.0f / (float(keysPressedAmount) * 0.7f), 1.0f); //divide thrust between multiple sides
+			forward *= thrustReduction;
+			backward *= thrustReduction;
+			port *= thrustReduction;
+			starboard *= thrustReduction;
+
+			addedVel += port;
+			addedVel += starboard;
 		}
-		Vec2f addedVel = Vec2f_zero;
+
 		addedVel += forward; 
 		addedVel += backward;
-		addedVel += port;
-		addedVel += starboard;
 		
 		addedVel.RotateByDegrees(blobAngle); //rotate thrust to match ship
 		

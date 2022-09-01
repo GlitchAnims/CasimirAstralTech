@@ -69,6 +69,7 @@ void MakeTradeMenu(CBlob@ trader)
 	//ships
 	s32 cost_martyr = cfg.read_s32("cost_martyr", 120);
 	s32 cost_balthazar = cfg.read_s32("cost_balthazar", 100);
+	s32 cost_wanderer= cfg.read_s32("cost_wanderer", 100);
 
 	//pods
 	s32 cost_pod_shield = cfg.read_s32("cost_pod_shield", 30);
@@ -104,6 +105,7 @@ void MakeTradeMenu(CBlob@ trader)
 
 	addItemForCoin(trader, "Martyr", cost_martyr, true, "$mat_firearrows$", "martyr", Descriptions::buy_martyr);
 	addItemForCoin(trader, "Balthazar", cost_balthazar, true, "$mat_firearrows$", "balthazar", Descriptions::buy_balthazar);
+	addItemForCoin(trader, "Wanderer", cost_wanderer, true, "$mat_firearrows$", "wanderer", Descriptions::buy_wanderer);
 
 	addItemForCoin(trader, "Shield Pod", cost_pod_shield, true, "$pod_shield$", "pod_shield", Descriptions::buy_pod_shield);
 	addItemForCoin(trader, "Flak Pod", cost_pod_flak, true, "$pod_flak$", "pod_flak", Descriptions::buy_pod_flak);
