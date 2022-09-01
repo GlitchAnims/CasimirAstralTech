@@ -81,9 +81,9 @@ void onTick(CMovement@ this)
 	const bool isknocked = isKnocked(thisBlob) || (thisBlob.get_bool("frozen") == true);
 	const bool is_client = isClient();
 
-	Vec2f pos = thisBlob.getPosition();
-	Vec2f vel = thisBlob.getVelocity();
-	Vec2f oldVel = vel;
+	Vec2f thisPos = thisBlob.getPosition();
+	Vec2f thisVel = thisBlob.getVelocity();
+	Vec2f oldVel = thisVel;
 	
 	f32 blobAngle = thisBlob.getAngleDegrees();
 	blobAngle = Maths::Abs(blobAngle) % 360;
@@ -276,7 +276,7 @@ void onTick(CMovement@ this)
 		
 		addedVel.RotateByDegrees(blobAngle); //rotate thrust to match ship
 		
-		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
+		thisVel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
 		blobSpinVel += addedSpin * moveVars.engineFactor; //spin velocity also affected by engine force
 	}
 	else
@@ -291,28 +291,30 @@ void onTick(CMovement@ this)
 		ship.starboardQuarter_thrust = false;
 	}
 
-	if (thisBlob.getPosition().y >=  (map.tilemapheight*8) - 8) //if too high or too low, bounce back
+	float wallWidth = 30.0f;
+	float bounceSpeed = 0.2f;
+	if (thisPos.y >=  (map.tilemapheight*8) - wallWidth) //if too high or too low, bounce back
 	{
-		vel = Vec2f(vel.x,-1);
+		thisVel = Vec2f(thisVel.x,-bounceSpeed);
 	}
-	else if (thisBlob.getPosition().y <= 2)
+	else if (thisPos.y <= wallWidth)
 	{
-		vel = Vec2f(vel.x,1);
+		thisVel = Vec2f(thisVel.x,bounceSpeed);
 	}
-	else if (thisBlob.getPosition().x >=  (map.tilemapwidth*8) - 8) //if too left or too right, bounce back
+	else if (thisPos.x >=  (map.tilemapwidth*8) - wallWidth) //if too left or too right, bounce back
 	{
-		vel = Vec2f(-1,vel.y);
+		thisVel = Vec2f(-bounceSpeed,thisVel.y);
 	}
-	else if (thisBlob.getPosition().x <= 8)
+	else if (thisPos.x <= wallWidth)
 	{
-		vel = Vec2f(1,vel.y);
+		thisVel = Vec2f(bounceSpeed,thisVel.y);
 	}
 
 	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
-	if (maxSpeed != 0 && vel.getLength() > maxSpeed) //max speed logic - 0 means no cap
+	if (maxSpeed != 0 && thisVel.getLength() > maxSpeed) //max speed logic - 0 means no cap
 	{
-		vel.Normalize();
-		vel *= maxSpeed;
+		thisVel.Normalize();
+		thisVel *= maxSpeed;
 	}
 
 	f32 maxTurnSpeed = ship.ship_turn_speed;
@@ -325,9 +327,9 @@ void onTick(CMovement@ this)
 		blobSpinVel = -maxTurnSpeed;
 	}
 
-	if (oldVel != vel) //if vel changed, set new velocity
+	if (oldVel != thisVel) //if thisVel changed, set new velocity
 	{
-		thisBlob.setVelocity(vel);
+		thisBlob.setVelocity(thisVel);
 	}
 	if (oldSpinVel != blobSpinVel) //if spin changed, set new spin
 	{

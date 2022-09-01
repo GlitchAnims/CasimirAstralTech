@@ -64,14 +64,14 @@ void onTick(CMovement@ this)
 	const bool isknocked = isKnocked(thisBlob) || (thisBlob.get_bool("frozen") == true);
 	const bool is_client = isClient();
 
-	Vec2f vel = thisBlob.getVelocity();
-	Vec2f oldVel = vel;
-	Vec2f pos = thisBlob.getPosition();
+	Vec2f thisVel = thisBlob.getVelocity();
+	Vec2f oldVel = thisVel;
+	Vec2f thisPos = thisBlob.getPosition();
 	f32 blobAngle = thisBlob.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 
 	Vec2f aimPos = thisBlob.getAimPos();
-	Vec2f aimVec = aimPos - pos;
+	Vec2f aimVec = aimPos - thisPos;
 	f32 aimAngle = -aimVec.getAngleDegrees();
 
 	if (blobAngle != aimAngle && !isDocked) //aiming logic
@@ -167,7 +167,7 @@ void onTick(CMovement@ this)
 		addedVel += port * thrustReduction;
 		addedVel += starboard * thrustReduction;
 		
-		vel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
+		thisVel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
 	}
 	else
 	{
@@ -177,33 +177,39 @@ void onTick(CMovement@ this)
 		ship.starboard_thrust = false;
 	}
 
-	if (thisBlob.getPosition().y >=  (map.tilemapheight*8) - 8) //if too high or too low, bounce back
+	float wallWidth = 8.0f;
+	float bounceSpeed = 0.2f;
+	if (thisPos.y > (map.tilemapheight*8) - wallWidth) //if too high or too low, bounce back
 	{
-		vel = Vec2f(vel.x,-1);
+		thisVel = Vec2f(thisVel.x,-bounceSpeed);
+		thisBlob.setPosition(Vec2f(thisPos.x,(map.tilemapheight*8) - wallWidth));
 	}
-	else if (thisBlob.getPosition().y <= 2)
+	else if (thisPos.y < wallWidth)
 	{
-		vel = Vec2f(vel.x,1);
+		thisVel = Vec2f(thisVel.x,bounceSpeed);
+		thisBlob.setPosition(Vec2f(thisPos.x,wallWidth));
 	}
-	else if (thisBlob.getPosition().x >=  (map.tilemapwidth*8) - 8) //if too left or too right, bounce back
+	else if (thisPos.x > (map.tilemapwidth*8) - wallWidth) //if too left or too right, bounce back
 	{
-		vel = Vec2f(-1,vel.y);
+		thisVel = Vec2f(-bounceSpeed,thisVel.y);
+		thisBlob.setPosition(Vec2f((map.tilemapwidth*8) - wallWidth,thisPos.y));
 	}
-	else if (thisBlob.getPosition().x <= 8)
+	else if (thisPos.x < wallWidth)
 	{
-		vel = Vec2f(1,vel.y);
+		thisVel = Vec2f(bounceSpeed,thisVel.y);
+		thisBlob.setPosition(Vec2f(wallWidth,thisPos.y));
 	}
 
 	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
-	if (maxSpeed != 0 && vel.getLength() > maxSpeed) //max speed logic - 0 means no cap
+	if (maxSpeed != 0 && thisVel.getLength() > maxSpeed) //max speed logic - 0 means no cap
 	{
-		vel.Normalize();
-		vel *= maxSpeed;
+		thisVel.Normalize();
+		thisVel *= maxSpeed;
 	}
 
-	if (oldVel != vel) //if vel changed, set new velocity
+	if (oldVel != thisVel) //if thisVel changed, set new velocity
 	{
-		thisBlob.setVelocity(vel);
+		thisBlob.setVelocity(thisVel);
 	}
 	
 	CleanUp(this, thisBlob, moveVars);
