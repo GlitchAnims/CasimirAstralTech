@@ -116,7 +116,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 
 		parasiteBlob.server_SetPlayer(null);
 		this.server_SetPlayer(parasitePlayer);
-		parasiteBlob.set_bool(explosionFXBoolString, false);
+		//parasiteBlob.set_bool(explosionFXBoolString, false);
 		parasiteBlob.server_Die();
 	}
 	else if (cmd == this.getCommandID(quit_ship_command_ID))
