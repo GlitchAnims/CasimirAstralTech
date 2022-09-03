@@ -1,5 +1,6 @@
 // Knight animations
 
+#include "SpaceshipGlobal.as"
 #include "MediumshipCommon.as";
 #include "RunnerAnimCommon.as";
 #include "RunnerCommon.as";
@@ -237,61 +238,20 @@ void onTick(CSprite@ this)
 	if (leftFire2 !is null)
 	{ leftFire2.SetVisible(rightEngine || rightBackEngine); }
 
-
-	if (mainEngine)
+	bool isWarp = blob.get_bool(isWarpBoolString);
+	if (mainEngine || isWarp)
 	{
 		Vec2f engineOffset = Vec2f(facingLeft ? 8.0f: -8.0f, 31.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		Vec2f trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 3, blobVel, blobAngle, teamNum);
+		makeEngineTrail(trailPos, isWarp, 3, blobVel, blobAngle, teamNum);
 
 		engineOffset = Vec2f(facingLeft ? -8.0f : 8.0f , 31.0f);
 		engineOffset.RotateByDegrees(blobAngle);
 		trailPos = blobPos + engineOffset;
 
-		makeEngineTrail(trailPos, 3, blobVel, blobAngle, teamNum);
-	}
-
-}
-
-void makeEngineTrail(Vec2f trailPos = Vec2f_zero, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, int teamNum = 0)
-{
-	Vec2f trailNorm = Vec2f(0, 1.0f);
-	trailNorm.RotateByDegrees(blobAngle);
-
-	u32 gameTime = getGameTime();
-
-	f32 trailSwing = Maths::Sin(gameTime * 0.1f);
-
-	f32 swingMaxAngle = 30.0f * trailSwing;
-
-	SColor color = getTeamColorWW(teamNum);
-
-	for(int i = 0; i <= particleNum; i++) //will do particleNum + 1
-    {
-		u8 alpha = 200.0f + (55.0f * _martyr_anim_r.NextFloat()); //randomize alpha
-		color.setAlpha(alpha);
-
-		f32 pRatio = float(i) / float(particleNum);
-		f32 pAngle = (pRatio*2.0f) - 1.0f;
-
-		Vec2f pVel = trailNorm;
-		pVel.RotateByDegrees(swingMaxAngle*pAngle);
-		pVel *= 3.0f - Maths::Abs(pAngle);
-
-		pVel += blobVel;
-
-        CParticle@ p = ParticlePixelUnlimited(trailPos, pVel, color, true);
-        if(p !is null)
-        {
-   	        p.collides = false;
-   	        p.gravity = Vec2f_zero;
-            p.bounce = 0;
-            p.Z = 7;
-            p.timeout = 30.0f + (15.0f * _martyr_anim_r.NextFloat());
-			p.setRenderStyle(RenderStyle::light);
-    	}
+		makeEngineTrail(trailPos, isWarp, 3, blobVel, blobAngle, teamNum);
 	}
 }
 

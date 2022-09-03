@@ -14,6 +14,7 @@ const string mediumTag = "medium_ship";
 const string bigTag = "big_ship";
 
 const string isDockedBoolString = "is_docked";
+const string isWarpBoolString = "is_warp";
 
 const string activeBoolString = "active";
 const string activeTimeString = "active_time";

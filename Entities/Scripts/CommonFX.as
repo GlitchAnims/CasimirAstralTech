@@ -352,3 +352,131 @@ void genericShipExplosion( Vec2f pos , int particleNum)
 		p.lighting = false;
     }
 }
+
+void makeWarpShockwave( Vec2f pos )
+{
+	Sound::Play("GenericExplosion1.ogg", pos, 0.8f, 0.8f + XORRandom(10)/10.0f);
+	
+	CParticle@ p = ParticleAnimated("Shockwave1.png", 
+								pos, // position
+								Vec2f_zero, // velocity
+								_sprk_r2.NextFloat() * 360.0f, // rotation
+								1.0f, // scale
+								1, // animate speed
+								0.0f, // gravity
+								false ); // self lit
+								
+	if(p !is null)
+	{
+		p.collides = false;
+		p.gravity = Vec2f_zero;
+		p.bounce = 0;
+		p.Z = 300.0f;
+		p.timeout = 2;
+		p.setRenderStyle(RenderStyle::light);
+	}
+}
+
+void makeWarpElectricSurge( Vec2f pos, Vec2f vel, float axisAngle, float soundPitch )
+{
+	Sound::Play("surge.ogg", pos, 1.0f, soundPitch);
+
+	u8 particleNum = 10;
+
+	for (u8 i = 0; i < particleNum; i++)
+    {
+		float pFactor = float(i) / float(particleNum-1);
+		float pDeviation = (pFactor - 0.5f) * 20.0f;
+		Vec2f peakPos = Vec2f(32.0f, pDeviation);
+		peakPos.RotateByDegrees(axisAngle);
+
+		Vec2f pPos = pos + peakPos;
+
+		Vec2f pVel = Vec2f(-8.0f, 0);
+		pVel.RotateByDegrees(axisAngle);
+		pVel += vel;
+
+        CParticle@ p = ParticleAnimated("electric_sheet.png", 
+								pPos, // position
+								pVel, // velocity
+								_sprk_r2.NextFloat() * 360.0f, // rotation
+								1.0f, // scale
+								1, // animate speed
+								0.0f, // gravity
+								false ); // self lit
+								
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 250.0f;
+			p.timeout = 2;
+			p.setRenderStyle(RenderStyle::light);
+		}
+    }
+}
+
+void makeEngineTrail( Vec2f trailPos = Vec2f_zero, bool isWarp = false, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, int teamNum = 0 )
+{
+	if (isWarp)
+	{
+		CParticle@ p = ParticleAnimated("IceBlast2.png", 
+								trailPos, // position
+								Vec2f_zero, // velocity
+								_sprk_r2.NextFloat() * 360.0f, // rotation
+								0.7f, // scale
+								2, // animate speed
+								0.0f, // gravity
+								false ); // self lit
+								
+		if(p !is null)
+		{
+			p.collides = false;
+			p.gravity = Vec2f_zero;
+			p.bounce = 0;
+			p.Z = 250.0f;
+			p.timeout = 2;
+			p.setRenderStyle(RenderStyle::light);
+		}
+	}
+	else
+	{
+		Vec2f trailNorm = Vec2f(0, 1.0f);
+		trailNorm.RotateByDegrees(blobAngle);
+
+		u32 gameTime = getGameTime();
+
+		f32 trailSwing = Maths::Sin(gameTime * 0.1f);
+
+		f32 swingMaxAngle = 30.0f * trailSwing;
+
+		SColor color = getTeamColorWW(teamNum);
+
+		for(int i = 0; i <= particleNum; i++)
+		{
+			u8 alpha = 200.0f + (55.0f * _sprk_r2.NextFloat()); //randomize alpha
+			color.setAlpha(alpha);
+
+			f32 pRatio = float(i) / float(particleNum);
+			f32 pAngle = (pRatio*2.0f) - 1.0f;
+
+			Vec2f pVel = trailNorm;
+			pVel.RotateByDegrees(swingMaxAngle*pAngle);
+			pVel *= 3.0f - Maths::Abs(pAngle);
+
+			pVel += blobVel;
+
+			CParticle@ p = ParticlePixelUnlimited(trailPos, pVel, color, true);
+			if(p !is null)
+			{
+				p.collides = false;
+				p.gravity = Vec2f_zero;
+				p.bounce = 0;
+				p.Z = 7;
+				p.timeout = 30.0f + (15.0f * _sprk_r2.NextFloat());
+				p.setRenderStyle(RenderStyle::light);
+			}
+		}
+	}
+}

@@ -108,11 +108,13 @@ void onTick( CSprite@ this )
 		case 1:
 		{
 			float volume = Maths::Min((ownerBlobSpeed * 0.5f)+0.35f, 2.5f);
-			float speed = 0.2f + (volume*0.6f);
+			float speed = Maths::Max(0.2f + (volume*0.6f), 0.9f);
+
+			if (ownerBlob.get_bool(isWarpBoolString)) speed = 2.0f;
 
 			this.SetEmitSoundPaused(false);
 			this.SetEmitSoundVolume(volume);
-			this.SetEmitSoundSpeed(Maths::Max(speed, 0.9f));
+			this.SetEmitSoundSpeed(speed);
 		}
 		break;
 

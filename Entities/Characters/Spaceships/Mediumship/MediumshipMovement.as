@@ -1,9 +1,11 @@
 // Fighter Movement
 
 #include "MediumshipCommon.as"
+#include "ChargeCommon.as"
 #include "SpaceshipVars.as"
 #include "MakeDustParticle.as";
 #include "KnockedCommon.as";
+#include "CommonFX.as"
 
 void onInit(CMovement@ this)
 {
@@ -15,12 +17,16 @@ void onInit(CMovement@ this)
 
 	this.getCurrentScript().removeIfTag = "dead";
 
-	thisBlob.set_s32("rightTap",0);
-	thisBlob.set_s32("leftTap",0);
-	thisBlob.set_s32("upTap",0);
-	thisBlob.set_s32("downTap",0);
+	//thisBlob.set_s32("rightTap",0);
+	//thisBlob.set_s32("leftTap",0);
+	//thisBlob.set_s32("upTap",0);
+	//thisBlob.set_s32("downTap",0);
+
+	thisBlob.set_u32( "m3_heldTime", 0 );
+	thisBlob.set_u32( "m3_cooldown", 0 );
 
 	thisBlob.set_bool("movementFirstTick", true);
+	thisBlob.set_bool(isWarpBoolString, false); // SpaceshipGlobal.as
 
 	CAttachment@ attachments = thisBlob.getAttachments();
 	if (attachments == null)
@@ -103,6 +109,9 @@ void onTick(CMovement@ this)
 	const bool right	= thisBlob.isKeyPressed(key_right);
 	const bool up		= thisBlob.isKeyPressed(key_up);
 	const bool down		= thisBlob.isKeyPressed(key_down);
+
+	const bool isShifting = thisBlob.get_bool("shifting");
+	const bool isWheelButton = thisBlob.get_bool("wheel_button");
 	
 	bool[] allKeys =
 	{
@@ -139,7 +148,8 @@ void onTick(CMovement@ this)
 		thisBlob.SetFacingLeft(false);
 	}
 
-	
+	checkWarp( thisBlob, isWheelButton, thisPos, thisVel, blobAngle, ship, moveVars, is_client); // engage warp speed :)
+
 	if (shape != null)
 	{
 		f32 gravScale = 0.0f;
@@ -157,7 +167,6 @@ void onTick(CMovement@ this)
 
 	const f32 vellen = shape.vellen;
 	const bool onground = thisBlob.isOnGround() || thisBlob.isOnLadder();
-	const bool isShifting = thisBlob.get_bool("shifting");
 	const bool facingLeft = thisBlob.isFacingLeft();
 
 	f32 blobSpinVel = thisBlob.getAngularVelocity();
@@ -319,7 +328,7 @@ void onTick(CMovement@ this)
 		addedVel.RotateByDegrees(blobAngle); //rotate thrust to match ship
 		
 		thisVel += addedVel * moveVars.engineFactor; //final speed modified by engine variable
-		blobSpinVel += addedSpin * moveVars.engineFactor; //spin velocity also affected by engine force
+		blobSpinVel += addedSpin * moveVars.engineFactor * moveVars.turnSpeedFactor; //spin velocity also affected by engine force
 	}
 	else
 	{
@@ -333,6 +342,20 @@ void onTick(CMovement@ this)
 		ship.starboardQuarter_thrust = false;
 	}
 
+	const bool isWarp = thisBlob.get_bool(isWarpBoolString);
+	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
+	if (isWarp)
+	{
+		thisVel = Vec2f(maxSpeed, 0).RotateByDegrees(blobAngle-90);
+	}
+	else if ((maxSpeed != 0 && thisVel.getLength() > maxSpeed)) //max speed logic - 0 means no cap
+	{
+		thisVel.Normalize();
+		thisVel *= maxSpeed;
+	}
+
+
+	//map wall collision
 	float wallWidth = 30.0f;
 	float bounceSpeed = 0.2f;
 	if (thisPos.y >=  (map.tilemapheight*8) - wallWidth) //if too high or too low, bounce back
@@ -352,13 +375,7 @@ void onTick(CMovement@ this)
 		thisVel = Vec2f(bounceSpeed,thisVel.y);
 	}
 
-	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
-	if (maxSpeed != 0 && thisVel.getLength() > maxSpeed) //max speed logic - 0 means no cap
-	{
-		thisVel.Normalize();
-		thisVel *= maxSpeed;
-	}
-
+	// turn speed cap
 	f32 maxTurnSpeed = ship.ship_turn_speed;
 	if (blobSpinVel > maxTurnSpeed)
 	{
@@ -369,6 +386,7 @@ void onTick(CMovement@ this)
 		blobSpinVel = -maxTurnSpeed;
 	}
 
+	//applies speed and rotation changes
 	if (oldVel != thisVel) //if thisVel changed, set new velocity
 	{
 		thisBlob.setVelocity(thisVel);
@@ -377,6 +395,93 @@ void onTick(CMovement@ this)
 	{
 		thisBlob.setAngularVelocity(blobSpinVel);
 	}
-	
+
 	CleanUp(this, thisBlob, moveVars);
+}
+
+void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVel, float blobAngle, MediumshipInfo@ ship, SpaceshipVars@ moveVars, bool is_client )
+{
+	const u8 activationCost = 50;
+	const u8 upkeepCost = 15;
+	const u32 warpLoadTime = 150;
+
+	u32 m3Time = thisBlob.get_u32( "m3_heldTime" );
+	u32 m3Cooldown = thisBlob.get_u32( "m3_cooldown" );
+
+	bool onCooldown = m3Cooldown > 0;
+	if (onCooldown) thisBlob.set_u32( "m3_cooldown", m3Cooldown-1 );
+
+	if (!isWheelButton || thisBlob.get_s32(absoluteCharge_string) < upkeepCost)
+	{
+		if (thisBlob.get_bool(isWarpBoolString))
+		{
+			if (is_client) makeWarpShockwave( thisPos ); // CommonFX.as
+			thisBlob.set_bool(isWarpBoolString, false);  // SpaceshipGlobal.as
+		}
+
+		if (m3Time > 0) // depower
+		{
+			thisBlob.set_u32( "m3_cooldown", 40 );
+		}
+
+		thisBlob.set_u32( "m3_heldTime", 0 );
+		return;
+	}
+
+	if (onCooldown) return; // cannot charge warp drive if on cooldown
+
+	u32 customTime = getGameTime() + thisBlob.getNetworkID();
+
+	float engineStatus = 1.0f;
+	float dragStatus = 1.0f;
+
+	float warpLoadProgress = float(m3Time) / float(warpLoadTime);
+	if (m3Time >= warpLoadTime)
+	{
+		engineStatus = 0.1f;
+		dragStatus = 8.0f;
+		if (thisBlob.get_s32(absoluteCharge_string) >= (activationCost+upkeepCost)) // minimum requirement
+		{
+			if (!thisBlob.get_bool(isWarpBoolString))
+			{
+				if (is_client) makeWarpShockwave( thisPos ); // CommonFX.as
+				if (isServer()) removeCharge(thisBlob, activationCost, true);
+				thisBlob.set_bool(isWarpBoolString, true); // SpaceshipGlobal.as
+			}
+		}
+		if (thisBlob.get_bool(isWarpBoolString))
+		{
+			moveVars.turnSpeedFactor *= 7.0f; //boosts turn speed for warp
+			moveVars.maxSpeedFactor *= 2.0f; // doubles max speed
+		}
+	}
+	else
+	{
+		engineStatus = 0.5f * warpLoadProgress;
+		dragStatus = 8.0f * warpLoadProgress;
+
+		if (is_client)
+		{
+			float surgeBuildup = thisBlob.get_f32("surge_buildup");
+			surgeBuildup += 1.0f + (25.0f * warpLoadProgress);
+			if (surgeBuildup >= 100.0f)
+			{
+				makeWarpElectricSurge( thisPos, thisVel, blobAngle-90, 0.3f + warpLoadProgress); // CommonFX.as
+				surgeBuildup = 0.0f;
+			}
+			thisBlob.set_f32("surge_buildup", surgeBuildup);
+		}
+	}
+
+	// drain charge thrice a second while warping
+	if (isServer() && customTime % 10 == 0)
+	{
+		removeCharge(thisBlob, thisBlob.get_bool(isWarpBoolString) ? upkeepCost : upkeepCost/2, true);
+	}
+
+	moveVars.engineFactor *= engineStatus; //cripples thruster efficacy
+	moveVars.dragFactor *= dragStatus; // increases shipdrag
+	
+	if (m3Time < warpLoadTime) m3Time++; // caps at warpLoadTime ticks
+	thisBlob.set_u32( "m3_heldTime", m3Time );
 }
