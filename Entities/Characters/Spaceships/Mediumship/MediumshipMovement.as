@@ -28,44 +28,47 @@ void onInit(CMovement@ this)
 	thisBlob.set_bool("movementFirstTick", true);
 	thisBlob.set_bool(isWarpBoolString, false); // SpaceshipGlobal.as
 
-	CAttachment@ attachments = thisBlob.getAttachments();
-	if (attachments == null)
-	{ return; }
-
-	Vec2f ownerPos = thisBlob.getPosition();
-
-	AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("ENGINESLOT1");
-	AttachmentPoint@ slot2 = attachments.getAttachmentPointByName("ENGINESLOT2");
-
-	if (slot1 != null)
+	if (isServer())
 	{
-		Vec2f slotOffset = slot1.offset;
-		CBlob@ turret = slot1.getOccupied();
-		if (turret == null)
+		CAttachment@ attachments = thisBlob.getAttachments();
+		if (attachments == null)
+		{ return; }
+
+		Vec2f ownerPos = thisBlob.getPosition();
+
+		AttachmentPoint@ slot1 = attachments.getAttachmentPointByName("ENGINESLOT1");
+		AttachmentPoint@ slot2 = attachments.getAttachmentPointByName("ENGINESLOT2");
+
+		if (slot1 != null)
 		{
-			CBlob@ blob = server_CreateBlob( "engine_blob" , -1, ownerPos + slotOffset);
-			if (blob !is null)
+			Vec2f slotOffset = slot1.offset;
+			CBlob@ turret = slot1.getOccupied();
+			if (turret == null)
 			{
-				blob.IgnoreCollisionWhileOverlapped( thisBlob );
-				thisBlob.server_AttachTo(blob, slot1);
-				blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
-				blob.set_u8("soundemit_num", 1);
+				CBlob@ blob = server_CreateBlob( "engine_blob" , -1, ownerPos + slotOffset);
+				if (blob !is null)
+				{
+					blob.IgnoreCollisionWhileOverlapped( thisBlob );
+					thisBlob.server_AttachTo(blob, slot1);
+					blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
+					blob.set_u8("soundemit_num", 1);
+				}
 			}
 		}
-	}
-	if (slot2 != null)
-	{
-		Vec2f slotOffset = slot2.offset;
-		CBlob@ turret = slot2.getOccupied();
-		if (turret == null)
+		if (slot2 != null)
 		{
-			CBlob@ blob = server_CreateBlob( "engine_blob" , -1, ownerPos + slotOffset);
-			if (blob !is null)
+			Vec2f slotOffset = slot2.offset;
+			CBlob@ turret = slot2.getOccupied();
+			if (turret == null)
 			{
-				blob.IgnoreCollisionWhileOverlapped( thisBlob );
-				thisBlob.server_AttachTo(blob, slot2);
-				blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
-				blob.set_u8("soundemit_num", 2);
+				CBlob@ blob = server_CreateBlob( "engine_blob" , -1, ownerPos + slotOffset);
+				if (blob !is null)
+				{
+					blob.IgnoreCollisionWhileOverlapped( thisBlob );
+					thisBlob.server_AttachTo(blob, slot2);
+					blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
+					blob.set_u8("soundemit_num", 2);
+				}
 			}
 		}
 	}
