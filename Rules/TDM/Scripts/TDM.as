@@ -139,7 +139,7 @@ shared class TDMSpawns : RespawnSystem
 			{
 				CBlob @blob = player.getBlob();
 				blob.server_SetPlayer(null);
-				blob.server_Die();
+				if (blob.hasTag("small_ship")) blob.server_Die();
 			}
 
 			CBlob@ playerBlob = SpawnPlayerIntoWorld(getSpawnLocation(p_info), p_info);

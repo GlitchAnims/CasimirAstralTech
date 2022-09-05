@@ -67,23 +67,26 @@ void onTick( CSprite@ this )
 
 void onTick( CBlob@ this )
 {
-	if (!this.get_bool("active"))
-	{ return; }
-
+	const bool isActive = this.get_bool("active");
+	
 	u32 gameTime = getGameTime();
 	u8 spriteTimer = this.get_u8("spriteTimer");
-	if (spriteTimer < 10) //thrice a second
+
+	if (isActive)
 	{
-		this.set_u8("spriteTimer", spriteTimer+1);
-	}
-	else
-	{
-		u16 frame = this.get_u16("frame");
-		if (frame < 2)
+		if (spriteTimer < 10) //thrice a second
 		{
-			this.set_u16("frame", frame+1);
+			this.set_u8("spriteTimer", spriteTimer+1);
 		}
-		this.set_u8("spriteTimer", 0);
+		else
+		{
+			u16 frame = this.get_u16("frame");
+			if (frame < 2)
+			{
+				this.set_u16("frame", frame+1);
+			}
+			this.set_u8("spriteTimer", 0);
+		}
 	}
 
 	if (!isServer())
@@ -96,6 +99,9 @@ void onTick( CBlob@ this )
 		this.server_Die();
 		return;
 	}
+
+	if (!isActive)
+	{ return; }
 
 	ChargeInfo@ chargeInfo;
 	if (!ownerBlob.get( "chargeInfo", @chargeInfo )) 
@@ -155,7 +161,7 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 
 void onDie( CBlob@ this )
 {
-	if (!isClient())
+	if (!isClient() || !this.get_bool("active"))
 	{ return; }
 
 	Vec2f thisPos = this.getPosition();
