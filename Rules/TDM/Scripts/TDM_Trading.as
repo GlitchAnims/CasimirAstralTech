@@ -182,6 +182,7 @@ void KillTradingPosts()
 
 void onPlayerDie(CRules@ this, CPlayer@ victim, CPlayer@ killer, u8 customData)
 {
+	/*
 	if (victim !is null)
 	{
 		if (killer !is null)
@@ -194,16 +195,18 @@ void onPlayerDie(CRules@ this, CPlayer@ victim, CPlayer@ killer, u8 customData)
 
 		victim.server_setCoins(victim.getCoins() - coinsOnDeathLose);
 	}
+	*/
 }
 
 // give coins for damage
 
 f32 onPlayerTakeDamage(CRules@ this, CPlayer@ victim, CPlayer@ attacker, f32 DamageScale)
 {
+	/*
 	if (attacker !is null && attacker !is victim)
 	{
 		attacker.server_setCoins(attacker.getCoins() + DamageScale * coinsOnDamageAdd / this.attackdamage_modifier);
 	}
-
+	*/
 	return DamageScale;
 }
