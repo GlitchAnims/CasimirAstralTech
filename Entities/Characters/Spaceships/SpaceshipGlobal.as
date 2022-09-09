@@ -18,6 +18,7 @@ const string isWarpBoolString = "is_warp";
 
 const string activeBoolString = "active";
 const string activeTimeString = "active_time";
+const string enableButtonBoolString = "active_button";
 
 string getBulletName(u8 shotType = 0)
 {

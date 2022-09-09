@@ -74,7 +74,12 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, podSlot);
 				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_bool(enableButtonBoolString, false);
 			}
+		}
+		else
+		{
+			turret.set_bool(activeBoolString, !ownerBlob.get_bool(isCarriedBoolString));
 		}
 	}
 }

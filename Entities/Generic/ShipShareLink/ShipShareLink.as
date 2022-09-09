@@ -15,6 +15,7 @@ void onInit( CBlob@ this )
 	this.set_bool(activeBoolString, false);
 	this.set_u32(activeTimeString, 0);
 	this.set_u32("ownerBlobID", 0);
+	this.set_bool(enableButtonBoolString, true);
 
 	AddIconToken("$link_toggle$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 11);
 
@@ -153,6 +154,8 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 		this.server_Die();
 		return;
 	}
+
+	if (!this.get_bool(enableButtonBoolString)) return;
 
 	bool isLinkActive = this.get_bool(activeBoolString);
 	if ((caller is ownerBlob) || (ownerBlob.hasTag("npc") && caller.getTeamNum() == ownerBlob.getTeamNum()))
