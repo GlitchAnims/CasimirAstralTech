@@ -21,7 +21,7 @@ void onInit(CBlob@ this)
 		ChargeInfo chargeInfo;
 		chargeInfo.charge 			= 1.0f;
 		chargeInfo.chargeMax 		= 3000;
-		chargeInfo.chargeRegen 		= 10;
+		chargeInfo.chargeRegen 		= 20;
 		chargeInfo.chargeRate 		= 30;
 		this.set("chargeInfo", @chargeInfo);
 	}
