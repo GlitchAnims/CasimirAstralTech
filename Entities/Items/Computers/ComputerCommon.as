@@ -92,9 +92,9 @@ void makeBlobTriangle( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f s
 	
 }
 
-void makeTargetSquare( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f scale = Vec2f(1.0f, 1.0f), f32 cornerSeparation = 1.0f, f32 particleStepDistance = 2.0f, SColor color = greenConsoleColor)
+void makeTargetSquare( Vec2f centerPos = Vec2f_zero, f32 drawAngle = 0.0f, Vec2f scale = Vec2f(1.0f, 1.0f), f32 cornerSeparation = 1.0f, f32 particleStepDistance = 2.0f, SColor color = greenConsoleColor)
 {
-	if (blobPos == Vec2f_zero)
+	if (centerPos == Vec2f_zero)
 	{ return; }
 
 	Vec2f[] vertexPos =
@@ -108,7 +108,7 @@ void makeTargetSquare( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f s
 	{
 		vertexPos[i].x *= scale.x;
 		vertexPos[i].y *= scale.y;
-		//vertexPos[i] += blobPos;
+		//vertexPos[i] += centerPos;
 	}
 
 	Vec2f separationVec = Vec2f(cornerSeparation, cornerSeparation);
@@ -122,10 +122,31 @@ void makeTargetSquare( Vec2f blobPos = Vec2f_zero, f32 blobAngle = 0.0f, Vec2f s
 			pos1 += separationVec;
 			pos2 += separationVec;
 
-			pos1.RotateByDegrees((90*corner) + blobAngle);
-			pos2.RotateByDegrees((90*corner) + blobAngle);
+			switch(corner+1)
+			{
+				case 2:
+				pos1.x *= -1.0f;
+				pos2.x *= -1.0f;
+				break;
 
-			drawParticleLine( pos1 + blobPos, pos2 + blobPos, Vec2f_zero, color, 0, particleStepDistance);
+				case 3:
+				pos1.y *= -1.0f;
+				pos2.y *= -1.0f;
+				break;
+
+				case 4:
+				pos1 *= -1.0f;
+				pos2 *= -1.0f;
+				break;
+			}
+
+			pos1.RotateByDegrees(drawAngle);
+			pos2.RotateByDegrees(drawAngle);
+
+			//pos1.RotateByDegrees((90*corner) + drawAngle);
+			//pos2.RotateByDegrees((90*corner) + drawAngle);
+
+			drawParticleLine( pos1 + centerPos, pos2 + centerPos, Vec2f_zero, color, 0, particleStepDistance);
 		}
 	}
 }

@@ -206,7 +206,7 @@ void drawParticleLine( Vec2f pos1 = Vec2f_zero, Vec2f pos2 = Vec2f_zero, Vec2f p
 			p.collides = false;
 			p.gravity = Vec2f_zero;
 			p.bounce = 0;
-			p.Z = 7;
+			p.Z = 1000;
 			p.timeout = timeout;
 			p.setRenderStyle(RenderStyle::light);
 		}
