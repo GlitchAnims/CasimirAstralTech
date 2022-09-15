@@ -288,8 +288,8 @@ void runTargeting( CBlob@ ownerBlob, u32 gameTime, u32 ticksASecond, u16 thisNet
 	{
 		case OrdinanceType::aa: //medium cone of target acquisition
 		{
-			const f32 arcDegrees = 90.0f;
-			const f32 range = 400.0f;
+			const f32 arcDegrees = 70.0f;
+			const f32 range = 600.0f;
 
 			CBlob@[] blobsInRadius;
 			map.getBlobsInRadius(ownerPos, range, @blobsInRadius); //possible enemies in radius

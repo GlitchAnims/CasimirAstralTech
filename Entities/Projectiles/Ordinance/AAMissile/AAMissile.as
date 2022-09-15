@@ -9,7 +9,7 @@
 
 Random _aa_missile_r(12231);
 
-const f32 damage = 0.5f;
+const f32 damage = 1.0f;
 const f32 searchRadius = 128.0f;
 const f32 radius = 24.0f;
 
