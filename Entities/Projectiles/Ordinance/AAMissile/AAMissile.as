@@ -133,11 +133,9 @@ void onTick(CBlob@ this)
 	}
 
 	//homing logic
-	f32 thisReducedSpeed = missile.max_speed*0.5f; //arbitrary travel speed. TODO actual homing logic
-
 	Vec2f targetPos = targetBlob.getPosition();
 	Vec2f targetVel = targetBlob.getVelocity();
-	Vec2f bVel = targetVel - (thisVel); //compensates for missile speed
+	Vec2f bVel = thisVel - targetVel; //compensates for missile speed
 
 	Vec2f targetVec = targetPos - thisPos;
 	f32 targetDist = targetVec.getLength(); //distance to target
@@ -178,33 +176,24 @@ void onTick(CBlob@ this)
 	}
 	float thisAngle = this.getAngleDegrees();
 	
-	Vec2f targetLastVel = this.get_Vec2f(targetLastVelString);
-	Vec2f targetAccel = targetLastVel - targetVel;
-	this.set_Vec2f(targetLastVelString, targetVel);
+	Vec2f lastBVel = this.get_Vec2f(lastAbsoluteVelString);
+	Vec2f bAccel = lastBVel - bVel;
+	this.set_Vec2f(lastAbsoluteVelString, bVel);
 
 	float engineForce = missile.main_engine_force;
 	Vec2f thrustNorm = Vec2f(1.0f, 0).RotateByDegrees(thisAngle);
 	Vec2f thrustVec = thrustNorm * engineForce;
+
+	float bVelAngle = (bVel + bAccel).getAngleDegrees();
+	float targetVecAngle = targetVec.getAngleDegrees();
+
+	float directionDiff = targetVecAngle - bVelAngle;
+	directionDiff += directionDiff > 180 ? -360 : directionDiff < -180 ? 360 : 0;
+	bool movingAway = Maths::Abs(directionDiff) > 90.0f;
+
+	float turnAngle = movingAway ? bVelAngle + 180.0f : targetVecAngle + directionDiff;
 	
-	Vec2f extendedVel = (thisVel*thisVel.getLength()*targetDist);
-	Vec2f thisFinalVel = (thrustVec*thrustVec.getLength()*targetDist) + extendedVel;
-
-	if (thisFinalVel.x < 0) thisFinalVel.x = Maths::Sqrt(Maths::Abs(thisFinalVel.x)) * -1.0f;
-	else thisFinalVel.x = Maths::Sqrt(thisFinalVel.x);
-
-	if (thisFinalVel.y < 0) thisFinalVel.y = Maths::Sqrt(Maths::Abs(thisFinalVel.y)) * -1.0f;
-	else thisFinalVel.y = Maths::Sqrt(thisFinalVel.y);
-
-	Vec2f thisAverageVel = (thisFinalVel + thisVel) / 2;
-
-	//float travelTicks = targetDist / thisAverageVel.getLength();
-	Vec2f futureTargetVel = (targetAccel*targetAccel.getLength()*targetDist) + targetVel;
-	Vec2f futureTargetDisplacement = (futureTargetVel - thisAverageVel) * 1.9f;
-	Vec2f futureTargetPos = targetPos + futureTargetDisplacement; //matches future target pos with travel time
-
-	float turnAngle = (futureTargetPos - thisPos).getAngleDegrees();
 	float angle = -turnAngle + 360.0f;
-	
 	float angleDiff = angle - thisAngle;
 	angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
 
@@ -236,13 +225,12 @@ void onTick(CBlob@ this)
 	CPlayer@ ownerPlayer = this.getDamageOwnerPlayer();
 	if (ownerPlayer != null && ownerPlayer.isMyPlayer()) //player who launched missiles only
 	{
-		makeBlobTriangle(targetPos, targetAngle, Vec2f(4.0f, 3.0f)); //enemy triangle
-		makeTargetSquare(futureTargetPos, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f); //target acquired square
+		makeTargetSquare(targetPos-thisVel, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f); //target acquired square
 	}
 	CPlayer@ targetPlayer = targetBlob.getPlayer();
 	if (targetPlayer != null && targetPlayer.isMyPlayer()) //targeted player only (if any)
 	{
-		makeTargetSquare(futureTargetPos, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f, redConsoleColor); //target acquired square
+		makeTargetSquare(targetPos-thisVel, targetSquareAngle, Vec2f(2.5f, 2.5f), 2.0f, 1.0f, redConsoleColor); //target acquired square
 	}
 }
 

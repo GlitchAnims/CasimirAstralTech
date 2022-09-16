@@ -8,18 +8,18 @@ const string hasTargetTicksString = "has_target_ticks";
 const string has_ordinance_update_ID = "has_ordinance_update";
 const string homing_target_update_ID = "homing_target_update";
 
-const string targetLastVelString = "target_last_vel";
+const string lastAbsoluteVelString = "last_absoulte_vel";
 
 const string quickHomingTag = "quick_homing";
 
 namespace AAMissileParams
 {
 	// movement general
-	const ::f32 main_engine_force = 0.4f;
+	const ::f32 main_engine_force = 0.35f;
 	const ::f32 secondary_engine_force = 0.18f;
 	const ::f32 rcs_force = 0.15f;
-	const ::f32 ship_turn_speed = 15.0f; // degrees per tick, 0 = instant (30 ticks a second)
-	const ::f32 max_speed = 18.0f; // 0 = infinite speed
+	const ::f32 ship_turn_speed = 14.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 max_speed = 16.0f; // 0 = infinite speed
 
 	//targeting
 	const ::u32 lose_target_ticks = 90; //ticks until targetblob is null again
