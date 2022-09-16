@@ -35,9 +35,6 @@ void onInit( CBlob@ this )
 
 void onTick( CBlob@ this )
 {
-	// vvvvvvvvvvvvvv SERVER-SIDE ONLY vvvvvvvvvvvvvvvvvvv
-	if (!isServer()) return;
-
 	u32 gameTime = getGameTime();
 
 	if ((gameTime + this.getNetworkID()) % 90 == 0 || this.get_bool(quickSlotCheckBoolString)) //once every 3 seconds, server only
@@ -67,6 +64,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 		CBlob@ turret = podSlot.getOccupied();
 		if (turret == null)
 		{
+			if (!isServer()) return; // server spawn blob
 			CBlob@ blob = server_CreateBlob( "ship_sharelink" , teamNum, ownerPos + slotOffset);
 			if (blob !is null)
 			{
