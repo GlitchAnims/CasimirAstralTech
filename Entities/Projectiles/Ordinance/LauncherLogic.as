@@ -197,7 +197,7 @@ void onTick( CBlob@ this )
 
 								Vec2f launchpos = Vec2f(0, 8.0f*leftMult);
 								f32 launchAngle = small ? blobAngle : blobAngle+90.0f;
-								Vec2f launchVec = Vec2f(0, 1.0f*leftMult).RotateByDegrees(launchAngle);
+								Vec2f launchVec = Vec2f(1.5f, 0).RotateByDegrees(launchAngle);
 								launchInfo.launch_pos 	= launchpos+thisPos;
 								launchInfo.launch_vec 	= launchVec+thisVel;
 

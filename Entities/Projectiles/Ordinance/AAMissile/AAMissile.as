@@ -19,7 +19,7 @@ void onInit(CBlob@ this)
 	missile.main_engine_force 			= AAMissileParams::main_engine_force;
 //	missile.secondary_engine_force 		= AAMissileParams::secondary_engine_force;
 //	missile.rcs_force 					= AAMissileParams::rcs_force;
-//	missile.ship_turn_speed 			= AAMissileParams::ship_turn_speed;
+	missile.ship_turn_speed 			= AAMissileParams::ship_turn_speed;
 	missile.max_speed 					= AAMissileParams::max_speed;
 	missile.lose_target_ticks 			= AAMissileParams::lose_target_ticks;
 	this.set("missileInfo", @missile);
@@ -48,11 +48,13 @@ void onTick(CBlob@ this)
 	const bool is_client = isClient();
 	const bool is_server = isServer();
 
-	if (this.get_bool(firstTickString))
+	const bool firstTick = this.get_bool(firstTickString) || (is_client && this.get_bool(clientFirstTickString));
+	if (firstTick)
 	{
 		if (is_client)
 		{
 			doMuzzleFlash(thisPos, thisVel);
+			this.set_bool(clientFirstTickString, false);
 		}
 		if (is_server) //bullet range moderation
 		{
@@ -134,7 +136,8 @@ void onTick(CBlob@ this)
 	f32 thisReducedSpeed = missile.max_speed*0.5f; //arbitrary travel speed. TODO actual homing logic
 
 	Vec2f targetPos = targetBlob.getPosition();
-	Vec2f bVel = targetBlob.getVelocity() - (thisVel); //compensates for missile speed
+	Vec2f targetVel = targetBlob.getVelocity();
+	Vec2f bVel = targetVel - (thisVel); //compensates for missile speed
 
 	Vec2f targetVec = targetPos - thisPos;
 	f32 targetDist = targetVec.getLength(); //distance to target
@@ -173,22 +176,43 @@ void onTick(CBlob@ this)
 			return;
 		}
 	}
+	float thisAngle = this.getAngleDegrees();
 	
-	f32 travelTicks = targetDist / thisReducedSpeed; //theoretical ticks required to get to the target (again, TODO)
-	Vec2f futureTargetPos = targetPos + (bVel*travelTicks); //matches future target pos with travel time
+	Vec2f targetLastVel = this.get_Vec2f(targetLastVelString);
+	Vec2f targetAccel = targetLastVel - targetVel;
+	this.set_Vec2f(targetLastVelString, targetVel);
+
+	float engineForce = missile.main_engine_force;
+	Vec2f thrustNorm = Vec2f(1.0f, 0).RotateByDegrees(thisAngle);
+	Vec2f thrustVec = thrustNorm * engineForce;
 	
-	//this block of code re-does the calculation to be more exact
-	targetVec = futureTargetPos - thisPos;
-	targetDist = targetVec.getLength();
-	travelTicks = targetDist / thisReducedSpeed;
-	futureTargetPos = targetPos + (bVel*travelTicks);
+	Vec2f extendedVel = (thisVel*thisVel.getLength()*targetDist);
+	Vec2f thisFinalVel = (thrustVec*thrustVec.getLength()*targetDist) + extendedVel;
 
-	Vec2f thrustVec = futureTargetPos - thisPos;
-	Vec2f thrustNorm = thrustVec;
-	thrustNorm.Normalize();
-	f32 thrustAngle = thrustNorm.getAngleDegrees();
+	if (thisFinalVel.x < 0) thisFinalVel.x = Maths::Sqrt(Maths::Abs(thisFinalVel.x)) * -1.0f;
+	else thisFinalVel.x = Maths::Sqrt(thisFinalVel.x);
 
-	Vec2f newVel = thisVel + (thrustNorm * missile.main_engine_force);
+	if (thisFinalVel.y < 0) thisFinalVel.y = Maths::Sqrt(Maths::Abs(thisFinalVel.y)) * -1.0f;
+	else thisFinalVel.y = Maths::Sqrt(thisFinalVel.y);
+
+	Vec2f thisAverageVel = (thisFinalVel + thisVel) / 2;
+
+	//float travelTicks = targetDist / thisAverageVel.getLength();
+	Vec2f futureTargetVel = (targetAccel*targetAccel.getLength()*targetDist) + targetVel;
+	Vec2f futureTargetDisplacement = (futureTargetVel - thisAverageVel) * 1.9f;
+	Vec2f futureTargetPos = targetPos + futureTargetDisplacement; //matches future target pos with travel time
+
+	float turnAngle = (futureTargetPos - thisPos).getAngleDegrees();
+	float angle = -turnAngle + 360.0f;
+	
+	float angleDiff = angle - thisAngle;
+	angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
+
+	float turnSpeed = missile.ship_turn_speed;
+	this.setAngleDegrees(thisAngle + Maths::Clamp(angleDiff, -turnSpeed, turnSpeed));
+	
+	bool hasThrust = Maths::Abs(angleDiff) < 45.0f;
+	Vec2f newVel = thisVel + (hasThrust ? thrustVec : Vec2f_zero);
 
 	f32 maxSpeed = missile.max_speed;
 	if (maxSpeed != 0 && newVel.getLength() > maxSpeed) //max speed logic - 0 means no cap
@@ -198,8 +222,7 @@ void onTick(CBlob@ this)
 	}
 
 	this.setVelocity(newVel);
-	this.setAngleDegrees(-thrustAngle);
-	missile.forward_thrust = true;
+	missile.forward_thrust = hasThrust;
 
 	if (!is_client)
 	{ return; }
