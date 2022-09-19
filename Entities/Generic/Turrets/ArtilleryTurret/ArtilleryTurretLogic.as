@@ -20,26 +20,7 @@ void onInit( CBlob@ this )
 	turret.auto_target_ID		= 0;
 	this.set("shipInfo", @turret);
 	
-	this.set_u32("ownerBlobID", 0);
-
-	this.set_u32( "space_heldTime", 0 );
-	this.set_u32( "space_shotTime", 0 );
-
-	this.set_bool( "automatic", false);
-	
-	this.Tag("npc");
-
-	//centered on items
-	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
-
-	this.getShape().SetRotationsAllowed(false); //no spinning
-	this.getShape().SetGravityScale(0);
-	this.getShape().getConsts().mapCollisions = false;
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
-	
-	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
-	this.getCurrentScript().removeIfTag = "dead";
+	turretSetup(this);
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -113,7 +94,7 @@ void onTick( CBlob@ this )
 
 				float bSpeed = b.getVelocity().getLength();
 				
-				if (!b.hasTag("hull") || b.hasTag(smallTag) || bSpeed > 1.5f)
+				if (!b.hasTag("hull") || b.hasTag(smallTag) || bSpeed > 2.5f)
 				{ continue; }
 
 				if (map.rayCastSolidNoBlobs(thisPos, b.getPosition()))
@@ -132,7 +113,7 @@ void onTick( CBlob@ this )
 
 			Vec2f targetVec = bPos - thisPos;
 			f32 targetDist = targetVec.getLength();
-			if (targetDist > 800 || bVel.getLength() > 1.5f) //too far away, lose target
+			if (targetDist > 800 || bVel.getLength() > 2.5f) //too far away, lose target
 			{
 				turret.auto_target_ID = 0;
 			}

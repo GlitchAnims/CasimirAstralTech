@@ -20,46 +20,7 @@ void onInit( CBlob@ this )
 	turret.auto_target_ID		= 0;
 	this.set("shipInfo", @turret);
 	
-	/*ManaInfo manaInfo;
-	manaInfo.maxMana = FrigateParams::MAX_MANA;
-	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
-	this.set("manaInfo", @manaInfo);*/
-
-	this.set_u32("ownerBlobID", 0);
-
-	this.set_u32( "space_heldTime", 0 );
-	this.set_u32( "m2_heldTime", 0 );
-
-	this.set_u32( "space_shotTime", 0 );
-	this.set_u32( "m2_shotTime", 0 );
-
-	this.set_bool( "automatic", false);
-	
-	this.Tag("npc");
-	//this.Tag("hull");
-	this.Tag("ignore crouch");
-
-	//centered on arrows
-	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
-	//centered on items
-	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
-
-	
-	this.getShape().SetRotationsAllowed(false); //no spinning
-	this.getShape().SetGravityScale(0);
-	this.getShape().getConsts().mapCollisions = false;
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
-	
-	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
-	this.getCurrentScript().removeIfTag = "dead";
-	
-
-	/*if(isClient())
-	{
-		this.getSprite().SetEmitSound("engine_loop.ogg");
-		this.getSprite().SetEmitSoundPaused(true);
-	}*/
+	turretSetup(this);
 }
 
 void onSetPlayer( CBlob@ this, CPlayer@ player )
@@ -201,13 +162,10 @@ void onTick( CBlob@ this )
 	s32 spaceChargeCost = turret.firing_cost;
 
 	bool pressed_space = ownerBlob.isKeyPressed(key_action3) || forceActivateFire;
-	bool pressed_m2 = this.isKeyPressed(key_action2);
 	
 	u32 spaceTime = this.get_u32( "space_heldTime");
-	u32 m2Time = this.get_u32( "m2_heldTime");
 
 	u32 spaceShotTicks = this.get_u32( "space_shotTime" );
-	u32 m2ShotTicks = this.get_u32( "m2_shotTime" );
 
 	if (pressed_space && spaceTime >= turret.firing_delay && ownerCharge >= spaceChargeCost)
 	{
@@ -245,21 +203,13 @@ void onTick( CBlob@ this )
 
 	// heresy
 	if (pressed_space) spaceTime++; else spaceTime = 0;
-	if (pressed_m2) m2Time++; else m2Time = 0;
 
 	this.set_u32( "space_heldTime", spaceTime );
-	this.set_u32( "m2_heldTime", m2Time );
 
 	if (spaceShotTicks < 1000)
 	{
 		spaceShotTicks++;
 		this.set_u32( "space_shotTime", spaceShotTicks );
-	}
-
-	if (m2ShotTicks < 1000)
-	{
-		//m2ShotTicks++;
-		this.set_u32( "m2_shotTime", m2ShotTicks );
 	}
 }
 
@@ -283,5 +233,5 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 void onDie( CBlob@ this )
 {
-	//empty
+	turretDeath(this);
 }

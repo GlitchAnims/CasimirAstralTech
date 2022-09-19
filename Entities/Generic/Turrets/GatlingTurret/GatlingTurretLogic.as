@@ -20,38 +20,8 @@ void onInit( CBlob@ this )
 	turret.auto_target_ID		= 0;
 	this.set("shipInfo", @turret);
 	
-	/*ManaInfo manaInfo;
-	manaInfo.maxMana = FrigateParams::MAX_MANA;
-	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
-	this.set("manaInfo", @manaInfo);*/
-
-	this.set_u32("ownerBlobID", 0);
-
-	this.set_u32( "space_heldTime", 0 );
-	this.set_u32( "space_shotTime", 0 );
-
-	this.set_bool( "automatic", false);
+	turretSetup(this);
 	
-	this.Tag("npc");
-	//this.Tag("hull");
-	this.Tag("ignore crouch");
-
-	//centered on arrows
-	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
-	//centered on items
-	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
-
-	
-	this.getShape().SetRotationsAllowed(false); //no spinning
-	this.getShape().SetGravityScale(0);
-	this.getShape().getConsts().mapCollisions = false;
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
-	
-	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
-	this.getCurrentScript().removeIfTag = "dead";
-	
-
 	if(isClient())
 	{
 		CSprite@ thisSprite = this.getSprite();
@@ -297,5 +267,5 @@ void onHitBlob( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob
 
 void onDie( CBlob@ this )
 {
-	//empty
+	turretDeath(this);
 }

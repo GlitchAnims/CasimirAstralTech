@@ -113,3 +113,32 @@ void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, V
 		blob.set_f32(shotLifetimeString, lifeTime);
 	}
 }
+
+void turretSetup( CBlob@ this )
+{
+	this.set_u32("ownerBlobID", 0);
+
+	this.set_u32( "space_heldTime", 0 );
+	this.set_u32( "space_shotTime", 0 );
+
+	this.set_bool( "automatic", false);
+	
+	this.Tag("npc");
+
+	CShape@ shape = this.getShape();
+	if (shape != null)
+	{
+		this.getShape().SetRotationsAllowed(false); //no spinning
+		this.getShape().SetGravityScale(0);
+		this.getShape().getConsts().mapCollisions = false;
+
+		this.getShape().getConsts().net_threshold_multiplier = 1.0f;
+	}
+
+	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
+}
+
+void turretDeath( CBlob@ this )
+{
+	// empty
+}
