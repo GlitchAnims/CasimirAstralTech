@@ -82,11 +82,10 @@ void makeEnergyLink(Vec2f fromPos = Vec2f_zero, Vec2f toPos = Vec2f_zero, int te
 
 	SColor color = getTeamColor(teamNum);
 
-	for(int i = 0; i < steps; i++) //particle loop
+	for(int i = 0; i < steps; i += 2) //particle loop
 	{
-		f32 chance = _sprk_r2.NextFloat(); //chance to not spawn particle
-		if (chance > 0.3f)
-		{ continue; }
+		f32 chance = 0.3f; //chance to spawn particle
+		if (_sprk_r2.NextFloat() > chance) continue;
 
 		f32 waveTravel = i - gameTime; //forward and backwards wave travel
 		f32 sinInput = waveTravel * 0.2f;
