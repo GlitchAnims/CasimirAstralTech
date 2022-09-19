@@ -8,7 +8,7 @@ const string hasTargetTicksString = "has_target_ticks";
 const string has_ordinance_update_ID = "has_ordinance_update";
 const string homing_target_update_ID = "homing_target_update";
 
-const string lastAbsoluteVelString = "last_absoulte_vel";
+const string lastRelativeVelString = "last_absoulte_vel";
 
 const string quickHomingTag = "quick_homing";
 

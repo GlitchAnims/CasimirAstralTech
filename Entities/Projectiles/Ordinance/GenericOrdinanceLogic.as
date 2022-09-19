@@ -21,7 +21,7 @@ void onInit(CBlob@ this)
 	this.set_bool(clientFirstTickString, true); //SpaceshipGlobal.as
 	this.set_f32(shotLifetimeString, 1.0f); //SpaceshipGlobal.as
 
-	this.set_Vec2f(lastAbsoluteVelString, Vec2f_zero);
+	this.set_Vec2f(lastRelativeVelString, Vec2f_zero);
 
 	this.set_u32(hasTargetTicksString, 0);
 	this.set_u16(targetNetIDString, 0);

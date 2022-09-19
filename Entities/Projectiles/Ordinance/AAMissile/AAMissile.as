@@ -176,9 +176,9 @@ void onTick(CBlob@ this)
 	}
 	float thisAngle = this.getAngleDegrees();
 	
-	Vec2f lastBVel = this.get_Vec2f(lastAbsoluteVelString);
+	Vec2f lastBVel = this.get_Vec2f(lastRelativeVelString);
 	Vec2f bAccel = lastBVel - bVel;
-	this.set_Vec2f(lastAbsoluteVelString, bVel);
+	this.set_Vec2f(lastRelativeVelString, bVel);
 
 	float engineForce = missile.main_engine_force;
 	Vec2f thrustNorm = Vec2f(1.0f, 0).RotateByDegrees(thisAngle);
