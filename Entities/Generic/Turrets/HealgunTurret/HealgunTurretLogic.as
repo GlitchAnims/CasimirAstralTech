@@ -78,7 +78,7 @@ void onTick( CBlob@ this )
 		
 		if ((gameTime + this.getNetworkID()) % 60 == 0 && turret.auto_target_ID == 0) //once every 2 seconds
 		{
-			turret.auto_target_ID = 0;
+			//turret.auto_target_ID = 0;
 
 			CMap@ map = getMap(); //standard map check
 			if (map is null)
@@ -133,6 +133,10 @@ void onTick( CBlob@ this )
 
 				forceActivateFire = Maths::Abs(angleDiff) < 5;
 			}
+		}
+		else // if null, means it died. Reset.
+		{
+			turret.auto_target_ID = 0;
 		}
 	}
 
