@@ -68,6 +68,7 @@ void onTick(CBlob@ this)
 	Vec2f thisVel = this.getVelocity();
 	int teamNum = this.getTeamNum();
 	f32 blobAngle = this.getAngleDegrees();
+	if (this.hasTag(mediumTag)) blobAngle+=270.0f;
 	blobAngle = Maths::Abs(blobAngle) % 360;
 	Vec2f aimPos = this.getAimPos();
 
