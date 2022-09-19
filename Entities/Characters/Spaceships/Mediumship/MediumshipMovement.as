@@ -405,7 +405,7 @@ void onTick(CMovement@ this)
 void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVel, float blobAngle, MediumshipInfo@ ship, SpaceshipVars@ moveVars, bool is_client )
 {
 	const u8 activationCost = 50;
-	const u8 upkeepCost = 15;
+	const u8 upkeepCost = 10;
 	const u32 warpLoadTime = 200;
 
 	u32 m3Time = thisBlob.get_u32( "m3_heldTime" );
