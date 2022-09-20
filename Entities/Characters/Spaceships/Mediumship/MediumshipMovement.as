@@ -5,6 +5,7 @@
 #include "SpaceshipVars.as"
 #include "MakeDustParticle.as";
 #include "KnockedCommon.as";
+#include "HoverMessage.as"
 #include "CommonFX.as"
 
 void onInit(CMovement@ this)
@@ -405,7 +406,7 @@ void onTick(CMovement@ this)
 void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVel, float blobAngle, MediumshipInfo@ ship, SpaceshipVars@ moveVars, bool is_client )
 {
 	const u8 activationCost = 50;
-	const u8 upkeepCost = 10;
+	const u8 upkeepCost = 15;
 	const u32 warpLoadTime = 200;
 
 	u32 m3Time = thisBlob.get_u32( "m3_heldTime" );
@@ -414,8 +415,12 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	bool onCooldown = m3Cooldown > 0;
 	if (onCooldown) thisBlob.set_u32( "m3_cooldown", m3Cooldown-1 );
 
-	if (!isWheelButton || thisBlob.get_s32(absoluteCharge_string) < upkeepCost)
+	const bool canPayUpkeep = thisBlob.get_s32(absoluteCharge_string) >= upkeepCost;
+	
+	if (!isWheelButton || !canPayUpkeep || onCooldown) // cannot charge warp drive if on cooldown
 	{
+		if (!canPayUpkeep) showMessage(thisBlob, "Charge depleted!");
+
 		if (thisBlob.get_bool(isWarpBoolString))
 		{
 			if (is_client) makeWarpShockwave( thisPos ); // CommonFX.as
@@ -431,7 +436,13 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 		return;
 	}
 
-	if (onCooldown) return; // cannot charge warp drive if on cooldown
+	const bool canPayActivation = thisBlob.get_s32(absoluteCharge_string) >= (activationCost+upkeepCost); // minimum requirement
+	if (!onCooldown && !canPayActivation && !thisBlob.get_bool(isWarpBoolString))
+	{
+		showMessage(thisBlob, "Not enough charge for activation");
+		thisBlob.set_u32( "m3_cooldown", 40 );
+		return; 
+	}
 
 	u32 customTime = getGameTime() + thisBlob.getNetworkID();
 
@@ -439,11 +450,11 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	float dragStatus = 1.0f;
 
 	float warpLoadProgress = float(m3Time) / float(warpLoadTime);
-	if (m3Time >= warpLoadTime)
+	if (m3Time >= warpLoadTime) // if warp progress is 100%
 	{
 		engineStatus = 0.1f;
 		dragStatus = 8.0f;
-		if (thisBlob.get_s32(absoluteCharge_string) >= (activationCost+upkeepCost)) // minimum requirement
+		if (canPayActivation)
 		{
 			if (!thisBlob.get_bool(isWarpBoolString))
 			{
@@ -452,6 +463,7 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 				thisBlob.set_bool(isWarpBoolString, true); // SpaceshipGlobal.as
 			}
 		}
+
 		if (thisBlob.get_bool(isWarpBoolString))
 		{
 			moveVars.turnSpeedFactor *= 7.0f; //boosts turn speed for warp
@@ -487,4 +499,18 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	
 	if (m3Time < warpLoadTime) m3Time++; // caps at warpLoadTime ticks
 	thisBlob.set_u32( "m3_heldTime", m3Time );
+}
+
+void showMessage( CBlob@ blob, string msg )
+{
+	if (!blob.isMyPlayer())
+	{ return; }
+
+	if (msg.length() <= 0)
+	{ return; }
+
+	ShipWarningMessage@ message = cast<ShipWarningMessage>(add_message(
+				ShipWarningMessage(msg),
+				true
+			));
 }
