@@ -19,6 +19,14 @@ enum EntityHash
 	_station_wing_se = 1112059356,
 	_station_wing_sw = 877172690,
 
+	//pods
+	_pod_shield = 1458069964,
+	_pod_flak = -1107631977,
+	_pod_gatling = -1623195145,
+	_pod_artillery = 1725415213,
+	_pod_healgun = 470083099,
+	_pod_generator = 154004078,
+
 	//kag
 	_knight = -541330116,
 	_archer = 871806850,

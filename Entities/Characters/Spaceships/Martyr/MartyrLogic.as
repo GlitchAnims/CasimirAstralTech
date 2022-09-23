@@ -15,18 +15,6 @@ Random _martyr_logic_r(16661);
 
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= MartyrParams::CHARGE_START * MartyrParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= MartyrParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= MartyrParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= MartyrParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
-	
 	MediumshipInfo ship;
 	ship.main_engine_force 			= MartyrParams::main_engine_force;
 	ship.secondary_engine_force 	= MartyrParams::secondary_engine_force;

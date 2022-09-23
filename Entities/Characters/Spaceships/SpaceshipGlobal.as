@@ -30,10 +30,11 @@ const string enableButtonBoolString = "active_button";
 enum ShipSizes
 {
 	_size_none = 0,
-	_size_small = 1,
-	_size_medium = 2,
-	_size_big = 3,
-	_size_structure = 4,
+	_size_box,
+	_size_small,
+	_size_medium,
+	_size_big,
+	_size_structure,
 };
 
 u8 getShipSize( int blobNameHash )
@@ -41,6 +42,15 @@ u8 getShipSize( int blobNameHash )
 	u8 shipSize = _size_none;
 	switch (blobNameHash)
 	{
+		// pods
+		case _pod_shield:
+		case _pod_flak:
+		case _pod_gatling:
+		case _pod_artillery:
+		case _pod_healgun:
+		case _pod_generator:
+		shipSize = _size_box; break;
+
 		case _fighter:
 		case _interceptor:
 		case _bomber:
@@ -49,8 +59,8 @@ u8 getShipSize( int blobNameHash )
 
 		case _martyr:
 		case _balthazar:
-		case _wanderer:
 		case _foul:
+		case _wanderer:
 		shipSize = _size_medium; break;
 
 		case _team_station:

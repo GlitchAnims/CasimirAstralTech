@@ -143,6 +143,67 @@ class PodInfo
 	}
 };
 
+void fetchPodInfo( int blobNameHash, bool &out carry_can_turn, 
+float &out carry_turn_speed, float &out carry_vel, float &out carry_dist )
+{
+	switch (blobNameHash)
+	{
+		case _pod_flak:
+		{
+			carry_can_turn 		= PodFlakParams::carry_can_turn;
+			carry_turn_speed 	= PodFlakParams::carry_turn_speed;
+			carry_vel 			= PodFlakParams::carry_vel;
+			carry_dist 			= PodFlakParams::carry_dist;
+		}
+		break;
+
+		case _pod_gatling:
+		{
+			carry_can_turn 		= PodGatlingParams::carry_can_turn;
+			carry_turn_speed 	= PodGatlingParams::carry_turn_speed;
+			carry_vel 			= PodGatlingParams::carry_vel;
+			carry_dist 			= PodGatlingParams::carry_dist;
+		}
+		break;
+
+		case _pod_artillery:
+		{
+			carry_can_turn 		= PodArtilleryParams::carry_can_turn;
+			carry_turn_speed 	= PodArtilleryParams::carry_turn_speed;
+			carry_vel 			= PodArtilleryParams::carry_vel;
+			carry_dist 			= PodArtilleryParams::carry_dist;
+		}
+		break;
+
+		case _pod_healgun:
+		{
+			carry_can_turn 		= PodHealgunParams::carry_can_turn;
+			carry_turn_speed 	= PodHealgunParams::carry_turn_speed;
+			carry_vel 			= PodHealgunParams::carry_vel;
+			carry_dist 			= PodHealgunParams::carry_dist;
+		}
+		break;
+
+		case _pod_generator:
+		{
+			carry_can_turn 		= PodGeneratorParams::carry_can_turn;
+			carry_turn_speed 	= PodGeneratorParams::carry_turn_speed;
+			carry_vel 			= PodGeneratorParams::carry_vel;
+			carry_dist 			= PodGeneratorParams::carry_dist;
+		}
+		break;
+
+		default: // _pod_shield, but as default
+		{
+			carry_can_turn 		= PodShieldParams::carry_can_turn;
+			carry_turn_speed 	= PodShieldParams::carry_turn_speed;
+			carry_vel 			= PodShieldParams::carry_vel;
+			carry_dist 			= PodShieldParams::carry_dist;
+		}
+		break;
+	}
+}
+
 /*
 void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, Vec2f blobVel = Vec2f_zero, float lifeTime = 1.0f)
 {

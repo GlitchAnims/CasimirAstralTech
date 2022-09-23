@@ -188,6 +188,7 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 {
 	switch(blobNameHash)
 	{
+		// smallships
 		case _fighter:
 		{
 			chargeStart 	= 0.1f; 	//percentage charge to start with (0.0f - 1.0f)
@@ -196,7 +197,6 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 			chargeRate 		= 20; 		//ticks per regen
 		}
 		break;
-
 		case _interceptor:
 		{
 			chargeStart 	= 0.1f;
@@ -205,7 +205,6 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 			chargeRate 		= 0;
 		}
 		break;
-
 		case _bomber:
 		{
 			chargeStart 	= 0.0f;
@@ -214,7 +213,6 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 			chargeRate 		= 120;
 		}
 		break;
-
 		case _scout:
 		{
 			chargeStart 	= 0.1f;
@@ -224,6 +222,111 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 		}
 		break;
 
+		// mediumships
+		case _martyr:
+		{
+			chargeStart 	= 0.3f;
+			chargeMax 		= 500;
+			chargeRegen 	= 9;
+			chargeRate 		= 30;
+		}
+		break;
+		case _balthazar:
+		{
+			chargeStart 	= 0.3f;
+			chargeMax 		= 700;
+			chargeRegen 	= 15;
+			chargeRate 		= 30;
+		}
+		break;
+		case _foul:
+		{
+			chargeStart 	= 0.1f;
+			chargeMax 		= 300;
+			chargeRegen 	= 3;
+			chargeRate 		= 20;
+		}
+		break;
+		case _wanderer:
+		{
+			chargeStart 	= 0.3f;
+			chargeMax 		= 600;
+			chargeRegen 	= 6;
+			chargeRate 		= 30;
+		}
+		break;
+
+		// structures
+		case _team_station:
+		{
+			chargeStart 	= 1.0f;
+			chargeMax 		= 3000;
+			chargeRegen 	= 20;
+			chargeRate 		= 30;
+		}
+		break;
+		case _station_wing_nw:
+		case _station_wing_ne:
+		case _station_wing_se:
+		case _station_wing_sw:
+		{
+			chargeStart 	= 1.0f;
+			chargeMax 		= 3000;
+			chargeRegen 	= 10;
+			chargeRate 		= 30;
+		}
+		break;
+
+		// pods
+		case _pod_shield:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 300;
+			chargeRegen 	= 1;
+			chargeRate 		= 0;
+		}
+		break;
+		case _pod_flak:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 300;
+			chargeRegen 	= 1;
+			chargeRate 		= 0;
+		}
+		break;
+		case _pod_gatling:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 400;
+			chargeRegen 	= 0;
+			chargeRate 		= 0;
+		}
+		break;
+		case _pod_artillery:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 400;
+			chargeRegen 	= 0;
+			chargeRate 		= 0;
+		}
+		break;
+		case _pod_healgun:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 300;
+			chargeRegen 	= 0;
+			chargeRate 		= 0;
+		}
+		break;
+		case _pod_generator:
+		{
+			chargeStart 	= 0.1f;
+			chargeMax 		= 1000;
+			chargeRegen 	= 10;
+			chargeRate 		= 30;
+		}
+		break;
+		
 		default:
 		return false; // did not find suitable candidate
 	}

@@ -10,26 +10,7 @@
 Random _pod_logic_r(98444);
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= PodShieldParams::CHARGE_START * PodShieldParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= PodShieldParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= PodShieldParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= PodShieldParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
-
-	PodInfo pod;
-	pod.carry_can_turn 		= PodShieldParams::carry_can_turn;
-	pod.carry_turn_speed 	= PodShieldParams::carry_turn_speed;
-	pod.carry_vel 			= PodShieldParams::carry_vel;
-	pod.carry_dist 			= PodShieldParams::carry_dist;
-	this.set("podInfo", @pod);
-
-	this.getShape().SetRotationsAllowed(pod.carry_can_turn);
+	// uh oh
 }
 
 void onTick( CBlob@ this )

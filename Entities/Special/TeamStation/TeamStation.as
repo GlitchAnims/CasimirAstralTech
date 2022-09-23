@@ -14,17 +14,6 @@ Random _TDM_ruins_r(67656);
 
 void onInit(CBlob@ this)
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= 1.0f;
-		chargeInfo.chargeMax 		= 3000;
-		chargeInfo.chargeRegen 		= 20;
-		chargeInfo.chargeRate 		= 30;
-		this.set("chargeInfo", @chargeInfo);
-	}
 	this.Tag(denyChargeInputTag);
 
 	this.CreateRespawnPoint("ruins", Vec2f(0.0f, 16.0f));
