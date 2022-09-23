@@ -153,3 +153,89 @@ class MediumshipInfo
 		shot_lifetime = 1.0f;
 	}
 };
+
+void fetchMediumshipInfo( int blobNameHash, 
+float &out main_engine_force, float &out secondary_engine_force, float &out rcs_force, 
+float &out ship_turn_speed, float &out ship_drag, float &out max_speed, 
+u32 &out firing_rate, u32 &out firing_burst, u32 &out firing_delay, u32 &out firing_spread, s32 &out firing_cost, 
+float &out shot_speed, float &out shot_lifetime )
+{
+	switch (blobNameHash)
+	{
+		case _balthazar:
+		{
+			main_engine_force 			= BalthazarParams::main_engine_force;
+			secondary_engine_force 		= BalthazarParams::secondary_engine_force;
+			rcs_force 					= BalthazarParams::rcs_force;
+			ship_turn_speed 			= BalthazarParams::ship_turn_speed;
+			ship_drag 					= BalthazarParams::ship_drag;
+			max_speed 					= BalthazarParams::max_speed;
+			
+			firing_rate 				= BalthazarParams::firing_rate;
+			firing_burst 				= BalthazarParams::firing_burst;
+			firing_delay 				= BalthazarParams::firing_delay;
+			firing_spread 				= BalthazarParams::firing_spread;
+			firing_cost 				= BalthazarParams::firing_cost;
+			shot_speed 					= BalthazarParams::shot_speed;
+			shot_lifetime 				= BalthazarParams::shot_lifetime;
+		}
+		break;
+
+		case _foul:
+		{
+			main_engine_force 			= FoulParams::main_engine_force;
+			secondary_engine_force 		= FoulParams::secondary_engine_force;
+			rcs_force 					= FoulParams::rcs_force;
+			ship_turn_speed 			= FoulParams::ship_turn_speed;
+			ship_drag 					= FoulParams::ship_drag;
+			max_speed 					= FoulParams::max_speed;
+			
+			firing_rate 				= FoulParams::firing_rate;
+			firing_burst 				= FoulParams::firing_burst;
+			firing_delay 				= FoulParams::firing_delay;
+			firing_spread 				= FoulParams::firing_spread;
+			firing_cost 				= FoulParams::firing_cost;
+			shot_speed 					= FoulParams::shot_speed;
+			shot_lifetime 				= FoulParams::shot_lifetime;
+		}
+		break;
+
+		case _wanderer:
+		{
+			main_engine_force 			= WandererParams::main_engine_force;
+			secondary_engine_force 		= WandererParams::secondary_engine_force;
+			rcs_force 					= WandererParams::rcs_force;
+			ship_turn_speed 			= WandererParams::ship_turn_speed;
+			ship_drag 					= WandererParams::ship_drag;
+			max_speed 					= WandererParams::max_speed;
+			
+			firing_rate 				= WandererParams::firing_rate;
+			firing_burst 				= WandererParams::firing_burst;
+			firing_delay 				= WandererParams::firing_delay;
+			firing_spread 				= WandererParams::firing_spread;
+			firing_cost 				= WandererParams::firing_cost;
+			shot_speed 					= WandererParams::shot_speed;
+			shot_lifetime 				= WandererParams::shot_lifetime;
+		}
+		break;
+
+		default: // _martyr, but default values
+		{
+			main_engine_force 			= MartyrParams::main_engine_force;
+			secondary_engine_force 		= MartyrParams::secondary_engine_force;
+			rcs_force 					= MartyrParams::rcs_force;
+			ship_turn_speed 			= MartyrParams::ship_turn_speed;
+			ship_drag 					= MartyrParams::ship_drag;
+			max_speed 					= MartyrParams::max_speed;
+			
+			firing_rate 				= MartyrParams::firing_rate;
+			firing_burst 				= MartyrParams::firing_burst;
+			firing_delay 				= MartyrParams::firing_delay;
+			firing_spread 				= MartyrParams::firing_spread;
+			firing_cost 				= MartyrParams::firing_cost;
+			shot_speed 					= MartyrParams::shot_speed;
+			shot_lifetime 				= MartyrParams::shot_lifetime;
+		}
+		break;
+	}
+}

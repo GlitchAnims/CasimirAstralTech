@@ -15,22 +15,6 @@ Random _martyr_logic_r(16661);
 
 void onInit( CBlob@ this )
 {
-	MediumshipInfo ship;
-	ship.main_engine_force 			= MartyrParams::main_engine_force;
-	ship.secondary_engine_force 	= MartyrParams::secondary_engine_force;
-	ship.rcs_force 					= MartyrParams::rcs_force;
-	ship.ship_turn_speed 			= MartyrParams::ship_turn_speed;
-	ship.ship_drag 					= MartyrParams::ship_drag;
-	ship.max_speed 					= MartyrParams::max_speed;
-	
-	ship.firing_rate 				= MartyrParams::firing_rate;
-	ship.firing_burst 				= MartyrParams::firing_burst;
-	ship.firing_delay 				= MartyrParams::firing_delay;
-	ship.firing_spread 				= MartyrParams::firing_spread;
-	ship.firing_cost 				= MartyrParams::firing_cost;
-	ship.shot_speed 				= MartyrParams::shot_speed;
-	ship.shot_lifetime 				= MartyrParams::shot_lifetime;
-	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;

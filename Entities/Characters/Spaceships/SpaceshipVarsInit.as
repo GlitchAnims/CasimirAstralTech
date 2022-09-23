@@ -41,7 +41,7 @@ void onInit(CMovement@ this)
 			fetchPodInfo(thisBlobHash, pod.carry_can_turn, pod.carry_turn_speed, pod.carry_vel, pod.carry_dist);
 			thisBlob.set("podInfo", @pod);
 
-			if (foundShape) thisShape.SetRotationsAllowed(pod.carry_can_turn);
+			rotationsAllowed = pod.carry_can_turn;
 		}
 		break;
 
@@ -63,6 +63,16 @@ void onInit(CMovement@ this)
 
 		case _size_medium:
 		{
+			MediumshipInfo ship;
+
+			fetchMediumshipInfo( thisBlobHash, 
+			ship.main_engine_force, ship.secondary_engine_force, ship.rcs_force, 
+			ship.ship_turn_speed, ship.ship_drag, ship.max_speed, 
+			ship.firing_rate, ship.firing_burst, ship.firing_delay, ship.firing_spread, ship.firing_cost, 
+			ship.shot_speed, ship.shot_lifetime );
+
+			thisBlob.set("shipInfo", @ship);
+	
 			rotationsAllowed = true;
 			canBePlayer = true;
 		}
@@ -102,7 +112,6 @@ void onInit(CMovement@ this)
 		thisShape.SetRotationsAllowed(rotationsAllowed);
 	}
 	
-
 	thisBlob.Tag("hull");
 	thisBlob.Tag("ignore crouch");
 }

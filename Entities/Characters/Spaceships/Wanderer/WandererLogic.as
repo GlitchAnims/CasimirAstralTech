@@ -15,22 +15,6 @@ Random _wanderer_logic_r(16661);
 
 void onInit( CBlob@ this )
 {
-	MediumshipInfo ship;
-	ship.main_engine_force 			= WandererParams::main_engine_force;
-	ship.secondary_engine_force 	= WandererParams::secondary_engine_force;
-	ship.rcs_force 					= WandererParams::rcs_force;
-	ship.ship_turn_speed 			= WandererParams::ship_turn_speed;
-	ship.ship_drag 					= WandererParams::ship_drag;
-	ship.max_speed 					= WandererParams::max_speed;
-	
-	ship.firing_rate 				= WandererParams::firing_rate;
-	ship.firing_burst 				= WandererParams::firing_burst;
-	ship.firing_delay 				= WandererParams::firing_delay;
-	ship.firing_spread 				= WandererParams::firing_spread;
-	ship.firing_cost 				= WandererParams::firing_cost;
-	ship.shot_speed 				= WandererParams::shot_speed;
-	ship.shot_lifetime 				= WandererParams::shot_lifetime;
-	this.set("shipInfo", @ship);
 	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;
