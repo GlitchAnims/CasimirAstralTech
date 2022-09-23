@@ -11,6 +11,15 @@ enum EntityHash
 	_foul = 1097470459,
 	_wanderer = 89317443,
 
+	//station
+	_team_station = 1500671615,
+
+	_station_wing_nw = 878997071,
+	_station_wing_ne = 644110405,
+	_station_wing_se = 1112059356,
+	_station_wing_sw = 877172690,
+
+	//kag
 	_knight = -541330116,
 	_archer = 871806850,
 	_builder = -466287296,

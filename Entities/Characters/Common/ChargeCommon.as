@@ -1,4 +1,6 @@
 
+#include "AllHashCodes.as"
+
 const string chargeTag = "holds_charge";
 const string denyChargeInputTag = "deny_charge_input";
 
@@ -180,4 +182,50 @@ s32 findBatteries(CBlob@ blob)
 {
 	//insert inventory search code here
 	return 0;
+}
+
+bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeMax, s32 &out chargeRegen, s32 &out chargeRate )
+{
+	switch(blobNameHash)
+	{
+		case _fighter:
+		{
+			chargeStart 	= 0.1f; 	//percentage charge to start with (0.0f - 1.0f)
+			chargeMax 		= 150; 		//max charge amount
+			chargeRegen 	= 1; 		//amount per regen
+			chargeRate 		= 20; 		//ticks per regen
+		}
+		break;
+
+		case _interceptor:
+		{
+			chargeStart 	= 0.1f;
+			chargeMax 		= 220;
+			chargeRegen 	= 0;
+			chargeRate 		= 0;
+		}
+		break;
+
+		case _bomber:
+		{
+			chargeStart 	= 0.0f;
+			chargeMax 		= 200;
+			chargeRegen 	= 1;
+			chargeRate 		= 120;
+		}
+		break;
+
+		case _scout:
+		{
+			chargeStart 	= 0.1f;
+			chargeMax 		= 300;
+			chargeRegen 	= 3;
+			chargeRate 		= 20;
+		}
+		break;
+
+		default:
+		return false; // did not find suitable candidate
+	}
+	return true;
 }

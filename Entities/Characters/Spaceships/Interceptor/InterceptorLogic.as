@@ -14,35 +14,6 @@
 Random _interceptor_logic_r(44440);
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= InterceptorParams::CHARGE_START * InterceptorParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= InterceptorParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= InterceptorParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= InterceptorParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
-	
-	SmallshipInfo ship;
-	ship.main_engine_force 			= InterceptorParams::main_engine_force;
-	ship.secondary_engine_force 	= InterceptorParams::secondary_engine_force;
-	ship.rcs_force 					= InterceptorParams::rcs_force;
-	ship.ship_turn_speed 			= InterceptorParams::ship_turn_speed;
-	ship.ship_drag 					= InterceptorParams::ship_drag;
-	ship.max_speed 					= InterceptorParams::max_speed;
-	
-	ship.firing_rate 				= InterceptorParams::firing_rate;
-	ship.firing_burst 				= InterceptorParams::firing_burst;
-	ship.firing_delay 				= InterceptorParams::firing_delay;
-	ship.firing_spread 				= InterceptorParams::firing_spread;
-	ship.firing_cost 				= InterceptorParams::firing_cost;
-	ship.shot_speed 				= InterceptorParams::shot_speed;
-	ship.shot_lifetime 				= InterceptorParams::shot_lifetime;
-	this.set("shipInfo", @ship);
-	
 	//keys setup
 
 	this.set_u32( "m1_heldTime", 0 );
@@ -56,10 +27,6 @@ void onInit( CBlob@ this )
 	this.set_bool("shifted", false);
 	this.set_bool("grav_bubble", false);
 	
-	this.Tag("player");
-	this.Tag("hull");
-	this.Tag("ignore crouch");
-	
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");
 
@@ -71,8 +38,6 @@ void onInit( CBlob@ this )
 	//no spinning
 	this.getShape().SetRotationsAllowed(false);
 	//this.getShape().SetGravityScale(0);
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";

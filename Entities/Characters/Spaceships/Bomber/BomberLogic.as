@@ -14,35 +14,6 @@
 Random _bomber_logic_r(37895);
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= BomberParams::CHARGE_START * BomberParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= BomberParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= BomberParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= BomberParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
-	
-	SmallshipInfo ship;
-	ship.main_engine_force 			= BomberParams::main_engine_force;
-	ship.secondary_engine_force 	= BomberParams::secondary_engine_force;
-	ship.rcs_force 					= BomberParams::rcs_force;
-	ship.ship_turn_speed 			= BomberParams::ship_turn_speed;
-	ship.ship_drag 					= BomberParams::ship_drag;
-	ship.max_speed 					= BomberParams::max_speed;
-	
-	ship.firing_rate 				= BomberParams::firing_rate;
-	ship.firing_burst 				= BomberParams::firing_burst;
-	ship.firing_delay 				= BomberParams::firing_delay;
-	ship.firing_spread 				= BomberParams::firing_spread;
-	ship.firing_cost 				= BomberParams::firing_cost;
-	ship.shot_speed 				= BomberParams::shot_speed;
-	ship.shot_lifetime 				= BomberParams::shot_lifetime;
-	this.set("shipInfo", @ship);
-	
 	//keys setup
 
 	this.set_u32( "m1_heldTime", 0 );
@@ -54,11 +25,7 @@ void onInit( CBlob@ this )
 	this.set_bool( "leftCannonTurn", false);
 
 	this.set_bool("shifted", false);
-	
-	this.Tag("player");
-	this.Tag("hull");
-	this.Tag("ignore crouch");
-	
+
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");
 
@@ -71,8 +38,6 @@ void onInit( CBlob@ this )
 	this.getShape().SetRotationsAllowed(false);
 	//this.getShape().SetGravityScale(0);
 
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
-	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";
 	

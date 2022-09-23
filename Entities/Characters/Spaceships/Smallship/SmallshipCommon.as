@@ -145,3 +145,89 @@ class SmallshipInfo
 		shot_lifetime = 1.0f;
 	}
 };
+
+void fetchSmallshipInfo( int blobNameHash, 
+float &out main_engine_force, float &out secondary_engine_force, float &out rcs_force, 
+float &out ship_turn_speed, float &out ship_drag, float &out max_speed, 
+u32 &out firing_rate, u32 &out firing_burst, u32 &out firing_delay, u32 &out firing_spread, s32 &out firing_cost, 
+float &out shot_speed, float &out shot_lifetime )
+{
+	switch (blobNameHash)
+	{
+		case _interceptor:
+		{
+			main_engine_force 			= InterceptorParams::main_engine_force;
+			secondary_engine_force 		= InterceptorParams::secondary_engine_force;
+			rcs_force 					= InterceptorParams::rcs_force;
+			ship_turn_speed 			= InterceptorParams::ship_turn_speed;
+			ship_drag 					= InterceptorParams::ship_drag;
+			max_speed 					= InterceptorParams::max_speed;
+			
+			firing_rate 				= InterceptorParams::firing_rate;
+			firing_burst 				= InterceptorParams::firing_burst;
+			firing_delay 				= InterceptorParams::firing_delay;
+			firing_spread 				= InterceptorParams::firing_spread;
+			firing_cost 				= InterceptorParams::firing_cost;
+			shot_speed 					= InterceptorParams::shot_speed;
+			shot_lifetime 				= InterceptorParams::shot_lifetime;
+		}
+		break;
+
+		case _bomber:
+		{
+			main_engine_force 			= BomberParams::main_engine_force;
+			secondary_engine_force 		= BomberParams::secondary_engine_force;
+			rcs_force 					= BomberParams::rcs_force;
+			ship_turn_speed 			= BomberParams::ship_turn_speed;
+			ship_drag 					= BomberParams::ship_drag;
+			max_speed 					= BomberParams::max_speed;
+			
+			firing_rate 				= BomberParams::firing_rate;
+			firing_burst 				= BomberParams::firing_burst;
+			firing_delay 				= BomberParams::firing_delay;
+			firing_spread 				= BomberParams::firing_spread;
+			firing_cost 				= BomberParams::firing_cost;
+			shot_speed 					= BomberParams::shot_speed;
+			shot_lifetime 				= BomberParams::shot_lifetime;
+		}
+		break;
+
+		case _scout:
+		{
+			main_engine_force 			= ScoutParams::main_engine_force;
+			secondary_engine_force 		= ScoutParams::secondary_engine_force;
+			rcs_force 					= ScoutParams::rcs_force;
+			ship_turn_speed 			= ScoutParams::ship_turn_speed;
+			ship_drag 					= ScoutParams::ship_drag;
+			max_speed 					= ScoutParams::max_speed;
+			
+			firing_rate 				= ScoutParams::firing_rate;
+			firing_burst 				= ScoutParams::firing_burst;
+			firing_delay 				= ScoutParams::firing_delay;
+			firing_spread 				= ScoutParams::firing_spread;
+			firing_cost 				= ScoutParams::firing_cost;
+			shot_speed 					= ScoutParams::shot_speed;
+			shot_lifetime 				= ScoutParams::shot_lifetime;
+		}
+		break;
+
+		default: // _fighter, but default values
+		{
+			main_engine_force 			= FighterParams::main_engine_force;
+			secondary_engine_force 		= FighterParams::secondary_engine_force;
+			rcs_force 					= FighterParams::rcs_force;
+			ship_turn_speed 			= FighterParams::ship_turn_speed;
+			ship_drag 					= FighterParams::ship_drag;
+			max_speed 					= FighterParams::max_speed;
+			
+			firing_rate 				= FighterParams::firing_rate;
+			firing_burst 				= FighterParams::firing_burst;
+			firing_delay 				= FighterParams::firing_delay;
+			firing_spread 				= FighterParams::firing_spread;
+			firing_cost 				= FighterParams::firing_cost;
+			shot_speed 					= FighterParams::shot_speed;
+			shot_lifetime 				= FighterParams::shot_lifetime;
+		}
+		break;
+	}
+}

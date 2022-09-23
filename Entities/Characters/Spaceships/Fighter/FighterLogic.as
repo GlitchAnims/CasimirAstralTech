@@ -14,35 +14,6 @@
 Random _fighter_logic_r(67532);
 void onInit( CBlob@ this )
 {
-	this.set_s32(absoluteCharge_string, 0);
-	this.set_s32(absoluteMaxCharge_string, 0);
-	if (isServer())
-	{
-		ChargeInfo chargeInfo;
-		chargeInfo.charge 			= FighterParams::CHARGE_START * FighterParams::CHARGE_MAX;
-		chargeInfo.chargeMax 		= FighterParams::CHARGE_MAX;
-		chargeInfo.chargeRegen 		= FighterParams::CHARGE_REGEN;
-		chargeInfo.chargeRate 		= FighterParams::CHARGE_RATE;
-		this.set("chargeInfo", @chargeInfo);
-	}
-	
-	SmallshipInfo ship;
-	ship.main_engine_force 			= FighterParams::main_engine_force;
-	ship.secondary_engine_force 	= FighterParams::secondary_engine_force;
-	ship.rcs_force 					= FighterParams::rcs_force;
-	ship.ship_turn_speed 			= FighterParams::ship_turn_speed;
-	ship.ship_drag 					= FighterParams::ship_drag;
-	ship.max_speed 					= FighterParams::max_speed;
-	
-	ship.firing_rate 				= FighterParams::firing_rate;
-	ship.firing_burst 				= FighterParams::firing_burst;
-	ship.firing_delay 				= FighterParams::firing_delay;
-	ship.firing_spread 				= FighterParams::firing_spread;
-	ship.firing_cost 				= FighterParams::firing_cost;
-	ship.shot_speed 				= FighterParams::shot_speed;
-	ship.shot_lifetime 				= FighterParams::shot_lifetime;
-	this.set("shipInfo", @ship);
-	
 	/*ManaInfo manaInfo;
 	manaInfo.maxMana = FrigateParams::MAX_MANA;
 	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
@@ -58,10 +29,6 @@ void onInit( CBlob@ this )
 
 	this.set_bool("shifted", false);
 	
-	this.Tag("player");
-	this.Tag("hull");
-	this.Tag("ignore crouch");
-	
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");
 
@@ -73,8 +40,6 @@ void onInit( CBlob@ this )
 	//no spinning
 	this.getShape().SetRotationsAllowed(false);
 	//this.getShape().SetGravityScale(0);
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";

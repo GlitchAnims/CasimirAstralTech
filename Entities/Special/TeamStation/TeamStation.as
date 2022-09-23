@@ -62,7 +62,6 @@ void onInit(CBlob@ this)
 
 	this.Tag("change class drop inventory");
 
-	this.Tag("hull");
 	this.Tag(bigTag);
 
 	this.getSprite().SetZ(-50.0f);   // push to background

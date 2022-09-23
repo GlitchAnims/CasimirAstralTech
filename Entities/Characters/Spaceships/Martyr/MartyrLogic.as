@@ -58,8 +58,6 @@ void onInit( CBlob@ this )
 
 	this.set_bool("shifted", false);
 	
-	this.Tag("player");
-	this.Tag("hull");
 	this.Tag(mediumTag);
 	
 	this.push("names to activate", "keg");
@@ -71,8 +69,6 @@ void onInit( CBlob@ this )
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
 	this.getShape().SetGravityScale(0);
-
-	this.getShape().getConsts().net_threshold_multiplier = 0.5f;
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";

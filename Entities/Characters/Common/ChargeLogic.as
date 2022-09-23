@@ -7,6 +7,33 @@ void onInit(CBlob@ this)
 	this.getCurrentScript().removeIfTag = "dead";
 	this.set_bool("chargeFirstTick", true);
 
+	this.set_s32(absoluteCharge_string, 0);
+	this.set_s32(absoluteMaxCharge_string, 0);
+	if (isServer())
+	{
+		string thisBlobName = this.getName();
+		int thisBlobHash = thisBlobName.getHash();
+
+		float chargeStart;
+		s32 chargeMax;
+		s32 chargeRegen;
+		s32 chargeRate;
+
+		if (fetchChargeInfo(thisBlobHash, chargeStart, chargeMax, chargeRegen, chargeRate))
+		{
+			ChargeInfo chargeInfo;
+			chargeInfo.charge 			= chargeStart * chargeMax;
+			chargeInfo.chargeMax 		= chargeMax;
+			chargeInfo.chargeRegen 		= chargeRegen;
+			chargeInfo.chargeRate 		= chargeRate;
+			this.set("chargeInfo", @chargeInfo);
+		}
+		else
+		{
+			print("no can do: "+ thisBlobName +" | hash: "+ thisBlobHash);
+		}
+	}
+
 	this.addCommandID( drain_charge_ID ); //ChargeCommon.as
 	this.addCommandID( transfer_charge_ID );
 	this.addCommandID( abscharge_update_ID );

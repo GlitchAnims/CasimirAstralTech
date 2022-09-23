@@ -25,7 +25,6 @@ void onInit(CBlob@ this)
 	//this.getShape().SetStatic(true);
 	this.getShape().getConsts().mapCollisions = false;
 
-	this.Tag("hull");
 	this.Tag(bigTag);
 
 	this.getShape().SetGravityScale(0);
