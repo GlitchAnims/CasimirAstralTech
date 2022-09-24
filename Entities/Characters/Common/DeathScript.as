@@ -17,31 +17,27 @@ void onDie( CBlob@ this )
 	Vec2f thisPos = this.getPosition();
 
 	bool hasFX = this.get_bool(explosionFXBoolString);
-	if (!hasFX)
-	{ return; }
-
+	if (!hasFX) return;
+	
+	u8 particleNum = 2;
 	if (this.hasTag("hull"))
 	{
-		if (this.hasTag(smallTag))
+		const u8 shipSize = this.get_u8(shipSizeString);
+		switch (shipSize)
 		{
-			genericShipExplosion( thisPos , 8);
-		}
-		else if (this.hasTag(mediumTag))
-		{
-			genericShipExplosion( thisPos , 20);
-		}
-		else if (this.hasTag(bigTag))
-		{
-			genericShipExplosion( thisPos , 50);
-		}
-		else
-		{
-			genericShipExplosion( thisPos , 2);
+			case _size_small:
+			particleNum = 8; break;
+			case _size_medium:
+			particleNum = 20; break;
+			case _size_big:
+			case _size_structure:
+			particleNum = 50; break;
 		}
 	}
 	else
 	{
-		genericShipExplosion( thisPos , 1);
 		print("does not have hull tag");
 	}
+
+	genericShipExplosion( thisPos , particleNum );
 }
