@@ -9,6 +9,18 @@ shared class SpaceshipVars
 
 	f32 firingRateFactor = 1.0f; //lower is higher rate
 	f32 firingSpreadFactor = 1.0f; //multiplier for bullet spread
+
+	bool is_warp = false;
+	bool is_boost = false;
+
+	bool forward_thrust = false;
+	bool backward_thrust = false;
+	bool port_thrust = false;
+	bool portBow_thrust = false;
+	bool portQuarter_thrust = false;
+	bool starboard_thrust = false;
+	bool starboardBow_thrust = false;
+	bool starboardQuarter_thrust = false;
 };
 
 //cleanup all vars here - reset clean slate for next frame

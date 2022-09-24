@@ -27,7 +27,6 @@ void onInit(CMovement@ this)
 	thisBlob.set_u32( "m3_cooldown", 0 );
 
 	thisBlob.set_bool("movementFirstTick", true);
-	thisBlob.set_bool(isWarpBoolString, false); // SpaceshipGlobal.as
 
 	if (isServer())
 	{
@@ -189,27 +188,27 @@ void onTick(CMovement@ this)
 			Vec2f thrustVel = Vec2f(0, -ship.main_engine_force);
 			//thrustVel.RotateByDegrees(blobAngle);
 			forward += thrustVel;
-			ship.forward_thrust = true;
+			moveVars.forward_thrust = true;
 		}
 		else
-		{ ship.forward_thrust = false; }
+		{ moveVars.forward_thrust = false; }
 
 		if(down)
 		{
 			Vec2f thrustVel = Vec2f(0, ship.secondary_engine_force);
 			//thrustVel.RotateByDegrees(blobAngle);
 			backward += thrustVel;
-			ship.backward_thrust = true;
+			moveVars.backward_thrust = true;
 		}
 		else
-		{ ship.backward_thrust = false; }
+		{ moveVars.backward_thrust = false; }
 
 		if (isShifting)
 		{
-			ship.portBow_thrust = false;
-			ship.portQuarter_thrust = false;
-			ship.starboardBow_thrust = false;
-			ship.starboardQuarter_thrust = false;
+			moveVars.portBow_thrust = false;
+			moveVars.portQuarter_thrust = false;
+			moveVars.starboardBow_thrust = false;
+			moveVars.starboardQuarter_thrust = false;
 
 			if(left)
 			{
@@ -218,16 +217,16 @@ void onTick(CMovement@ this)
 				port += thrustVel;
 
 				if (facingLeft)
-				{ ship.port_thrust = true; }
+				{ moveVars.port_thrust = true; }
 				else
-				{ ship.starboard_thrust = true; }
+				{ moveVars.starboard_thrust = true; }
 			}
 			else
 			{
 				if (facingLeft)
-				{ ship.port_thrust = false; }
+				{ moveVars.port_thrust = false; }
 				else
-				{ ship.starboard_thrust = false; }
+				{ moveVars.starboard_thrust = false; }
 			}
 			
 			if(right)
@@ -236,19 +235,19 @@ void onTick(CMovement@ this)
 				//thrustVel.RotateByDegrees(blobAngle);
 				starboard += thrustVel;
 
-				if (facingLeft) 	ship.starboard_thrust = true;
-				else 				ship.port_thrust = true;
+				if (facingLeft) 	moveVars.starboard_thrust = true;
+				else 				moveVars.port_thrust = true;
 			}
 			else
 			{
-				if (facingLeft) 	ship.starboard_thrust = false;
-				else 				ship.port_thrust = false;
+				if (facingLeft) 	moveVars.starboard_thrust = false;
+				else 				moveVars.port_thrust = false;
 			}
 		}
 		else
 		{
-			ship.port_thrust = false;
-			ship.starboard_thrust = false;
+			moveVars.port_thrust = false;
+			moveVars.starboard_thrust = false;
 
 			if(left)
 			{
@@ -256,26 +255,26 @@ void onTick(CMovement@ this)
 
 				if (facingLeft)
 				{
-					ship.portBow_thrust = true;
-					ship.starboardQuarter_thrust = true;
+					moveVars.portBow_thrust = true;
+					moveVars.starboardQuarter_thrust = true;
 				}
 				else
 				{
-					ship.portQuarter_thrust = true;
-					ship.starboardBow_thrust = true;
+					moveVars.portQuarter_thrust = true;
+					moveVars.starboardBow_thrust = true;
 				}
 			}
 			else
 			{
 				if (facingLeft)
 				{
-					ship.portBow_thrust = false;
-					ship.starboardQuarter_thrust = false;
+					moveVars.portBow_thrust = false;
+					moveVars.starboardQuarter_thrust = false;
 				}
 				else
 				{
-					ship.portQuarter_thrust = false;
-					ship.starboardBow_thrust = false;
+					moveVars.portQuarter_thrust = false;
+					moveVars.starboardBow_thrust = false;
 				}
 			}
 			
@@ -285,26 +284,26 @@ void onTick(CMovement@ this)
 
 				if (!facingLeft)
 				{
-					ship.portBow_thrust = true;
-					ship.starboardQuarter_thrust = true;
+					moveVars.portBow_thrust = true;
+					moveVars.starboardQuarter_thrust = true;
 				}
 				else
 				{
-					ship.portQuarter_thrust = true;
-					ship.starboardBow_thrust = true;
+					moveVars.portQuarter_thrust = true;
+					moveVars.starboardBow_thrust = true;
 				}
 			}
 			else
 			{
 				if (!facingLeft)
 				{
-					ship.portBow_thrust = false;
-					ship.starboardQuarter_thrust = false;
+					moveVars.portBow_thrust = false;
+					moveVars.starboardQuarter_thrust = false;
 				}
 				else
 				{
-					ship.portQuarter_thrust = false;
-					ship.starboardBow_thrust = false;
+					moveVars.portQuarter_thrust = false;
+					moveVars.starboardBow_thrust = false;
 				}
 			}
 		}
@@ -332,17 +331,17 @@ void onTick(CMovement@ this)
 	}
 	else
 	{
-		ship.forward_thrust = false;
-		ship.backward_thrust = false;
-		ship.port_thrust = false;
-		ship.portBow_thrust = false;
-		ship.portQuarter_thrust = false;
-		ship.starboard_thrust = false;
-		ship.starboardBow_thrust = false;
-		ship.starboardQuarter_thrust = false;
+		moveVars.forward_thrust = false;
+		moveVars.backward_thrust = false;
+		moveVars.port_thrust = false;
+		moveVars.portBow_thrust = false;
+		moveVars.portQuarter_thrust = false;
+		moveVars.starboard_thrust = false;
+		moveVars.starboardBow_thrust = false;
+		moveVars.starboardQuarter_thrust = false;
 	}
 
-	const bool isWarp = thisBlob.get_bool(isWarpBoolString);
+	const bool isWarp = moveVars.is_warp;
 	f32 maxSpeed = ship.max_speed * moveVars.maxSpeedFactor;
 	if (isWarp)
 	{
@@ -417,10 +416,10 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	{
 		if (!canPayUpkeep) showMessage(thisBlob, "Charge depleted!");
 
-		if (thisBlob.get_bool(isWarpBoolString))
+		if (moveVars.is_warp)
 		{
 			if (is_client) makeWarpShockwave( thisPos ); // CommonFX.as
-			thisBlob.set_bool(isWarpBoolString, false);  // SpaceshipGlobal.as
+			moveVars.is_warp = false;
 		}
 
 		if (m3Time > 0) // depower
@@ -433,7 +432,7 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	}
 
 	const bool canPayActivation = thisBlob.get_s32(absoluteCharge_string) >= (activationCost+upkeepCost); // minimum requirement
-	if (!onCooldown && !canPayActivation && !thisBlob.get_bool(isWarpBoolString))
+	if (!onCooldown && !canPayActivation && !moveVars.is_warp)
 	{
 		showMessage(thisBlob, "Not enough charge for activation");
 		thisBlob.set_u32( "m3_cooldown", 40 );
@@ -452,15 +451,15 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 		dragStatus = 8.0f;
 		if (canPayActivation)
 		{
-			if (!thisBlob.get_bool(isWarpBoolString))
+			if (!moveVars.is_warp)
 			{
 				if (is_client) makeWarpShockwave( thisPos ); // CommonFX.as
 				if (isServer()) removeCharge(thisBlob, activationCost, true);
-				thisBlob.set_bool(isWarpBoolString, true); // SpaceshipGlobal.as
+				moveVars.is_warp = true;
 			}
 		}
 
-		if (thisBlob.get_bool(isWarpBoolString))
+		if (moveVars.is_warp)
 		{
 			moveVars.turnSpeedFactor *= 7.0f; //boosts turn speed for warp
 			moveVars.maxSpeedFactor *= 2.0f; // doubles max speed
@@ -487,7 +486,7 @@ void checkWarp( CBlob@ thisBlob, bool isWheelButton, Vec2f thisPos, Vec2f thisVe
 	// drain charge thrice a second while warping
 	if (isServer() && customTime % 10 == 0)
 	{
-		removeCharge(thisBlob, thisBlob.get_bool(isWarpBoolString) ? upkeepCost : upkeepCost/2, true);
+		removeCharge(thisBlob, moveVars.is_warp ? upkeepCost : upkeepCost/2, true);
 	}
 
 	moveVars.engineFactor *= engineStatus; //cripples thruster efficacy

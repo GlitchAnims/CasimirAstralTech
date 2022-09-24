@@ -1,6 +1,5 @@
 #include "SpaceshipGlobal.as"
-#include "SmallshipCommon.as"
-#include "MediumshipCommon.as"
+#include "SpaceshipVars.as"
 #include "CommonFX.as"
 
 void onInit( CBlob@ this )
@@ -41,7 +40,10 @@ void onTick( CSprite@ this )
 		this.SetEmitSoundSpeed(0);
 		thisBlob.set_bool(clientFirstTickString, false);
 	}
-
+	
+	SpaceshipVars@ moveVars;
+	if (!ownerBlob.get("moveVars", @moveVars)) return;
+	
 	Vec2f ownerBlobVel = ownerBlob.getVelocity();
 	float ownerBlobSpeed = ownerBlobVel.getLength();
 
@@ -49,29 +51,25 @@ void onTick( CSprite@ this )
 	{
 		case 0:
 		{
-			SmallshipInfo@ ship;
-			if (!ownerBlob.get( "shipInfo", @ship )) 
-			{ return; }
-
 			float volume = 0.0f;
 			float speed = 1.0f;
 
-			if (ship.forward_thrust)
+			if (moveVars.forward_thrust)
 			{
 				volume += 1.1f;
 				speed += 0.15;
 			}
-			if (ship.backward_thrust)
+			if (moveVars.backward_thrust)
 			{
 				volume += 0.8f;
 				speed += 0.1;
 			}
-			if (ship.port_thrust)
+			if (moveVars.port_thrust)
 			{
 				volume += 0.5f;
 				speed += 0.1;
 			}
-			if (ship.starboard_thrust)
+			if (moveVars.starboard_thrust)
 			{
 				volume += 0.5f;
 				speed += 0.1;
@@ -120,29 +118,25 @@ void onTick( CSprite@ this )
 
 		case 2:
 		{
-			MediumshipInfo@ ship;
-			if (!ownerBlob.get( "shipInfo", @ship )) 
-			{ return; }
-
 			float volume = 0.0f;
 			float speed = 0.2f;
 
-			if (ship.forward_thrust)
+			if (moveVars.forward_thrust)
 			{
 				volume += 1.5f;
 				speed += 0.15;
 			}
-			if (ship.backward_thrust)
+			if (moveVars.backward_thrust)
 			{
 				volume += 1.0f;
 				speed += 0.1;
 			}
-			if (ship.portBow_thrust || ship.port_thrust)
+			if (moveVars.portBow_thrust || moveVars.port_thrust)
 			{
 				volume += 0.7f;
 				speed += 0.1;
 			}
-			if (ship.starboardBow_thrust || ship.starboard_thrust)
+			if (moveVars.starboardBow_thrust || moveVars.starboard_thrust)
 			{
 				volume += 0.7f;
 				speed += 0.1;

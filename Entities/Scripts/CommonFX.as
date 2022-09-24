@@ -416,7 +416,7 @@ void makeWarpElectricSurge( Vec2f pos, Vec2f vel, float axisAngle, float soundPi
     }
 }
 
-void makeEngineTrail( Vec2f trailPos = Vec2f_zero, bool isWarp = false, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, int teamNum = 0 )
+void makeEngineTrail( Vec2f trailPos = Vec2f_zero, bool isWarp = false, u8 particleNum = 0, Vec2f blobVel = Vec2f_zero, float blobAngle = 0.0f, int teamNum = 0, float speedMult = 1.0f )
 {
 	if (isWarp)
 	{
@@ -460,7 +460,7 @@ void makeEngineTrail( Vec2f trailPos = Vec2f_zero, bool isWarp = false, u8 parti
 			f32 pRatio = float(i) / float(particleNum);
 			f32 pAngle = (pRatio*2.0f) - 1.0f;
 
-			Vec2f pVel = trailNorm;
+			Vec2f pVel = trailNorm * speedMult;
 			pVel.RotateByDegrees(swingMaxAngle*pAngle);
 			pVel *= 3.0f - Maths::Abs(pAngle);
 

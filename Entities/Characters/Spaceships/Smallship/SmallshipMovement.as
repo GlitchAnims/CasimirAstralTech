@@ -156,40 +156,40 @@ void onTick(CMovement@ this)
 			Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
 			thrustVel.RotateByDegrees(blobAngle);
 			forward += thrustVel;
-			ship.forward_thrust = true;
+			moveVars.forward_thrust = true;
 		}
 		else
-		{ ship.forward_thrust = false; }
+		{ moveVars.forward_thrust = false; }
 
 		if(down)
 		{
 			Vec2f thrustVel = Vec2f(ship.secondary_engine_force, 0);
 			thrustVel.RotateByDegrees(blobAngle + 180.0f);
 			backward += thrustVel;
-			ship.backward_thrust = true;
+			moveVars.backward_thrust = true;
 		}
 		else
-		{ ship.backward_thrust = false; }
+		{ moveVars.backward_thrust = false; }
 
 		if(left)
 		{
 			Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
 			thrustVel.RotateByDegrees(blobAngle + 270.0f);
 			port += thrustVel;
-			ship.port_thrust = true;
+			moveVars.port_thrust = true;
 		}
 		else
-		{ ship.port_thrust = false; }
+		{ moveVars.port_thrust = false; }
 		
 		if(right)
 		{
 			Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
 			thrustVel.RotateByDegrees(blobAngle + 90.0f);
 			starboard += thrustVel;
-			ship.starboard_thrust = true;
+			moveVars.starboard_thrust = true;
 		}
 		else
-		{ ship.starboard_thrust = false; }
+		{ moveVars.starboard_thrust = false; }
 
 		Vec2f addedVel = Vec2f_zero;
 		float thrustReduction = Maths::Min(1.0f / (float(keysPressedAmount) * 0.8f), 1.0f); //divide thrust between multiple sides
@@ -202,10 +202,10 @@ void onTick(CMovement@ this)
 	}
 	else
 	{
-		ship.forward_thrust = false;
-		ship.backward_thrust = false;
-		ship.port_thrust = false;
-		ship.starboard_thrust = false;
+		moveVars.forward_thrust = false;
+		moveVars.backward_thrust = false;
+		moveVars.port_thrust = false;
+		moveVars.starboard_thrust = false;
 	}
 
 	float wallWidth = 8.0f;

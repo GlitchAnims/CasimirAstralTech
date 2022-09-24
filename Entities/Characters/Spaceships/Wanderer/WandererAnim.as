@@ -1,11 +1,6 @@
 // Knight animations
 
-#include "SpaceshipGlobal.as"
-#include "MediumshipCommon.as"
-#include "RunnerAnimCommon.as"
-#include "RunnerCommon.as"
-#include "KnockedCommon.as"
-#include "PixelOffsets.as"
+#include "SpaceshipVars.as"
 #include "CommonFX.as"
 #include "SpaceshipAnimCommon.as"
 
@@ -35,19 +30,19 @@ void LoadSprites(CSprite@ this)
 	const float frameSizeX = thrustFlashFrameSize.x;
 	const float frameSizeY = thrustFlashFrameSize.y;
 
-	CSpriteLayer@ forFire1 		= this.addSpriteLayer(forwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ forFire2 		= this.addSpriteLayer(forwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ backFire1 	= this.addSpriteLayer(backwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ backFire2 	= this.addSpriteLayer(backwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ portFire1 	= this.addSpriteLayer(portFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ portFire2 	= this.addSpriteLayer(portFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ forFire1 			= this.addSpriteLayer(forwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ forFire2 			= this.addSpriteLayer(forwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ backFire1 		= this.addSpriteLayer(backwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ backFire2 		= this.addSpriteLayer(backwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ portFire1 		= this.addSpriteLayer(portFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ portFire2 		= this.addSpriteLayer(portFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
 	CSpriteLayer@ starboardFire1 	= this.addSpriteLayer(starboardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
 	CSpriteLayer@ starboardFire2 	= this.addSpriteLayer(starboardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
 	if (forFire1 !is null)
 	{
 		Animation@ anim = forFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = forFire1.addAnimation("boost", 2, true);
+		Animation@ anim2 = forFire1.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		forFire1.SetVisible(false);
 		forFire1.SetRelativeZ(-1.1f);
@@ -59,7 +54,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = forFire2.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = forFire2.addAnimation("boost", 2, true);
+		Animation@ anim2 = forFire2.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		forFire2.SetVisible(false);
 		forFire2.SetRelativeZ(-1.1f);
@@ -71,7 +66,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = backFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = backFire1.addAnimation("boost", 2, true);
+		Animation@ anim2 = backFire1.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		backFire1.SetVisible(false);
 		backFire1.SetRelativeZ(-1.2f);
@@ -83,7 +78,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = backFire2.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = backFire2.addAnimation("boost", 2, true);
+		Animation@ anim2 = backFire2.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		backFire2.SetVisible(false);
 		backFire2.SetRelativeZ(-1.2f);
@@ -95,7 +90,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = portFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = portFire1.addAnimation("boost", 2, true);
+		Animation@ anim2 = portFire1.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		portFire1.SetVisible(false);
 		portFire1.SetRelativeZ(-1.3f);
@@ -107,7 +102,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = portFire2.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = portFire2.addAnimation("boost", 2, true);
+		Animation@ anim2 = portFire2.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		portFire2.SetVisible(false);
 		portFire2.SetRelativeZ(-1.3f);
@@ -119,7 +114,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = starboardFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = starboardFire1.addAnimation("boost", 2, true);
+		Animation@ anim2 = starboardFire1.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		starboardFire1.SetVisible(false);
 		starboardFire1.SetRelativeZ(-1.4f);
@@ -131,7 +126,7 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = starboardFire2.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = starboardFire2.addAnimation("boost", 2, true);
+		Animation@ anim2 = starboardFire2.addAnimation("warp", 2, true);
 		anim2.AddFrames(thrustFrames3);
 		starboardFire2.SetVisible(false);
 		starboardFire2.SetRelativeZ(-1.4f);
@@ -145,26 +140,24 @@ void LoadSprites(CSprite@ this)
 void onTick(CSprite@ this)
 {
 	// store some vars for ease and speed
-	CBlob@ blob = this.getBlob();
-	if (blob == null)
-	{ return; }
+	CBlob@ thisBlob = this.getBlob();
+	if (thisBlob == null) return;
 
-	Vec2f blobPos = blob.getPosition();
-	Vec2f blobVel = blob.getVelocity();
-	f32 blobAngle = blob.getAngleDegrees();
+	Vec2f blobPos = thisBlob.getPosition();
+	Vec2f blobVel = thisBlob.getVelocity();
+	f32 blobAngle = thisBlob.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 	Vec2f aimpos;
 	bool facingLeft = this.isFacingLeft();
-	int teamNum = blob.getTeamNum();
+	int teamNum = thisBlob.getTeamNum();
 
-	MediumshipInfo@ ship;
-	if (!blob.get( "shipInfo", @ship )) 
-	{ return; }
+	SpaceshipVars@ moveVars;
+	if (!thisBlob.get("moveVars", @moveVars)) return;
 	
-	const bool isWarp = blob.get_bool(isWarpBoolString);
-	string animationName = isWarp ? "boost" : "default";
-	const bool changeAnim = blob.get_bool(boostAnimBoolString) != isWarp || _ship_anim_r.NextFloat() < 0.001f;
-	blob.set_bool(boostAnimBoolString, isWarp);
+	const bool isWarp = moveVars.is_warp;
+	string animationName = isWarp ? "warp" : "default";
+	const bool changeAnim = thisBlob.get_bool(boostAnimBoolString) != isWarp || _ship_anim_r.NextFloat() < 0.001f;
+	thisBlob.set_bool(boostAnimBoolString, isWarp);
 	
 	//set engine fires to correct places
 	CSpriteLayer@ forFire1		= this.getSpriteLayer(forwardFire1Name);
@@ -176,14 +169,14 @@ void onTick(CSprite@ this)
 	CSpriteLayer@ starboardFire1	= this.getSpriteLayer(starboardFire1Name);
 	CSpriteLayer@ starboardFire2	= this.getSpriteLayer(starboardFire2Name);
 
-	bool mainEngine = ship.forward_thrust || isWarp;
-	bool secEngine = ship.backward_thrust && !isWarp;
-	bool leftEngine = ship.port_thrust;
-	bool leftFrontEngine = ship.portBow_thrust;
-	bool leftBackEngine = ship.portQuarter_thrust;
-	bool rightEngine = ship.starboard_thrust;
-	bool rightFrontEngine = ship.starboardBow_thrust;
-	bool rightBackEngine = ship.starboardQuarter_thrust;
+	bool mainEngine = moveVars.forward_thrust || isWarp;
+	bool secEngine = moveVars.backward_thrust && !isWarp;
+	bool leftEngine = moveVars.port_thrust;
+	bool leftFrontEngine = moveVars.portBow_thrust;
+	bool leftBackEngine = moveVars.portQuarter_thrust;
+	bool rightEngine = moveVars.starboard_thrust;
+	bool rightFrontEngine = moveVars.starboardBow_thrust;
+	bool rightBackEngine = moveVars.starboardQuarter_thrust;
 
 	f32 leftFlipDegrees = facingLeft ? 180.0f : 0.0f;
 	if (forFire1 !is null) //forward engines
@@ -269,11 +262,11 @@ void onGib(CSprite@ this)
 	}
 
 	CBlob@ blob = this.getBlob();
-	Vec2f pos = blob.getPosition();
-	Vec2f vel = blob.getVelocity();
+	Vec2f pos = thisBlob.getPosition();
+	Vec2f vel = thisBlob.getVelocity();
 	vel.y -= 3.0f;
-	f32 hp = Maths::Min(Maths::Abs(blob.getHealth()), 2.0f) + 1.0f;
-	const u8 team = blob.getTeamNum();
+	f32 hp = Maths::Min(Maths::Abs(thisBlob.getHealth()), 2.0f) + 1.0f;
+	const u8 team = thisBlob.getTeamNum();
 	CParticle@ Body     = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 0, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
 	CParticle@ Arm      = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp - 0.2 , 80), 1, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall", team);
 	CParticle@ Shield   = makeGibParticle("Entities/Characters/Knight/KnightGibs.png", pos, vel + getRandomVelocity(90, hp , 80), 2, 0, Vec2f(16, 16), 2.0f, 0, "Sounds/material_drop.ogg", team);
@@ -296,7 +289,7 @@ const string cursorTexture = "Entities/Characters/Sprites/TileCursor.png";
 void onRender(CSprite@ this)
 {
 	CBlob@ blob = this.getBlob();
-	if (!blob.isMyPlayer())
+	if (!thisBlob.isMyPlayer())
 	{
 		return;
 	}
@@ -307,11 +300,11 @@ void onRender(CSprite@ this)
 
 	// draw tile cursor
 
-	if (blob.isKeyPressed(key_action1))
+	if (thisBlob.isKeyPressed(key_action1))
 	{
-		CMap@ map = blob.getMap();
-		Vec2f position = blob.getPosition();
-		Vec2f cursor_position = blob.getAimPos();
+		CMap@ map = thisBlob.getMap();
+		Vec2f position = thisBlob.getPosition();
+		Vec2f cursor_position = thisBlob.getAimPos();
 		Vec2f surface_position;
 		map.rayCastSolid(position, cursor_position, surface_position);
 		Vec2f vector = surface_position - position;
