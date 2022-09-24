@@ -83,12 +83,8 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
-	if (this == null)
-	{ return; }
-
-	if (!isServer())
-	{ return; }
-
+	if (this == null) return;
+	
     if (cmd == this.getCommandID(takeover_command_ID)) // 1 shot instance
     {
 		if (this.getPlayer() != null)
@@ -114,12 +110,16 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 		this.set_f32("takeover_blob_health", parasiteHealth);
 		this.set_string("takeover_blob_name", parasiteName);
 
-		parasiteBlob.server_SetPlayer(null);
-		this.server_SetPlayer(parasitePlayer);
-		//parasiteBlob.set_bool(explosionFXBoolString, false);
-		parasiteBlob.server_Die();
+		if (isClient()) parasiteBlob.set_bool(explosionFXBoolString, false);
+
+		if (isServer())
+		{
+			parasiteBlob.server_SetPlayer(null);
+			this.server_SetPlayer(parasitePlayer);
+			parasiteBlob.server_Die();
+		}
 	}
-	else if (cmd == this.getCommandID(quit_ship_command_ID))
+	else if (isServer() && cmd == this.getCommandID(quit_ship_command_ID))
 	{
 		CPlayer@ player = this.getPlayer();
 		if (player == null || this == null)
