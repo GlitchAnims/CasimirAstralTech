@@ -236,17 +236,13 @@ void onTick(CMovement@ this)
 				//thrustVel.RotateByDegrees(blobAngle);
 				starboard += thrustVel;
 
-				if (!facingLeft)
-				{ ship.port_thrust = true; }
-				else
-				{ ship.starboard_thrust = true; }
+				if (facingLeft) 	ship.starboard_thrust = true;
+				else 				ship.port_thrust = true;
 			}
 			else
 			{
-				if (!facingLeft)
-				{ ship.port_thrust = false; }
-				else
-				{ ship.starboard_thrust = false; }
+				if (facingLeft) 	ship.starboard_thrust = false;
+				else 				ship.port_thrust = false;
 			}
 		}
 		else

@@ -1,29 +1,18 @@
 // Knight animations
 
 #include "SpaceshipGlobal.as"
-#include "MediumshipCommon.as";
-#include "RunnerAnimCommon.as";
-#include "RunnerCommon.as";
-#include "KnockedCommon.as";
+#include "MediumshipCommon.as"
+#include "RunnerAnimCommon.as"
+#include "RunnerCommon.as"
+#include "KnockedCommon.as"
 #include "PixelOffsets.as"
-#include "RunnerTextures.as"
 #include "CommonFX.as"
-#include "ShieldCommon.as"
-
-const string up_fire1 = "forward_burn1";
-const string up_fire2 = "forward_burn2";
-const string down_fire1 = "backward_burn1";
-const string down_fire2 = "backward_burn2";
-const string left_fire1 = "port_burn1";
-const string left_fire2 = "port_burn2";
-const string right_fire1 = "starboard_burn1";
-const string right_fire2 = "starboard_burn2";
-
-Random _martyr_anim_r(65444);
+#include "SpaceshipAnimCommon.as"
 
 void onInit(CSprite@ this)
 {
 	LoadSprites(this);
+	this.getBlob().set_bool(boostAnimBoolString, false);
 }
 
 void onPlayerInfoChanged(CSprite@ this)
@@ -33,124 +22,122 @@ void onPlayerInfoChanged(CSprite@ this)
 
 void LoadSprites(CSprite@ this)
 {
+	// add engine fires
+	this.RemoveSpriteLayer(forwardFire1Name);
+	this.RemoveSpriteLayer(forwardFire2Name);
+	this.RemoveSpriteLayer(backwardFire1Name);
+	this.RemoveSpriteLayer(backwardFire2Name);
+	this.RemoveSpriteLayer(portFire1Name);
+	this.RemoveSpriteLayer(portFire2Name);
+	this.RemoveSpriteLayer(starboardFire1Name);
+	this.RemoveSpriteLayer(starboardFire2Name);
 
-	// add shiny
-	/*
-	this.RemoveSpriteLayer(shiny_layer);
-	CSpriteLayer@ shiny = this.addSpriteLayer(shiny_layer, "AnimeShiny.png", 16, 16);
-	if (shiny !is null)
-	{
-		Animation@ anim = shiny.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		shiny.SetVisible(false);
-		shiny.SetRelativeZ(1.0f);
-	}*/
+	const float frameSizeX = thrustFlashFrameSize.x;
+	const float frameSizeY = thrustFlashFrameSize.y;
 
-	// add engine burns
-	this.RemoveSpriteLayer(up_fire1);
-	this.RemoveSpriteLayer(up_fire2);
-	this.RemoveSpriteLayer(down_fire1);
-	this.RemoveSpriteLayer(down_fire2);
-	this.RemoveSpriteLayer(left_fire1);
-	this.RemoveSpriteLayer(left_fire2);
-	this.RemoveSpriteLayer(right_fire1);
-	this.RemoveSpriteLayer(right_fire2);
-	CSpriteLayer@ upFire1 		= this.addSpriteLayer(up_fire1, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ upFire2 		= this.addSpriteLayer(up_fire2, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ downFire1 	= this.addSpriteLayer(down_fire1, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ downFire2 	= this.addSpriteLayer(down_fire2, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ leftFire1 	= this.addSpriteLayer(left_fire1, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ leftFire2 	= this.addSpriteLayer(left_fire2, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ rightFire1 	= this.addSpriteLayer(right_fire1, "ThrustFlash.png", 27, 27);
-	CSpriteLayer@ rightFire2 	= this.addSpriteLayer(right_fire2, "ThrustFlash.png", 27, 27);
-	if (upFire1 !is null)
+	CSpriteLayer@ forFire1 		= this.addSpriteLayer(forwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ forFire2 		= this.addSpriteLayer(forwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ backFire1 	= this.addSpriteLayer(backwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ backFire2 	= this.addSpriteLayer(backwardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ portFire1 	= this.addSpriteLayer(portFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ portFire2 	= this.addSpriteLayer(portFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ starboardFire1 	= this.addSpriteLayer(starboardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ starboardFire2 	= this.addSpriteLayer(starboardFire2Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	if (forFire1 !is null)
 	{
-		Animation@ anim = upFire1.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		upFire1.SetVisible(false);
-		upFire1.SetRelativeZ(-1.1f);
-		upFire1.ScaleBy(0.8f, 0.8f);
-		upFire1.RotateBy(-90, Vec2f_zero);
-		upFire1.SetOffset(Vec2f(8.0f, 31.0f));
+		Animation@ anim = forFire1.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = forFire1.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		forFire1.SetVisible(false);
+		forFire1.SetRelativeZ(-1.1f);
+		forFire1.ScaleBy(0.8f, 0.8f);
+		forFire1.RotateBy(-90, Vec2f_zero);
+		forFire1.SetOffset(Vec2f(8.0f, 31.0f));
 	}
-	if (upFire2 !is null)
+	if (forFire2 !is null)
 	{
-		Animation@ anim = upFire2.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		upFire2.SetVisible(false);
-		upFire2.SetRelativeZ(-1.1f);
-		upFire2.ScaleBy(0.8f, 0.8f);
-		upFire2.RotateBy(-90, Vec2f_zero);
-		upFire2.SetOffset(Vec2f(-8.0f, 31.0f));
+		Animation@ anim = forFire2.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = forFire2.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		forFire2.SetVisible(false);
+		forFire2.SetRelativeZ(-1.1f);
+		forFire2.ScaleBy(0.8f, 0.8f);
+		forFire2.RotateBy(-90, Vec2f_zero);
+		forFire2.SetOffset(Vec2f(-8.0f, 31.0f));
 	}
-	if (downFire1 !is null)
+	if (backFire1 !is null)
 	{
-		Animation@ anim = downFire1.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		downFire1.SetVisible(false);
-		downFire1.SetRelativeZ(-1.2f);
-		downFire1.ScaleBy(0.5f, 0.5f);
-		downFire1.RotateBy(90, Vec2f_zero);
-		downFire1.SetOffset(Vec2f(7.0f, -32.0f));
+		Animation@ anim = backFire1.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = backFire1.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		backFire1.SetVisible(false);
+		backFire1.SetRelativeZ(-1.2f);
+		backFire1.ScaleBy(0.5f, 0.5f);
+		backFire1.RotateBy(90, Vec2f_zero);
+		backFire1.SetOffset(Vec2f(7.0f, -32.0f));
 	}
-	if (downFire2 !is null)
+	if (backFire2 !is null)
 	{
-		Animation@ anim = downFire2.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		downFire2.SetVisible(false);
-		downFire2.SetRelativeZ(-1.2f);
-		downFire2.ScaleBy(0.5f, 0.5f);
-		downFire2.RotateBy(90, Vec2f_zero);
-		downFire2.SetOffset(Vec2f(-7.0f, -32.0f));
+		Animation@ anim = backFire2.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = backFire2.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		backFire2.SetVisible(false);
+		backFire2.SetRelativeZ(-1.2f);
+		backFire2.ScaleBy(0.5f, 0.5f);
+		backFire2.RotateBy(90, Vec2f_zero);
+		backFire2.SetOffset(Vec2f(-7.0f, -32.0f));
 	}
-	if (leftFire1 !is null)
+	if (portFire1 !is null)
 	{
-		Animation@ anim = leftFire1.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		leftFire1.SetVisible(false);
-		leftFire1.SetRelativeZ(-1.3f);
-		leftFire1.ScaleBy(0.3f, 0.3f);
-		leftFire1.RotateBy(180, Vec2f_zero);
-		leftFire1.SetOffset(Vec2f(-10.0f, -21.0f));
+		Animation@ anim = portFire1.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = portFire1.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		portFire1.SetVisible(false);
+		portFire1.SetRelativeZ(-1.3f);
+		portFire1.ScaleBy(0.3f, 0.3f);
+		//portFire1.RotateBy(180, Vec2f_zero);
+		portFire1.SetOffset(Vec2f(10.0f, -21.0f));
 	}
-	if (leftFire2 !is null)
+	if (portFire2 !is null)
 	{
-		Animation@ anim = leftFire2.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		leftFire2.SetVisible(false);
-		leftFire2.SetRelativeZ(-1.3f);
-		leftFire2.ScaleBy(0.3f, 0.3f);
-		leftFire2.RotateBy(180, Vec2f_zero);
-		leftFire2.SetOffset(Vec2f(-15.0f, 22.0f));
+		Animation@ anim = portFire2.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = portFire2.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		portFire2.SetVisible(false);
+		portFire2.SetRelativeZ(-1.3f);
+		portFire2.ScaleBy(0.3f, 0.3f);
+		//portFire2.RotateBy(180, Vec2f_zero);
+		portFire2.SetOffset(Vec2f(15.0f, 22.0f));
 	}
-	if (rightFire1 !is null)
+	if (starboardFire1 !is null)
 	{
-		Animation@ anim = rightFire1.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		rightFire1.SetVisible(false);
-		rightFire1.SetRelativeZ(-1.4f);
-		rightFire1.ScaleBy(0.3f, 0.3f);
-		//rightFire1.RotateBy(180, Vec2f_zero);
-		rightFire1.SetOffset(Vec2f(10.0f, -21.0f));
+		Animation@ anim = starboardFire1.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = starboardFire1.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		starboardFire1.SetVisible(false);
+		starboardFire1.SetRelativeZ(-1.4f);
+		starboardFire1.ScaleBy(0.3f, 0.3f);
+		starboardFire1.RotateBy(180, Vec2f_zero);
+		starboardFire1.SetOffset(Vec2f(-10.0f, -21.0f));
 	}
-	if (rightFire2 !is null)
+	if (starboardFire2 !is null)
 	{
-		Animation@ anim = rightFire2.addAnimation("default", 2, true);
-		int[] frames = {0, 1, 2, 3};
-		anim.AddFrames(frames);
-		rightFire2.SetVisible(false);
-		rightFire2.SetRelativeZ(-1.4f);
-		rightFire2.ScaleBy(0.3f, 0.3f);
-		//rightFire2.RotateBy(180, Vec2f_zero);
-		rightFire2.SetOffset(Vec2f(15.0f, 22.0f));
+		Animation@ anim = starboardFire2.addAnimation("default", 2, true);
+		anim.AddFrames(thrustFrames1);
+		Animation@ anim2 = starboardFire2.addAnimation("boost", 2, true);
+		anim2.AddFrames(thrustFrames3);
+		starboardFire2.SetVisible(false);
+		starboardFire2.SetRelativeZ(-1.4f);
+		starboardFire2.ScaleBy(0.3f, 0.3f);
+		starboardFire2.RotateBy(180, Vec2f_zero);
+		starboardFire2.SetOffset(Vec2f(-15.0f, 22.0f));
 	}
 	
 }
@@ -174,19 +161,23 @@ void onTick(CSprite@ this)
 	if (!blob.get( "shipInfo", @ship )) 
 	{ return; }
 	
-	//set engine burns to correct places
+	const bool isWarp = blob.get_bool(isWarpBoolString);
+	string animationName = isWarp ? "boost" : "default";
+	const bool changeAnim = blob.get_bool(boostAnimBoolString) != isWarp || _ship_anim_r.NextFloat() < 0.001f;
+	blob.set_bool(boostAnimBoolString, isWarp);
+	
+	//set engine fires to correct places
+	CSpriteLayer@ forFire1		= this.getSpriteLayer(forwardFire1Name);
+	CSpriteLayer@ forFire2		= this.getSpriteLayer(forwardFire2Name);
+	CSpriteLayer@ backFire1		= this.getSpriteLayer(backwardFire1Name);
+	CSpriteLayer@ backFire2		= this.getSpriteLayer(backwardFire2Name);
+	CSpriteLayer@ portFire1		= this.getSpriteLayer(portFire1Name);
+	CSpriteLayer@ portFire2		= this.getSpriteLayer(portFire2Name);
+	CSpriteLayer@ starboardFire1	= this.getSpriteLayer(starboardFire1Name);
+	CSpriteLayer@ starboardFire2	= this.getSpriteLayer(starboardFire2Name);
 
-	CSpriteLayer@ upFire1		= this.getSpriteLayer(up_fire1);
-	CSpriteLayer@ upFire2		= this.getSpriteLayer(up_fire2);
-	CSpriteLayer@ downFire1		= this.getSpriteLayer(down_fire1);
-	CSpriteLayer@ downFire2		= this.getSpriteLayer(down_fire2);
-	CSpriteLayer@ leftFire1		= this.getSpriteLayer(left_fire1);
-	CSpriteLayer@ leftFire2		= this.getSpriteLayer(left_fire2);
-	CSpriteLayer@ rightFire1	= this.getSpriteLayer(right_fire1);
-	CSpriteLayer@ rightFire2	= this.getSpriteLayer(right_fire2);
-
-	bool mainEngine = ship.forward_thrust;
-	bool secEngine = ship.backward_thrust;
+	bool mainEngine = ship.forward_thrust || isWarp;
+	bool secEngine = ship.backward_thrust && !isWarp;
 	bool leftEngine = ship.port_thrust;
 	bool leftFrontEngine = ship.portBow_thrust;
 	bool leftBackEngine = ship.portQuarter_thrust;
@@ -195,50 +186,64 @@ void onTick(CSprite@ this)
 	bool rightBackEngine = ship.starboardQuarter_thrust;
 
 	f32 leftFlipDegrees = facingLeft ? 180.0f : 0.0f;
-	if (upFire1 !is null) //forward engines
+	if (forFire1 !is null) //forward engines
 	{
-		upFire1.SetVisible(mainEngine);
+		forFire1.SetVisible(mainEngine);
+		if (changeAnim) forFire1.SetAnimation(animationName);
 
-		upFire1.ResetTransform();
-		upFire1.ScaleBy(0.8f, 0.8f);
-		upFire1.RotateBy(-90.0f + leftFlipDegrees, Vec2f_zero);
+		forFire1.ResetTransform();
+		forFire1.RotateBy(-90.0f + leftFlipDegrees, Vec2f_zero);
 	}
-	if (upFire2 !is null)
+	if (forFire2 !is null)
 	{
-		upFire2.SetVisible(mainEngine);
+		forFire2.SetVisible(mainEngine);
+		if (changeAnim) forFire2.SetAnimation(animationName);
 
-		upFire2.ResetTransform();
-		upFire2.RotateBy(-90 + leftFlipDegrees, Vec2f_zero);
+		forFire2.ResetTransform();
+		forFire2.RotateBy(-90 + leftFlipDegrees, Vec2f_zero);
 	}
 
-	if (downFire1 !is null) //backwards engines
+	if (backFire1 !is null) //backwards engines
 	{
-		downFire1.SetVisible(secEngine);
+		backFire1.SetVisible(secEngine);
+		if (changeAnim) backFire1.SetAnimation(animationName);
 
-		downFire1.ResetTransform();
-		downFire1.ScaleBy(0.5f, 0.5f);
-		downFire1.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
+		backFire1.ResetTransform();
+		backFire1.ScaleBy(0.5f, 0.5f);
+		backFire1.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
 	}
-	if (downFire2 !is null)
+	if (backFire2 !is null)
 	{
-		downFire2.SetVisible(secEngine);
+		backFire2.SetVisible(secEngine);
+		if (changeAnim) backFire2.SetAnimation(animationName);
 
-		downFire2.ResetTransform();
-		downFire2.ScaleBy(0.5f, 0.5f);
-		downFire2.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
+		backFire2.ResetTransform();
+		backFire2.ScaleBy(0.5f, 0.5f);
+		backFire2.RotateBy(90 + leftFlipDegrees, Vec2f_zero);
+	}
+
+	if (portFire1 !is null)//left side engines
+	{
+		portFire1.SetVisible(leftEngine || leftFrontEngine);
+		if (changeAnim) portFire1.SetAnimation(animationName);
+	}
+	if (portFire2 !is null)
+	{
+		portFire2.SetVisible(leftEngine || leftBackEngine);
+		if (changeAnim) portFire2.SetAnimation(animationName);
+	}
+
+	if (starboardFire1 !is null)//right side engines
+	{
+		starboardFire1.SetVisible(rightEngine || rightFrontEngine);
+		if (changeAnim) starboardFire1.SetAnimation(animationName);
+	}
+	if (starboardFire2 !is null)
+	{
+		starboardFire2.SetVisible(rightEngine || rightBackEngine);
+		if (changeAnim) starboardFire2.SetAnimation(animationName);
 	}
 	
-	if (rightFire1 !is null)//left side engines
-	{ rightFire1.SetVisible(leftEngine || leftFrontEngine); }
-	if (rightFire2 !is null)
-	{ rightFire2.SetVisible(leftEngine || leftBackEngine); }
-
-	if (leftFire1 !is null)//right side engines
-	{ leftFire1.SetVisible(rightEngine || rightFrontEngine); }
-	if (leftFire2 !is null)
-	{ leftFire2.SetVisible(rightEngine || rightBackEngine); }
-
-	bool isWarp = blob.get_bool(isWarpBoolString);
 	if (mainEngine || isWarp)
 	{
 		Vec2f engineOffset = Vec2f(facingLeft ? 8.0f: -8.0f, 31.0f);
