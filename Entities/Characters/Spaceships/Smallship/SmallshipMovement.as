@@ -210,20 +210,22 @@ void onTick(CMovement@ this)
 
 	float wallWidth = 8.0f;
 	float bounceSpeed = 0.2f;
-	if (thisPos.y > (map.tilemapheight*8) - wallWidth) //if too high or too low, bounce back
+	float mapHeight = map.tilemapheight*8;
+	float mapWidth = map.tilemapwidth*8;
+	if (thisPos.y > mapHeight - wallWidth) //if too high or too low, bounce back
 	{
 		thisVel = Vec2f(thisVel.x,-bounceSpeed);
-		thisBlob.setPosition(Vec2f(thisPos.x,(map.tilemapheight*8) - wallWidth));
+		thisBlob.setPosition(Vec2f(thisPos.x,mapHeight - wallWidth - 1.0f));
 	}
 	else if (thisPos.y < wallWidth)
 	{
 		thisVel = Vec2f(thisVel.x,bounceSpeed);
 		thisBlob.setPosition(Vec2f(thisPos.x,wallWidth));
 	}
-	else if (thisPos.x > (map.tilemapwidth*8) - wallWidth) //if too left or too right, bounce back
+	else if (thisPos.x > mapWidth - wallWidth) //if too left or too right, bounce back
 	{
 		thisVel = Vec2f(-bounceSpeed,thisVel.y);
-		thisBlob.setPosition(Vec2f((map.tilemapwidth*8) - wallWidth,thisPos.y));
+		thisBlob.setPosition(Vec2f(mapWidth - wallWidth - 1.0f,thisPos.y));
 	}
 	else if (thisPos.x < wallWidth)
 	{
