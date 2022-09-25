@@ -13,6 +13,7 @@ const string thrusterAnimation2Name = "strongFlash";
 const string thrustFlashFilename = "ThrustFlashAll.png";
 const Vec2f thrustFlashFrameSize = Vec2f(33.0f, 17.0f);
 
+const string warpThrustAnimBoolString = "warp_thrust_anim";
 const string boostAnimBoolString = "boost_anim";
 
 const int[] thrustFrames1 = {0, 1, 2, 3};

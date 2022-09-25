@@ -27,17 +27,19 @@ void LoadSprites(CSprite@ this)
 	const float frameSizeX = thrustFlashFrameSize.x;
 	const float frameSizeY = thrustFlashFrameSize.y;
 
-	CSpriteLayer@ forFire1 = this.addSpriteLayer(forwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ backFire1 = this.addSpriteLayer(backwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ portFire1 = this.addSpriteLayer(portFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
-	CSpriteLayer@ starboardFire1 = this.addSpriteLayer(starboardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ forFire1 			= this.addSpriteLayer(forwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ backFire1 		= this.addSpriteLayer(backwardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ portFire1 		= this.addSpriteLayer(portFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
+	CSpriteLayer@ starboardFire1 	= this.addSpriteLayer(starboardFire1Name, thrustFlashFilename, frameSizeX, frameSizeY);
 
 	if (forFire1 !is null)
 	{
 		Animation@ anim = forFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = forFire1.addAnimation("warp", 2, true);
-		anim2.AddFrames(thrustFrames3);
+		Animation@ anim2 = forFire1.addAnimation("boost", 1, true);
+		anim2.AddFrames(thrustFrames2);
+		Animation@ anim3 = forFire1.addAnimation("warp", 2, true);
+		anim3.AddFrames(thrustFrames3);
 
 		forFire1.SetVisible(false);
 		forFire1.SetRelativeZ(-1.1f);
@@ -48,8 +50,10 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = backFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = backFire1.addAnimation("warp", 2, true);
-		anim2.AddFrames(thrustFrames3);
+		Animation@ anim2 = backFire1.addAnimation("boost", 1, true);
+		anim2.AddFrames(thrustFrames2);
+		Animation@ anim3 = backFire1.addAnimation("warp", 2, true);
+		anim3.AddFrames(thrustFrames3);
 
 		backFire1.SetVisible(false);
 		backFire1.SetRelativeZ(-1.2f);
@@ -61,8 +65,10 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = portFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = portFire1.addAnimation("warp", 2, true);
-		anim2.AddFrames(thrustFrames3);
+		Animation@ anim2 = portFire1.addAnimation("boost", 1, true);
+		anim2.AddFrames(thrustFrames2);
+		Animation@ anim3 = portFire1.addAnimation("warp", 2, true);
+		anim3.AddFrames(thrustFrames3);
 
 		portFire1.SetVisible(false);
 		portFire1.SetRelativeZ(-1.3f);
@@ -74,8 +80,10 @@ void LoadSprites(CSprite@ this)
 	{
 		Animation@ anim = starboardFire1.addAnimation("default", 2, true);
 		anim.AddFrames(thrustFrames1);
-		Animation@ anim2 = starboardFire1.addAnimation("warp", 2, true);
-		anim2.AddFrames(thrustFrames3);
+		Animation@ anim2 = starboardFire1.addAnimation("boost", 1, true);
+		anim2.AddFrames(thrustFrames2);
+		Animation@ anim3 = starboardFire1.addAnimation("warp", 2, true);
+		anim3.AddFrames(thrustFrames3);
 
 		starboardFire1.SetVisible(false);
 		starboardFire1.SetRelativeZ(-1.4f);
@@ -117,15 +125,17 @@ void onTick(CSprite@ this)
 	SpaceshipVars@ moveVars;
 	if (!thisBlob.get("moveVars", @moveVars)) return;
 
-	const bool isWarp = false;
-	string animationName = isWarp ? "warp" : "default";
-	const bool changeAnim = thisBlob.get_bool(boostAnimBoolString) != isWarp || _ship_anim_r.NextFloat() < 0.001f;
-	thisBlob.set_bool(boostAnimBoolString, isWarp);
+	const bool isWarp = moveVars.is_warp;
+	const bool isBoost = moveVars.is_boost;
+	string animationName = isWarp ? "warp" : isBoost ? "boost" : "default";
+	const bool changeAnim = thisBlob.get_bool(warpThrustAnimBoolString) != isWarp || thisBlob.get_bool(boostAnimBoolString) != isBoost || _ship_anim_r.NextFloat() < 0.001f;
+	thisBlob.set_bool(warpThrustAnimBoolString, isWarp);
+	thisBlob.set_bool(boostAnimBoolString, isBoost);
 
 	//set engine burns to correct visibility
-	CSpriteLayer@ forFire1	= this.getSpriteLayer(forwardFire1Name);
-	CSpriteLayer@ backFire1	= this.getSpriteLayer(backwardFire1Name);
-	CSpriteLayer@ portFire1	= this.getSpriteLayer(portFire1Name);
+	CSpriteLayer@ forFire1			= this.getSpriteLayer(forwardFire1Name);
+	CSpriteLayer@ backFire1			= this.getSpriteLayer(backwardFire1Name);
+	CSpriteLayer@ portFire1			= this.getSpriteLayer(portFire1Name);
 	CSpriteLayer@ starboardFire1	= this.getSpriteLayer(starboardFire1Name);
 
 	bool mainEngine = moveVars.forward_thrust;
