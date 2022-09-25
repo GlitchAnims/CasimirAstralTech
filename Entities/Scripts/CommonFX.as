@@ -360,7 +360,7 @@ void makeWarpShockwave( Vec2f pos )
 								pos, // position
 								Vec2f_zero, // velocity
 								_sprk_r2.NextFloat() * 360.0f, // rotation
-								1.0f, // scale
+								2.0f, // scale
 								1, // animate speed
 								0.0f, // gravity
 								false ); // self lit
