@@ -8,7 +8,7 @@ void onInit( CBlob@ this )
 	this.getShape().getConsts().mapCollisions = false;
 
 	this.set_bool("active", false);
-	this.set_u32("ownerBlobID", 0);
+	this.set_u16("ownerBlobID", 0);
 
 	this.set_u8(soundEmitNumString, 0); //CommonFX.as
 	this.set_bool(clientFirstTickString, true); //SpaceshipGlobal.as
@@ -25,7 +25,7 @@ void onTick( CSprite@ this )
 	if (thisBlob == null)
 	{ return; }
 	
-	u32 ownerBlobID = thisBlob.get_u32("ownerBlobID");
+	u16 ownerBlobID = thisBlob.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!thisBlob.isAttached() || ownerBlobID == 0 || ownerBlob == null) return;
 
@@ -155,7 +155,7 @@ void onTick( CBlob@ this )
 	if (!isServer())
 	{ return; }
 	
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!this.isAttached() || ownerBlobID == 0 || ownerBlob == null)
 	{

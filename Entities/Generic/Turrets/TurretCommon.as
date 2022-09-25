@@ -116,7 +116,7 @@ void turretFire(CBlob@ ownerBlob, u8 shotType = 0, Vec2f blobPos = Vec2f_zero, V
 
 void turretSetup( CBlob@ this )
 {
-	this.set_u32("ownerBlobID", 0);
+	this.set_u16("ownerBlobID", 0);
 
 	this.set_u32( "space_heldTime", 0 );
 	this.set_u32( "space_shotTime", 0 );

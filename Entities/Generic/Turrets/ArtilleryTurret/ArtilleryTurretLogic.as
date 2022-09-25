@@ -40,7 +40,7 @@ void onTick( CBlob@ this )
 	u32 gameTime = getGameTime();
 
 	bool attached = this.isAttached();
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!attached || ownerBlobID == 0 || ownerBlob == null)
 	{ 

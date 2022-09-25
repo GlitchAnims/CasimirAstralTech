@@ -40,7 +40,7 @@ void onInit(CMovement@ this)
 				{
 					blob.IgnoreCollisionWhileOverlapped( thisBlob );
 					thisBlob.server_AttachTo(blob, slot1);
-					blob.set_u32("ownerBlobID", thisBlob.getNetworkID());
+					blob.set_u16("ownerBlobID", thisBlob.getNetworkID());
 					blob.set_u8("soundemit_num", 0);
 				}
 			}

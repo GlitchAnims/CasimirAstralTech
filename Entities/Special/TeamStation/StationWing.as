@@ -32,7 +32,7 @@ void onTick(CBlob@ this)
 	u32 gameTime = getGameTime();
 
 	bool attached = this.isAttached();
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!attached || ownerBlobID == 0 || ownerBlob == null)
 	{ 
@@ -78,7 +78,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, flakslot1);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.set_bool("automatic", true);
 			}
 		}
@@ -95,7 +95,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, flakslot2);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.set_bool("automatic", true);
 			}
 		}
@@ -113,7 +113,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, gatlingslot1);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.set_bool("automatic", true);
 			}
 		}
@@ -130,7 +130,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, gatlingslot2);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.set_bool("automatic", true);
 			}
 		}
@@ -148,7 +148,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, pdslot1);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.set_bool("automatic", true);
 			}
 		}

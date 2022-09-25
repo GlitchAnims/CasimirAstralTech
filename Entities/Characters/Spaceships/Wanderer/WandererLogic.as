@@ -409,7 +409,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, shieldSlot);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 			}
 		}
 	}

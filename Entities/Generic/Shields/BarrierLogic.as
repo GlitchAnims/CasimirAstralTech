@@ -15,7 +15,7 @@ void onInit( CBlob@ this )
 
 	this.set_bool("active", false);
 	this.set_u16(shieldModeNumString, 0);
-	this.set_u32("ownerBlobID", 0);
+	this.set_u16("ownerBlobID", 0);
 
 	this.set_u16("frame", 0);
 	this.set_u8("spriteTimer", 0);
@@ -92,7 +92,7 @@ void onTick( CBlob@ this )
 	if (!isServer())
 	{ return; }
 
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!this.isAttached() || ownerBlobID == 0 || ownerBlob == null)
 	{
@@ -140,7 +140,7 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 
 	if (isServer())
 	{
-		u32 ownerBlobID = this.get_u32("ownerBlobID");
+		u16 ownerBlobID = this.get_u16("ownerBlobID");
 		CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 		if (ownerBlobID == 0 || ownerBlob == null)
 		{ 
@@ -198,7 +198,7 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 {
 	//if (!canSeeButtons(this, caller)) return;
 
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (ownerBlobID == 0 || ownerBlob == null)
 	{ 
@@ -239,7 +239,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 	
     if (cmd == this.getCommandID(shield_toggle_ID)) // 1 shot instance
     {
-		u32 ownerBlobID = this.get_u32("ownerBlobID");
+		u16 ownerBlobID = this.get_u16("ownerBlobID");
 		CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 		if (ownerBlobID == 0 || ownerBlob == null)
 		{ 

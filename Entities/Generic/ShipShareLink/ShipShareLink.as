@@ -14,7 +14,7 @@ void onInit( CBlob@ this )
 
 	this.set_bool(activeBoolString, false);
 	this.set_u32(activeTimeString, 0);
-	this.set_u32("ownerBlobID", 0);
+	this.set_u16("ownerBlobID", 0);
 	this.set_bool(enableButtonBoolString, true);
 
 	AddIconToken("$link_toggle$", "/GUI/InteractionIcons.png", Vec2f(32, 32), 11);
@@ -24,7 +24,7 @@ void onInit( CBlob@ this )
 
 void onTick( CBlob@ this )
 {
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (!this.isAttached() || ownerBlobID == 0 || ownerBlob == null)
 	{ 
@@ -147,7 +147,7 @@ f32 onHit( CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hit
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
 {
-	u32 ownerBlobID = this.get_u32("ownerBlobID");
+	u16 ownerBlobID = this.get_u16("ownerBlobID");
 	CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 	if (ownerBlobID == 0 || ownerBlob == null)
 	{ 
@@ -174,7 +174,7 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
     if (cmd == this.getCommandID(link_toggle_ID)) // 1 shot instance
     {
-		u32 ownerBlobID = this.get_u32("ownerBlobID");
+		u16 ownerBlobID = this.get_u16("ownerBlobID");
 		CBlob@ ownerBlob = getBlobByNetworkID(ownerBlobID);
 		if (ownerBlobID == 0 || ownerBlob == null)
 		{ 

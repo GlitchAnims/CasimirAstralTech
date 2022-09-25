@@ -257,7 +257,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, wingNW);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				
 			}
 		}
@@ -275,7 +275,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, wingNE);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.SetFacingLeft(false);
 			}
 		}
@@ -293,7 +293,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, wingSE);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 				blob.SetFacingLeft(false);
 			}
 		}
@@ -311,7 +311,7 @@ void spawnAttachments(CBlob@ ownerBlob)
 				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
 				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
 				ownerBlob.server_AttachTo(blob, wingSW);
-				blob.set_u32("ownerBlobID", ownerBlob.getNetworkID());
+				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
 			}
 		}
 	}
