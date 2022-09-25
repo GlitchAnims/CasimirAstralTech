@@ -1,63 +1,58 @@
-// PodShield logic
+// Depth Mine logic
 
-#include "SpaceshipGlobal.as"
-#include "ChargeCommon.as"
-#include "PodCommon.as"
-#include "SpaceshipVars.as"
-#include "CommonFX.as"
-#include "BarrierCommon.as"
-
-Random _pod_logic_r(98444);
+Random _mine_logic_r(11141);
 void onInit( CBlob@ this )
 {
-	this.Tag(denyChargeInputTag);
+	this.set_s8("ordinance_state", 0);
+
+	this.getShape().SetGravityScale(0.0f);
+
+	if (isServer())
+	{
+		float rotSpeed = _mine_logic_r.NextFloat() * 10.0f;
+		this.setAngularVelocity(rotSpeed + 2.0f);
+	}
 }
 
 void onTick( CBlob@ this )
 {
-	u32 gameTime = getGameTime();
+	s8 ordinanceState = this.get_s8("ordinance_state");
 
-	if ((gameTime + this.getNetworkID()) % 90 == 0 || this.get_bool(quickSlotCheckBoolString)) //once every 3 seconds, server only
-	{ 
-		spawnAttachments(this);
-		this.set_bool(quickSlotCheckBoolString, false);
+	if (ordinanceState == 0)
+	{
+		int creationTicks = this.getTickSinceCreated();
+		if (creationTicks >= 60) this.set_s8("ordinance_state", 1);
+		return;
 	}
+
+	CMap@ map = getMap(); //standard map check
+	if (map is null) return;
+
+	Vec2f thisPos = this.getPosition();
+	int teamNum = this.getTeamNum();
+
+	bool targetFound = false;
+
+	CBlob@[] blobsInRadius;
+	map.getBlobsInRadius(thisPos, 64.0f, @blobsInRadius); //get a target
+	for (uint i = 0; i < blobsInRadius.length; i++)
+	{
+		CBlob@ b = blobsInRadius[i];
+		if (b is null || b is this) continue;
+
+		int blobTeamNum = b.getTeamNum();
+		if (teamNum == blobTeamNum) continue;
+
+		if (!b.hasTag("player")) continue;
+
+		targetFound = true;
+		break;
+	}
+
+	this.set_s8("ordinance_state", targetFound ? 2 : 1);
 }
 
-void spawnAttachments(CBlob@ ownerBlob)
+bool doesCollideWithBlob( CBlob@ this, CBlob@ blob )
 {
-	if (ownerBlob == null)
-	{ return; }
-
-	CAttachment@ attachments = ownerBlob.getAttachments();
-	if (attachments == null)
-	{ return; }
-
-	Vec2f ownerPos = ownerBlob.getPosition();
-	int teamNum = ownerBlob.getTeamNum();
-
-	AttachmentPoint@ podSlot = attachments.getAttachmentPointByName("PODSLOT");
-
-	if (podSlot != null)
-	{
-		Vec2f slotOffset = podSlot.offset;
-		CBlob@ turret = podSlot.getOccupied();
-		if (turret == null)
-		{
-			if (!isServer()) return; // server spawn blob
-			CBlob@ blob = server_CreateBlob( "ship_sharelink" , teamNum, ownerPos + slotOffset);
-			if (blob !is null)
-			{
-				blob.IgnoreCollisionWhileOverlapped( ownerBlob );
-				blob.SetDamageOwnerPlayer( ownerBlob.getPlayer() );
-				ownerBlob.server_AttachTo(blob, podSlot);
-				blob.set_u16("ownerBlobID", ownerBlob.getNetworkID());
-				blob.set_bool(enableButtonBoolString, false);
-			}
-		}
-		else
-		{
-			turret.set_bool(activeBoolString, !ownerBlob.get_bool(isCarriedBoolString));
-		}
-	}
+	return false;
 }
