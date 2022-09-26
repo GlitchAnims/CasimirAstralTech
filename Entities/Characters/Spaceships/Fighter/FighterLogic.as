@@ -14,11 +14,6 @@
 Random _fighter_logic_r(67532);
 void onInit( CBlob@ this )
 {
-	/*ManaInfo manaInfo;
-	manaInfo.maxMana = FrigateParams::MAX_MANA;
-	manaInfo.manaRegen = FrigateParams::MANA_REGEN;
-	this.set("manaInfo", @manaInfo);*/
-
 	this.set_u32( "m1_heldTime", 0 );
 	this.set_u32( "m2_heldTime", 0 );
 
@@ -26,20 +21,12 @@ void onInit( CBlob@ this )
 	this.set_u32( "m2_shotTime", 0 );
 
 	this.set_bool( "leftCannonTurn", false);
-
-	this.set_bool("shifted", false);
 	
 	this.push("names to activate", "keg");
 	this.push("names to activate", "nuke");
 
-	//centered on arrows
-	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
-
-	//no spinning
-	this.getShape().SetRotationsAllowed(false);
-	//this.getShape().SetGravityScale(0);
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";
@@ -61,23 +48,18 @@ void onSetPlayer( CBlob@ this, CPlayer@ player )
 
 void onTick( CBlob@ this )
 {
-	// vvvvvvvvvvvvvv CLIENT-SIDE ONLY vvvvvvvvvvvvvvvvvvv
 	//if (!isClient()) return;
 	if (this.isInInventory()) return;
 	if (!this.isMyPlayer()) return;
 
     SmallshipInfo@ ship;
-	if (!this.get( "shipInfo", @ship )) 
-	{ return; }
+	if (!this.get( "shipInfo", @ship )) return;
 	
 	CPlayer@ thisPlayer = this.getPlayer();
-	if ( thisPlayer is null )
-	{ return; }
+	if ( thisPlayer is null ) return;
 
 	SpaceshipVars@ moveVars;
-    if (!this.get( "moveVars", @moveVars )) {
-        return;
-    }
+    if (!this.get( "moveVars", @moveVars )) return;
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
@@ -86,8 +68,9 @@ void onTick( CBlob@ this )
 
 	//gun logic
 	s32 m1ChargeCost = ship.firing_cost;
-	bool pressed_m1 = this.isKeyPressed(key_action1);
-	bool pressed_m2 = this.isKeyPressed(key_action2);
+	const bool isShifting = this.get_bool("shifting");
+	bool pressed_m1 = this.isKeyPressed(key_action1) && !isShifting;
+	bool pressed_m2 = this.isKeyPressed(key_action2) && !isShifting;
 	
 	u32 m1Time = this.get_u32( "m1_heldTime");
 	u32 m2Time = this.get_u32( "m2_heldTime");

@@ -180,18 +180,15 @@ void onTick(CBlob@ this)
 	Vec2f bAccel = lastBVel - bVel;
 	this.set_Vec2f(lastRelativeVelString, bVel);
 
-	float engineForce = missile.main_engine_force;
-	Vec2f thrustNorm = Vec2f(1.0f, 0).RotateByDegrees(thisAngle);
-	Vec2f thrustVec = thrustNorm * engineForce;
-
-	float bVelAngle = (bVel + bAccel).getAngleDegrees();
+	Vec2f bVelFinal = bVel - (bAccel*bAccel.getLengthSquared());
+	float bVelFinalAngle = bVelFinal.getAngleDegrees();
 	float targetVecAngle = targetVec.getAngleDegrees();
 
-	float directionDiff = targetVecAngle - bVelAngle;
+	float directionDiff = targetVecAngle - bVelFinalAngle;
 	directionDiff += directionDiff > 180 ? -360 : directionDiff < -180 ? 360 : 0;
 	bool movingAway = Maths::Abs(directionDiff) > 90.0f;
 
-	float turnAngle = movingAway ? bVelAngle + 180.0f : targetVecAngle + directionDiff;
+	float turnAngle = movingAway ? bVelFinalAngle + 180.0f : targetVecAngle + directionDiff;
 	
 	float angle = -turnAngle + 360.0f;
 	float angleDiff = angle - thisAngle;
@@ -200,6 +197,11 @@ void onTick(CBlob@ this)
 	float turnSpeed = missile.ship_turn_speed;
 	this.setAngleDegrees(thisAngle + Maths::Clamp(angleDiff, -turnSpeed, turnSpeed));
 	
+	// thrust
+	float engineForce = missile.main_engine_force;
+	Vec2f thrustNorm = Vec2f(1.0f, 0).RotateByDegrees(thisAngle);
+	Vec2f thrustVec = thrustNorm * engineForce;
+
 	bool hasThrust = Maths::Abs(angleDiff) < 45.0f;
 	Vec2f newVel = thisVel + (hasThrust ? thrustVec : Vec2f_zero);
 

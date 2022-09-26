@@ -34,10 +34,6 @@ void onInit( CBlob@ this )
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
 
-	//no spinning
-	this.getShape().SetRotationsAllowed(false);
-	//this.getShape().SetGravityScale(0);
-	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";
 	
@@ -63,8 +59,7 @@ void onTick( CBlob@ this )
 	if (this.isInInventory()) return;
 
 	CMap@ map = getMap(); //standard map check
-	if (map is null)
-	{ return; }
+	if (map is null) return;
 
 	Vec2f thisPos = this.getPosition();
 	Vec2f thisVel = this.getVelocity();
@@ -114,13 +109,10 @@ void onTick( CBlob@ this )
 	if (!this.isMyPlayer()) return;
 
     SmallshipInfo@ ship;
-	if (!this.get( "shipInfo", @ship )) 
-	{ return; }
+	if (!this.get( "shipInfo", @ship )) return;
 
 	SpaceshipVars@ moveVars;
-    if (!this.get( "moveVars", @moveVars )) {
-        return;
-    }
+    if (!this.get( "moveVars", @moveVars )) return;
 
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;

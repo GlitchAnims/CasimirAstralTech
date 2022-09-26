@@ -62,8 +62,10 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			}
 		}
 	}
+	/*
 	else if (cmd == this.getCommandID(hit_command_ID)) // if a shot hits, this gets sent
     {
 		
 	}
+	*/
 }

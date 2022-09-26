@@ -34,10 +34,6 @@ void onInit( CBlob@ this )
 	//this.set_Vec2f("inventory offset", Vec2f(0.0f, 122.0f));
 	//centered on items
 	this.set_Vec2f("inventory offset", Vec2f(0.0f, 0.0f));
-
-	//no spinning
-	this.getShape().SetRotationsAllowed(false);
-	//this.getShape().SetGravityScale(0);
 	
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_nodeath);
 	this.getCurrentScript().removeIfTag = "dead";

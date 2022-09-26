@@ -33,8 +33,7 @@ void onInit(CBlob@ this)
 
 void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 {
-	if (this == null)
-	{ return; }
+	if (this == null) return;
 	
     if (cmd == this.getCommandID(homing_target_update_ID)) // updates target for all clients
     {
