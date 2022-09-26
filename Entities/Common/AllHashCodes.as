@@ -11,6 +11,8 @@ enum EntityHash
 	_foul = 1097470459,
 	_wanderer = 89317443,
 
+	_faraday = -1940953163,
+
 	//station
 	_team_station = 1500671615,
 

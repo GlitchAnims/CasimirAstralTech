@@ -98,6 +98,30 @@ namespace WandererParams
 	const ::f32 shot_lifetime = 1.2f; // float, seconds
 }
 
+namespace FaradayParams
+{
+	//charge
+	const ::f32 CHARGE_START = 0.3f; //percentage charge to start with (0.0f - 1.0f)
+	const ::s32 CHARGE_MAX = 600; //max charge amount
+	const ::s32 CHARGE_REGEN = 2; //amount per regen
+	const ::s32 CHARGE_RATE = 10; //ticks per regen
+	// ship general
+	const ::f32 main_engine_force = 0.03f;
+	const ::f32 secondary_engine_force = 0.02f;
+	const ::f32 rcs_force = 0.02f;
+	const ::f32 ship_turn_speed = 2.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 ship_drag = 0.2f; // air drag
+	const ::f32 max_speed = 5.0f; // 0 = infinite speed
+	//gun general
+	const ::u32 firing_rate = 15; // ticks per shot, won't fire if 0
+	const ::u32 firing_burst = 3; // bullets per shot, won't fire if 0
+	const ::u32 firing_delay = 30; // ticks before first shot
+	const ::u32 firing_spread = 15; // degrees
+	const ::s32 firing_cost = 15; // charge cost
+	const ::f32 shot_speed = 15.0f; // pixels per tick, won't fire if 0
+	const ::f32 shot_lifetime = 1.2f; // float, seconds
+}
+
 class MediumshipInfo
 {
 	bool forward_thrust;
@@ -216,6 +240,25 @@ float &out shot_speed, float &out shot_lifetime )
 			firing_cost 				= WandererParams::firing_cost;
 			shot_speed 					= WandererParams::shot_speed;
 			shot_lifetime 				= WandererParams::shot_lifetime;
+		}
+		break;
+
+		case _faraday:
+		{
+			main_engine_force 			= FaradayParams::main_engine_force;
+			secondary_engine_force 		= FaradayParams::secondary_engine_force;
+			rcs_force 					= FaradayParams::rcs_force;
+			ship_turn_speed 			= FaradayParams::ship_turn_speed;
+			ship_drag 					= FaradayParams::ship_drag;
+			max_speed 					= FaradayParams::max_speed;
+			
+			firing_rate 				= FaradayParams::firing_rate;
+			firing_burst 				= FaradayParams::firing_burst;
+			firing_delay 				= FaradayParams::firing_delay;
+			firing_spread 				= FaradayParams::firing_spread;
+			firing_cost 				= FaradayParams::firing_cost;
+			shot_speed 					= FaradayParams::shot_speed;
+			shot_lifetime 				= FaradayParams::shot_lifetime;
 		}
 		break;
 

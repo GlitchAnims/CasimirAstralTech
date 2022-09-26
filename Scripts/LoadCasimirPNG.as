@@ -13,7 +13,9 @@ namespace tdm_colors
 		balthazar_1 = 0xFF7888FF,
 		balthazar_2 = 0xFFFF7888,
 		wanderer_1 = 0xFF6888FF,
-		wanderer_2 = 0xFFFF6888
+		wanderer_2 = 0xFFFF6888,
+		faraday_1 = 0xFF5888FF,
+		faraday_2 = 0xFFFF5888
 	};
 }
 
@@ -39,6 +41,8 @@ class TDMPNGLoader : PNGLoader
 			case tdm_colors::balthazar_2: autotile(offset); spawnBlob(map, "balthazar", offset, 1); break;
 			case tdm_colors::wanderer_1: autotile(offset); spawnBlob(map, "wanderer", offset, 0); break;
 			case tdm_colors::wanderer_2: autotile(offset); spawnBlob(map, "wanderer", offset, 1); break;
+			case tdm_colors::faraday_1: autotile(offset); spawnBlob(map, "faraday", offset, 0); break;
+			case tdm_colors::faraday_2: autotile(offset); spawnBlob(map, "faraday", offset, 1); break;
 		};
 	}
 };

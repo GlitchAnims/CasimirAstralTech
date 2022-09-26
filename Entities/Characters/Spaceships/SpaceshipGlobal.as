@@ -61,6 +61,7 @@ u8 getShipSize( int blobNameHash )
 		case _balthazar:
 		case _foul:
 		case _wanderer:
+		case _faraday:
 		shipSize = _size_medium; break;
 
 		case _team_station:

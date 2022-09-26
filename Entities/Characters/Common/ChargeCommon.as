@@ -255,6 +255,14 @@ bool fetchChargeInfo( int blobNameHash, float &out chargeStart, s32 &out chargeM
 			chargeRate 		= 30;
 		}
 		break;
+		case _faraday:
+		{
+			chargeStart 	= 0.3f;
+			chargeMax 		= 600;
+			chargeRegen 	= 5;
+			chargeRate 		= 30;
+		}
+		break;
 
 		// structures
 		case _team_station:
