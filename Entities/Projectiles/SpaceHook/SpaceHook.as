@@ -275,7 +275,7 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 		&&
 		(
 			blob.hasTag("flesh") ||
-			blob.hasTag("hull") ||
+			(blob.hasTag("hull") && blob.get_u8(shipSizeString) >= _size_medium) ||
 			blob.hasTag("barrier")
 		)
 	);

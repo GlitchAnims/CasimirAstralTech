@@ -5,17 +5,16 @@ void onInit( CBlob@ this )
 	this.set_u32( "shift_heldTime", 0 );
 	
 	GrappleInfo grapple;
-	grapple.isDeployed = false;
 	grapple.hookBlobNetID = 0;
 	grapple.chainLength = 0.0f;
 	grapple.grappledBlobNetID = 0;
 	this.set("grappleInfo", @grapple);
 
+	ChainInfo chain;
+	this.set("chainInfo", @chain);
+
 	if (isClient())
 	{
-		ChainInfo chain;
-		this.set("chainInfo", @chain);
-
 		this.set_f32( "grapplesound_progress", 0.0f );
 	}
 
@@ -47,76 +46,241 @@ void onTick( CBlob@ this )
 	f32 blobAngle = this.getAngleDegrees();
 	blobAngle = (blobAngle+360.0f) % 360;
 
-	const bool isGrappleDeployed = grapple.isDeployed;
-	const u16 hookBlobNetID = grapple.hookBlobNetID;
+	bool isGrappleDeployed = false;
+	u16 hookBlobNetID = grapple.hookBlobNetID;
 
-	if (isGrappleDeployed)
+	float chainLength = grapple.chainLength;
+
+	CBlob@ hookBlob = getBlobByNetworkID(hookBlobNetID);
+	const bool isHookNull = hookBlob == null;
+	if (hookBlobNetID == 0 || isHookNull)
 	{
-		if (hookBlobNetID != 0)
+		if (isServer())
 		{
-			CBlob@ hookBlob = getBlobByNetworkID(hookBlobNetID);
-			if (hookBlob == null)
+			if (hookBlobNetID != 0 && isHookNull)
 			{
 				grappleSync(this);
 			}
-			else
+			else if (hookBlobNetID == 0 && !isHookNull)
 			{
-				u16 grappledBlobNetID = grapple.grappledBlobNetID;
-
-				float chainLength = grapple.chainLength;
-				Vec2f hookPos = hookBlob.getPosition();
-				Vec2f hookVec = hookPos - thisPos;
-				float hookDist = hookVec.getLength();
-
-				if (hookBlob.get_bool(hookIsAttachedBoolString))
-				{
-					grappledBlobNetID = hookBlob.get_u16(hookTargetNetIDString);
-					grapple.grappledBlobNetID = grappledBlobNetID;
-				}
-				else 
-				{
-					grapple.grappledBlobNetID = 0;
-					grappledBlobNetID = 0;
-
-					if (chainLength < hookDist)
-					{
-						chainLength == hookDist;
-						grapple.chainLength = hookDist;
-					}
-				}
-
-				CBlob@ grappledBlob = getBlobByNetworkID(grappledBlobNetID);
-				if (grappledBlob != null)
-				{
-					Vec2f hookVecNorm = hookVec;
-					hookVecNorm.Normalize();
-
-					float thisMass = this.getMass();
-					float grappledMass = grappledBlob.getMass();
-					float massRatio = thisMass/grappledMass;
-
-					float pullDist = Maths::Max(hookDist-chainLength, 0.0f);
-
-					if (pullDist > 0)
-					{
-						float pullStrength = Maths::FastSqrt(pullDist);
-						
-						this.setPosition(thisPos + (hookVecNorm*pullDist));
-						this.setVelocity(thisVel + (hookVecNorm*0.1f));
-						grappledBlob.AddForceAtPosition(-hookVecNorm*pullStrength*massRatio*4.0f, hookPos);
-					}
-				}
-
-				makeStraightChain(hookPos, thisPos);
-				if (isServer() && gameTimeVariation % 30 == 0) grappleSync(this, isGrappleDeployed, hookBlobNetID, chainLength, grapple.grappledBlobNetID); // once a second, sync to client
+				grappleSync(this);
 			}
 		}
+		if (isClient())
+		{
+			chain.movingLinkList.clear();
+			chain.boneList.clear();
+		}
 	}
-	else
+	else if (!isHookNull)
 	{
-		grapple.chainLength = 0;
-	}
+		isGrappleDeployed = true;
 
+		u16 grappledBlobNetID = grapple.grappledBlobNetID;
+
+		Vec2f hookPos = hookBlob.getPosition();
+		Vec2f hookVec = hookPos - thisPos;
+		Vec2f hookVecNorm = hookVec;
+		hookVecNorm.Normalize();
+
+		float hookDist = hookVec.getLength();
+
+		if (hookDist > 400.0f)
+		{
+			hookDist = 400.0f;
+			hookPos = (hookVecNorm*hookDist)+thisPos;
+			hookVec = hookPos - thisPos;
+			hookBlob.setPosition(hookPos - hookVecNorm);
+			hookBlob.setVelocity(thisVel + (-hookVecNorm));
+		}
+
+		if (hookBlob.get_bool(hookIsAttachedBoolString))
+		{
+			grappledBlobNetID = hookBlob.get_u16(hookTargetNetIDString);
+			grapple.grappledBlobNetID = grappledBlobNetID;
+		}
+		else 
+		{
+			grapple.grappledBlobNetID = 0;
+			grappledBlobNetID = 0;
+
+			if (chainLength < hookDist)
+			{
+				chainLength == hookDist;
+				grapple.chainLength = hookDist;
+			}
+		}
+
+		CBlob@ grappledBlob = getBlobByNetworkID(grappledBlobNetID);
+		if (grappledBlob != null)
+		{
+			float thisMass = this.getMass();
+			float grappledMass = grappledBlob.getMass();
+
+			float pullDist = Maths::Max(hookDist-chainLength, 0.0f);
+
+			if (pullDist > 0)
+			{
+				float hookVecAngle = hookVecNorm.getAngleDegrees();
+				float thisVelAngle = thisVel.getAngleDegrees();
+
+				float angleDiff = hookVecAngle - thisVelAngle;
+				angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
+				angleDiff = Maths::Abs(angleDiff);
+
+				Vec2f hookPullVel;
+				if (angleDiff > 90.0f)
+				{
+					angleDiff -= 90.0f;
+					float velAffect = angleDiff/90.0f;
+					print ("velAffect: "+ velAffect);
+					this.setVelocity(thisVel + (hookVecNorm*pullDist*velAffect));
+				}
+
+				this.setPosition(thisPos + (hookVecNorm*pullDist));
+				thisPos = this.getPosition();
+				grappledBlob.AddForceAtPosition(-hookVecNorm*pullDist*20.0f, hookPos);
+			}
+		}
+		
+		if (isClient()) // chain magic
+		{
+			int movingLinkCount = chain.movingLinkList.get_length();
+			int chainSteps = Maths::Max(grapple.chainLength / (chainLinkLength*1.1f), 1);
+			
+			if (movingLinkCount < chainSteps)
+			{
+				if (movingLinkCount > 0)
+				{
+					Vec2f lastLinkPos = chain.movingLinkList[movingLinkCount-1].pos;
+					Vec2f lastLinkVec = thisPos - lastLinkPos;
+					lastLinkVec.Normalize();
+					for (uint i = 0; i < chainSteps-movingLinkCount; i++)
+					{
+						MovingLink newMovingLink;
+						newMovingLink.pos = (lastLinkVec * i)+thisPos;
+						newMovingLink.prevPos = thisPos;
+						chain.movingLinkList.push_back(newMovingLink);
+					}
+				}
+				else
+				{
+					for (uint i = 0; i < chainSteps-movingLinkCount; i++)
+					{
+						MovingLink newMovingLink;
+						newMovingLink.pos = (-hookVecNorm)+thisPos;
+						newMovingLink.prevPos = thisPos;
+						chain.movingLinkList.push_back(newMovingLink);
+					}
+				}
+				movingLinkCount = chain.movingLinkList.get_length();
+
+				/*chain.boneList.clear();
+
+				for (uint i = 0; i < movingLinkCount; i++)
+				{
+					if (i == 0) continue;
+
+					MovingBone newBone;
+					newBone.unit1 = chain.movingLinkList[i-1];
+					newBone.unit2 = chain.movingLinkList[i];
+					chain.boneList.push_back(newBone);
+				}*/
+			}
+
+			if (movingLinkCount > 0)
+			{
+				for (uint i = 0; i < movingLinkCount; i++)
+				{
+					MovingLink@ thisMovingLink = chain.movingLinkList[i];
+					if (i == 0) // closest to hook
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						thisMovingLink.pos = hookPos;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+					else if (i == movingLinkCount-1) // closest to ship
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						thisMovingLink.pos = thisPos;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+					else if (!thisMovingLink.locked)
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						Vec2f linkMovement = thisMovingLink.pos - thisMovingLink.prevPos;
+						thisMovingLink.pos += linkMovement;
+						thisMovingLink.prevPos += linkMovement*0.1f;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+				}
+
+				for (u8 i = 0; i < 8; i++)
+				for (uint i = 0; i < movingLinkCount; i++)
+				{
+					if ( i == 0) continue; // no anchors
+					
+					MovingLink@ thisMovingLink = chain.movingLinkList[i];
+					MovingLink@ prevMovingLink = chain.movingLinkList[i-1];
+					//MovingLink@ nextMovingLink = chain.movingLinkList[i+1];
+
+					Vec2f boneCentre = (prevMovingLink.pos + thisMovingLink.pos) / 2;
+					Vec2f boneDir = prevMovingLink.pos - thisMovingLink.pos;
+					boneDir.Normalize();
+
+					if (!prevMovingLink.locked)
+						prevMovingLink.pos = boneCentre + boneDir * chainLinkLength / 2;
+					thisMovingLink.pos = boneCentre - boneDir * chainLinkLength / 2;
+				}
+
+				/*
+				for (uint i = 0; i < movingLinkCount; i++)
+				{
+					MovingLink@ thisMovingLink = chain.movingLinkList[i];
+					if (i == 0) // closest to hook
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						thisMovingLink.pos = hookPos;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+					else if (i == movingLinkCount-1) // closest to ship
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						thisMovingLink.pos = thisPos;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+					else if (!thisMovingLink.locked)
+					{
+						Vec2f beforePosUpdate = thisMovingLink.pos;
+						thisMovingLink.pos += thisMovingLink.pos - thisMovingLink.prevPos;
+						thisMovingLink.prevPos = beforePosUpdate;
+					}
+				}
+				
+				int movingBoneCount = chain.boneList.get_length();
+				for (u8 i = 0; i < 3; i++)
+				for (uint i = 0; i < movingBoneCount; i++)
+				{
+					MovingBone@ thisBone = chain.boneList[i];
+					
+					Vec2f boneCentre = (thisBone.unit1.pos + thisBone.unit2.pos) / 2;
+					Vec2f boneDir = thisBone.unit1.pos - thisBone.unit2.pos;
+					boneDir.Normalize();
+
+					if (!thisBone.unit1.locked)
+						thisBone.unit1.pos = boneCentre + boneDir * chainLinkLength / 2;
+					if (!thisBone.unit2.locked)
+						thisBone.unit2.pos = boneCentre - boneDir * chainLinkLength / 2;
+				}*/
+
+				// chain render
+				makeChain(chain);
+			}
+		}
+		
+		if (isServer() && gameTimeVariation % 10 == 0) grappleSync(this, hookBlobNetID, grapple.chainLength, grapple.grappledBlobNetID); // once a second, sync to client
+	}
+	
 
 	if (!isClient()) return; // client only
 	//gun logic
@@ -152,8 +316,8 @@ void onTick( CBlob@ this )
 	const bool pressed_m1 = this.isKeyPressed(key_action1);
 	if (pressed_m1)
 	{
-		float launch_speed = grappleLoad * 5.0f;
-		Vec2f launch_vec = Vec2f(1.0f+launch_speed,0);
+		float launch_speed = grappleLoad * 10.0f;
+		Vec2f launch_vec = Vec2f(2.0f+launch_speed,0);
 		launch_vec.RotateByDegrees(blobAngle);
 		launch_vec += thisVel;
 
@@ -172,7 +336,11 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 	
     if (isServer() && cmd == this.getCommandID(launchGrappleCommandID))
     {
-		if (grapple.isDeployed) return;
+		if (grapple.hookBlobNetID != 0) 
+		{
+			print("fucked up");
+			return;
+		}
 
 		Vec2f launch_vec = Vec2f_zero;
 		
@@ -185,19 +353,19 @@ void onCommand( CBlob@ this, u8 cmd, CBitStream @params )
 			blob.SetDamageOwnerPlayer( this.getPlayer() );
 			blob.setVelocity( launch_vec );
 			blob.set_u16("ownerBlobID", this.getNetworkID());
-
-			grapple.isDeployed = true;
-			grappleSync(this, true, blob.getNetworkID());
+			
+			u16 blobNetID = blob.getNetworkID();
+			grapple.hookBlobNetID = blobNetID;
+			grappleSync(this, blobNetID);
 		}
 	}
 	else if (cmd == this.getCommandID(grappleSyncCommandID))
 	{
-		bool isDeployed;
-		u16 hookBlobNetID;
+		print("ya sync");
+		u16 hookBlobNetID = 0;
 
-		if (!params.saferead_bool(isDeployed) || !params.saferead_u16(hookBlobNetID)) return;
+		if (!params.saferead_u16(hookBlobNetID)) return;
 
-		grapple.isDeployed = isDeployed;
 		grapple.hookBlobNetID = hookBlobNetID;
 		
 		f32 chainLength;
