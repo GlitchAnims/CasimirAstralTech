@@ -7,6 +7,7 @@
 #include "KnockedCommon.as";
 #include "HoverMessage.as"
 #include "CommonFX.as"
+#include "FaradayCommon.as"
 
 void onInit(CMovement@ this)
 {
@@ -115,6 +116,36 @@ void onTick(CMovement@ this)
 
 	const bool isShifting = thisBlob.get_bool("shifting");
 	const bool isWheelButton = thisBlob.get_bool("wheel_button");
+
+	u8 faradayTime = thisBlob.get_u8(faradayTimeString);
+	u8 faradayPhase = thisBlob.get_u8(faradayPhaseString);
+	if (isWheelButton && faradayTime == 0)
+	{
+		thisBlob.set_u8(faradayNextString, faradayPhase == 3 ? 0 : faradayPhase+1);
+
+		faradayTime = 45;
+		thisBlob.set_u8(faradayTimeString, faradayTime);
+	}
+
+	if (faradayTime == 0)
+	{
+		u8 faradayNext = thisBlob.get_u8(faradayNextString);
+		if (faradayPhase != faradayNext)
+		{
+			thisBlob.set_u8(faradayPhaseString, faradayNext);
+			moveVars.is_warp = faradayNext == 1 || faradayNext == 2;
+			thisBlob.set_bool(faradayIsAssaultBoolString, faradayNext == 2 || faradayNext == 3);
+		}
+	}
+	else
+	{
+		if (faradayTime > 0) thisBlob.set_u8(faradayTimeString, faradayTime-1);
+	}
+
+	if (moveVars.is_warp)
+	{
+		moveVars.engineFactor *= 2.5f;
+	}
 	
 	bool[] allKeys =
 	{
@@ -131,6 +162,8 @@ void onTick(CMovement@ this)
 		if (currentKey)
 		{ keysPressedAmount++; }
 	}
+
+	keysPressedAmount = faradayTime > 0 ? 0 : keysPressedAmount == 0 ? 1 : keysPressedAmount;
 	
 	const bool isknocked = isKnocked(thisBlob) || (thisBlob.get_bool("frozen") == true);
 	const bool is_client = isClient();
@@ -141,15 +174,6 @@ void onTick(CMovement@ this)
 	
 	f32 blobAngle = thisBlob.getAngleDegrees();
 	blobAngle = Maths::Abs(blobAngle) % 360;
-
-	if (blobAngle > 180 && !thisBlob.isFacingLeft()) //flips ship if aiming left
-	{
-		thisBlob.SetFacingLeft(true);
-	}
-	else if (blobAngle <= 180 && thisBlob.isFacingLeft())
-	{
-		thisBlob.SetFacingLeft(false);
-	}
 
 	if (shape != null)
 	{
@@ -168,7 +192,6 @@ void onTick(CMovement@ this)
 
 	const f32 vellen = shape.vellen;
 	const bool onground = thisBlob.isOnGround() || thisBlob.isOnLadder();
-	const bool facingLeft = thisBlob.isFacingLeft();
 
 	f32 blobSpinVel = thisBlob.getAngularVelocity();
 	f32 oldSpinVel = blobSpinVel;
@@ -183,7 +206,7 @@ void onTick(CMovement@ this)
 
 		if(up)
 		{
-			Vec2f thrustVel = Vec2f(0, -ship.main_engine_force);
+			Vec2f thrustVel = Vec2f(ship.main_engine_force, 0);
 			//thrustVel.RotateByDegrees(blobAngle);
 			forward += thrustVel;
 			moveVars.forward_thrust = true;
@@ -193,7 +216,7 @@ void onTick(CMovement@ this)
 
 		if(down)
 		{
-			Vec2f thrustVel = Vec2f(0, ship.secondary_engine_force);
+			Vec2f thrustVel = Vec2f(-ship.secondary_engine_force, 0);
 			//thrustVel.RotateByDegrees(blobAngle);
 			backward += thrustVel;
 			moveVars.backward_thrust = true;
@@ -201,7 +224,7 @@ void onTick(CMovement@ this)
 		else
 		{ moveVars.backward_thrust = false; }
 
-		if (isShifting)
+		if (!isShifting)
 		{
 			moveVars.portBow_thrust = false;
 			moveVars.portQuarter_thrust = false;
@@ -210,36 +233,42 @@ void onTick(CMovement@ this)
 
 			if(left)
 			{
-				Vec2f thrustVel = Vec2f(-ship.rcs_force, 0);
-				//thrustVel.RotateByDegrees(blobAngle);
+				Vec2f thrustVel = Vec2f(0, -ship.secondary_engine_force);
 				port += thrustVel;
 
-				if (facingLeft)
-				{ moveVars.port_thrust = true; }
-				else
-				{ moveVars.starboard_thrust = true; }
+				moveVars.starboard_thrust = true;
 			}
 			else
 			{
-				if (facingLeft)
-				{ moveVars.port_thrust = false; }
-				else
-				{ moveVars.starboard_thrust = false; }
+				moveVars.starboard_thrust = false;
 			}
 			
 			if(right)
 			{
-				Vec2f thrustVel = Vec2f(ship.rcs_force, 0);
-				//thrustVel.RotateByDegrees(blobAngle);
+				Vec2f thrustVel = Vec2f(0, ship.secondary_engine_force);
 				starboard += thrustVel;
 
-				if (facingLeft) 	moveVars.starboard_thrust = true;
-				else 				moveVars.port_thrust = true;
+				moveVars.port_thrust = true;
 			}
 			else
 			{
-				if (facingLeft) 	moveVars.starboard_thrust = false;
-				else 				moveVars.port_thrust = false;
+				moveVars.port_thrust = false;
+			}
+
+			Vec2f thisAimPos = thisBlob.getAimPos();
+			Vec2f thisAimVec = thisAimPos - thisPos;
+			float thisAimAngle = thisAimVec.getAngleDegrees();
+
+			float angleDiff = (-thisAimAngle+360.0f) - blobAngle;
+			angleDiff += angleDiff > 180 ? -360 : angleDiff < -180 ? 360 : 0;
+			
+			angleDiff /= 180.0f; // sets it from 0 to 1
+
+			addedSpin = ship.rcs_force * angleDiff;
+
+			if ((addedSpin > 0 && blobSpinVel < 0) || (addedSpin < 0 && blobSpinVel > 0))
+			{
+				addedSpin *= 3.0f;
 			}
 		}
 		else
@@ -247,67 +276,19 @@ void onTick(CMovement@ this)
 			moveVars.port_thrust = false;
 			moveVars.starboard_thrust = false;
 
-			if(left)
-			{
-				addedSpin -= ship.rcs_force;
-
-				if (facingLeft)
-				{
-					moveVars.portBow_thrust = true;
-					moveVars.starboardQuarter_thrust = true;
-				}
-				else
-				{
-					moveVars.portQuarter_thrust = true;
-					moveVars.starboardBow_thrust = true;
-				}
-			}
-			else
-			{
-				if (facingLeft)
-				{
-					moveVars.portBow_thrust = false;
-					moveVars.starboardQuarter_thrust = false;
-				}
-				else
-				{
-					moveVars.portQuarter_thrust = false;
-					moveVars.starboardBow_thrust = false;
-				}
-			}
+			if(left) addedSpin -= ship.rcs_force;
+				
+			moveVars.portQuarter_thrust = left;
+			moveVars.starboardBow_thrust = left;
 			
-			if(right)
-			{
-				addedSpin += ship.rcs_force;
+			if(right) addedSpin += ship.rcs_force;
+			moveVars.portBow_thrust = right;
+			moveVars.starboardQuarter_thrust = right;
 
-				if (!facingLeft)
-				{
-					moveVars.portBow_thrust = true;
-					moveVars.starboardQuarter_thrust = true;
-				}
-				else
-				{
-					moveVars.portQuarter_thrust = true;
-					moveVars.starboardBow_thrust = true;
-				}
-			}
-			else
-			{
-				if (!facingLeft)
-				{
-					moveVars.portBow_thrust = false;
-					moveVars.starboardQuarter_thrust = false;
-				}
-				else
-				{
-					moveVars.portQuarter_thrust = false;
-					moveVars.starboardBow_thrust = false;
-				}
-			}
 		}
 
 		Vec2f addedVel = Vec2f_zero;
-		if (isShifting) //does not divide thrust if using rotational thrust
+		if (!isShifting) //does not divide thrust if using rotational thrust
 		{
 			float thrustReduction = Maths::Min(1.0f / (float(keysPressedAmount) * 0.7f), 1.0f); //divide thrust between multiple sides
 			forward *= thrustReduction;
@@ -318,7 +299,7 @@ void onTick(CMovement@ this)
 			addedVel += port;
 			addedVel += starboard;
 		}
-
+		
 		addedVel += forward; 
 		addedVel += backward;
 		
@@ -345,7 +326,6 @@ void onTick(CMovement@ this)
 		thisVel.Normalize();
 		thisVel *= maxSpeed;
 	}
-
 
 	//map wall collision
 	float wallWidth = 30.0f;

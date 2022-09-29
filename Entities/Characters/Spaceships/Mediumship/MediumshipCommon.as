@@ -106,12 +106,12 @@ namespace FaradayParams
 	const ::s32 CHARGE_REGEN = 2; //amount per regen
 	const ::s32 CHARGE_RATE = 10; //ticks per regen
 	// ship general
-	const ::f32 main_engine_force = 0.03f;
-	const ::f32 secondary_engine_force = 0.02f;
-	const ::f32 rcs_force = 0.02f;
-	const ::f32 ship_turn_speed = 2.0f; // degrees per tick, 0 = instant (30 ticks a second)
+	const ::f32 main_engine_force = 0.06f;
+	const ::f32 secondary_engine_force = 0.04f;
+	const ::f32 rcs_force = 0.2f;
+	const ::f32 ship_turn_speed = 3.0f; // degrees per tick, 0 = instant (30 ticks a second)
 	const ::f32 ship_drag = 0.2f; // air drag
-	const ::f32 max_speed = 5.0f; // 0 = infinite speed
+	const ::f32 max_speed = 8.0f; // 0 = infinite speed
 	//gun general
 	const ::u32 firing_rate = 15; // ticks per shot, won't fire if 0
 	const ::u32 firing_burst = 3; // bullets per shot, won't fire if 0
